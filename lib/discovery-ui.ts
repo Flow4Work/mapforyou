@@ -56,7 +56,7 @@ export function regionLabel(regionKey: string, language: PublicLanguage) {
     hongdae: { en: "Hongdae", ja: "弘大" },
     geondae: { en: "Konkuk Univ.", ja: "建大入口" },
   };
-  return labels[regionKey]?.[language] ?? regionKey || (language === "ja" ? "ソウル" : "Seoul");
+  return labels[regionKey]?.[language] ?? (regionKey || (language === "ja" ? "ソウル" : "Seoul"));
 }
 
 export function googleMapUrl(store: DiscoveryRestaurant) {
