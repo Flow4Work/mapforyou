@@ -77,6 +77,17 @@ type MarkerGroup = {
   stores: DiscoveryRestaurant[];
 };
 
+type MarkerCategory =
+  | "cafe"
+  | "chicken"
+  | "bbq"
+  | "korean"
+  | "japanese"
+  | "western"
+  | "bar"
+  | "seafood"
+  | "restaurant";
+
 function mapLanguage(language: PublicLanguage): NaverLanguage {
   return language === "ja" ? "ja" : "en";
 }
@@ -151,12 +162,84 @@ function groupStores(stores: DiscoveryRestaurant[], zoom: number, selectedId: st
   return groups;
 }
 
-function markerIcon(maps: NaverMapsNamespace, selected: boolean): MarkerIcon {
-  const size = selected ? 38 : 28;
+function includesAny(text: string, keywords: string[]) {
+  return keywords.some((keyword) => text.includes(keyword));
+}
+
+function markerCategory(store: DiscoveryRestaurant): MarkerCategory {
+  const text = [
+    store.category,
+    store.licenseType,
+    store.name,
+    store.nameEn,
+    store.nameJa,
+    store.searchKeyword,
+    ...store.menus.flatMap((menu) => [menu.nameKo, menu.nameEn, menu.nameJa]),
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLocaleLowerCase();
+
+  if (includesAny(text, ["치킨", "통닭", "닭강정", "닭갈비", "chicken", "チキン", "鶏肉", "唐揚げ"])) {
+    return "chicken";
+  }
+  if (includesAny(text, ["카페", "커피", "디저트", "베이커리", "제과", "빵", "coffee", "cafe", "café", "dessert", "bakery", "喫茶", "カフェ", "コーヒー", "パン"])) {
+    return "cafe";
+  }
+  if (includesAny(text, ["고기", "구이", "갈비", "삼겹", "곱창", "막창", "바비큐", "barbecue", "bbq", "grill", "焼肉", "焼き肉"])) {
+    return "bbq";
+  }
+  if (includesAny(text, ["일식", "스시", "초밥", "라멘", "우동", "소바", "돈카츠", "사시미", "izakaya", "sushi", "ramen", "udon", "soba", "tonkatsu", "japanese", "寿司", "ラーメン", "うどん", "そば", "とんかつ", "居酒屋", "日本料理"])) {
+    return "japanese";
+  }
+  if (includesAny(text, ["해산물", "횟집", "생선회", "조개", "생선", "seafood", "fish", "刺身", "海鮮", "魚"])) {
+    return "seafood";
+  }
+  if (includesAny(text, ["주점", "술집", "포차", "펍", "와인", "맥주", "칵테일", "pub", "bar", "beer", "wine", "cocktail", "バー", "ビール", "ワイン"])) {
+    return "bar";
+  }
+  if (includesAny(text, ["양식", "파스타", "피자", "버거", "스테이크", "브런치", "pasta", "pizza", "burger", "steak", "brunch", "western", "洋食"])) {
+    return "western";
+  }
+  if (includesAny(text, ["한식", "국밥", "찌개", "전골", "냉면", "비빔밥", "떡볶이", "분식", "korean", "韓国料理"])) {
+    return "korean";
+  }
+  return "restaurant";
+}
+
+function markerSvg(category: MarkerCategory) {
+  const common = 'viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"';
+
+  switch (category) {
+    case "cafe":
+      return `<svg ${common}><path d="M4 6h10v5a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4V6Z"/><path d="M14 8h1.5a2.5 2.5 0 0 1 0 5H14"/><path d="M5 19h12"/></svg>`;
+    case "chicken":
+      return `<svg ${common}><path d="M12.4 13.2c-2.5 2.5-6 3-7.8 1.2s-1.3-5.3 1.2-7.8 5.6-3.2 7.5-1.3 1.6 5.4-.9 7.9Z"/><path d="m12.2 13.1 2.5 2.5"/><path d="M15.5 14.6a2 2 0 0 1 2.8 0c.4.4.6.9.6 1.4.5 0 1 .2 1.4.6a2 2 0 0 1-2.8 2.8l-3.1-3.1"/></svg>`;
+    case "bbq":
+      return `<svg ${common}><path d="M12.2 3.5c.7 2.7-.4 4.2-1.8 5.5-1.1 1-1.9 2.2-1.9 4a3.5 3.5 0 0 0 7 0c0-1.4-.7-2.7-2-4 .1 1.8-.8 2.9-1.9 3.4.5-2.4-1.1-4.6-2.6-6.4-2.2 2.1-4 4.5-4 7.4a7 7 0 0 0 14 0c0-4.3-3.1-7.7-6.8-9.9Z"/></svg>`;
+    case "korean":
+      return `<svg ${common}><path d="M4 10h16c0 5-3.2 8-8 8s-8-3-8-8V10Z"/><path d="M6 7c1-1 2-1 3 0s2 1 3 0 2-1 3 0 2 1 3 0"/><path d="M9 21h6"/></svg>`;
+    case "japanese":
+      return `<svg ${common}><path d="M5 8c0-2.2 3.1-4 7-4s7 1.8 7 4-3.1 4-7 4-7-1.8-7-4Z"/><path d="M5 8v7c0 2.2 3.1 4 7 4s7-1.8 7-4V8"/><path d="M9 12v6M15 12v6"/></svg>`;
+    case "western":
+      return `<svg ${common}><path d="M7 3v7M4 3v4a3 3 0 0 0 6 0V3M7 10v11"/><path d="M17 3v18M17 3c3 2 3 6 0 8"/></svg>`;
+    case "bar":
+      return `<svg ${common}><path d="M5 4h14l-5 7v7"/><path d="M10 21h8M8 8h8"/></svg>`;
+    case "seafood":
+      return `<svg ${common}><path d="M4 12s4-5 9-5c3 0 5 2 7 5-2 3-4 5-7 5-5 0-9-5-9-5Z"/><path d="m4 12-2-3v6l2-3Z"/><circle cx="15.5" cy="10.5" r=".8" fill="currentColor" stroke="none"/></svg>`;
+    default:
+      return `<svg ${common}><circle cx="12" cy="12" r="6"/><path d="M3 12h3M18 12h3M12 3v3M12 18v3"/></svg>`;
+  }
+}
+
+function markerIcon(maps: NaverMapsNamespace, store: DiscoveryRestaurant, selected: boolean): MarkerIcon {
+  const category = markerCategory(store);
+  const width = selected ? 42 : 34;
+  const height = selected ? 46 : 38;
   return {
-    content: `<div class="naver-map-marker${selected ? " selected" : ""}" aria-hidden="true"><span></span></div>`,
-    size: new maps.Size(size, size),
-    anchor: new maps.Point(size / 2, size / 2),
+    content: `<div class="naver-map-marker category-${category}${selected ? " selected" : ""}" aria-hidden="true"><span class="naver-map-marker-icon">${markerSvg(category)}</span></div>`,
+    size: new maps.Size(width, height),
+    anchor: new maps.Point(width / 2, height),
   };
 }
 
@@ -222,7 +305,7 @@ export default function DiscoveryMap({
       const marker = new maps.Marker({
         map,
         position: coordinate,
-        icon: isCluster ? clusterIcon(maps, group.stores.length) : markerIcon(maps, selected),
+        icon: isCluster ? clusterIcon(maps, group.stores.length) : markerIcon(maps, store, selected),
         title: isCluster
           ? `${group.stores.length} places`
           : localizedRestaurantName(store, language),

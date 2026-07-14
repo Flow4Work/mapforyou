@@ -4,38 +4,72 @@
 }
 
 .naver-map-marker {
+  position: relative;
   display: grid;
   place-items: center;
-  width: 28px;
-  height: 28px;
-  border: 3px solid #fff;
-  border-radius: 50% 50% 50% 12px;
-  background: #e84b35;
-  box-shadow: 0 5px 14px rgba(103, 39, 26, .28);
-  transform: rotate(-45deg);
-  transition: width .15s ease, height .15s ease, box-shadow .15s ease;
+  width: 34px;
+  height: 34px;
+  box-sizing: border-box;
+  border: 2px solid rgba(255, 255, 255, .98);
+  border-radius: 13px;
+  color: #c9582e;
+  background: #fffaf4;
+  box-shadow: 0 0 0 1px rgba(166, 72, 38, .18), 0 5px 13px rgba(82, 48, 33, .22);
+  cursor: pointer;
+  transition: width .15s ease, height .15s ease, color .15s ease, background .15s ease, box-shadow .15s ease;
 }
 
-.naver-map-marker > span {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #ffd455;
-  transform: rotate(45deg);
+.naver-map-marker::after {
+  position: absolute;
+  z-index: 0;
+  left: 50%;
+  bottom: -4px;
+  width: 9px;
+  height: 9px;
+  content: "";
+  background: inherit;
+  border-right: 2px solid rgba(255, 255, 255, .98);
+  border-bottom: 2px solid rgba(255, 255, 255, .98);
+  transform: translateX(-50%) rotate(45deg);
+  border-radius: 0 0 3px 0;
+}
+
+.naver-map-marker-icon {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 17px;
+  height: 17px;
+}
+
+.naver-map-marker-icon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 .naver-map-marker.selected {
-  width: 38px;
-  height: 38px;
-  border-width: 4px;
-  background: #ff8a2b;
-  box-shadow: 0 0 0 5px rgba(255, 212, 85, .5), 0 8px 20px rgba(103, 39, 26, .32);
+  width: 42px;
+  height: 42px;
+  border-width: 3px;
+  border-radius: 16px;
+  color: #fff;
+  background: #e56531;
+  box-shadow: 0 0 0 4px rgba(229, 101, 49, .2), 0 8px 20px rgba(82, 48, 33, .3);
 }
 
-.naver-map-marker.selected > span {
+.naver-map-marker.selected::after {
+  bottom: -5px;
   width: 11px;
   height: 11px;
-  background: #fff4bf;
+  border-right-width: 3px;
+  border-bottom-width: 3px;
+}
+
+.naver-map-marker.selected .naver-map-marker-icon {
+  width: 21px;
+  height: 21px;
 }
 
 .naver-map-cluster {
@@ -44,11 +78,11 @@
   min-width: 46px;
   min-height: 46px;
   padding: 0 10px;
-  border: 4px solid rgba(255,255,255,.94);
+  border: 3px solid rgba(255, 255, 255, .98);
   border-radius: 999px;
-  color: #fff;
-  background: linear-gradient(145deg, #e84b35, #ff8a2b);
-  box-shadow: 0 8px 22px rgba(103, 39, 26, .25);
+  color: #8c4328;
+  background: #fff9f2;
+  box-shadow: 0 0 0 2px rgba(222, 101, 49, .5), 0 7px 18px rgba(82, 48, 33, .22);
 }
 
 .naver-map-cluster strong {
