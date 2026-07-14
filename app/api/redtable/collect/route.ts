@@ -10,7 +10,6 @@ const TOKEN_SETTING_KEY = "seoul_tourism_api_token";
 const REGION_ALIASES: Record<string, string[]> = {
   seongsu: ["성동구", "성수동"],
   hongdae: ["마포구", "서교동", "동교동", "연남동", "상수동", "합정동"],
-  geondae: ["광진구", "자양동", "화양동", "군자동"],
 };
 
 const CATEGORY_ALIASES: Record<string, string[]> = {
@@ -55,7 +54,23 @@ type MenuRow = {
   RSTR_ID?: string | number;
 };
 
-type ImageRow = { RSTR_ID?: string | number; RSTR_IMG_URL?: string };
+type RestaurantImageRow = {
+  RSTR_ID?: string | number;
+  RSTR_IMG_URL?: string;
+};
+
+type FoodImageRow = {
+  RSTR_ID?: string | number;
+  MENU_ID?: string | number;
+  FOOD_IMG_URL?: string;
+};
+
+type ImageCandidate = {
+  url: string;
+  source: "redtable_restaurant" | "redtable_food";
+  attribution: string;
+  sourceUrl: string;
+};
 
 type MenuResult = {
   menuId: string;
@@ -183,6 +198,12 @@ function nextPage(header: ApiHeader | undefined, lastPage: number) {
   const rows = Number(header?.numOfRows) || 1000;
   const total = Number(header?.totalCount) || 0;
   return total && lastPage * rows >= total ? null : lastPage + 1;
+}
+
+function pageCount(header: ApiHeader | undefined) {
+  const rows = Number(header?.numOfRows) || 1000;
+  const total = Number(header?.totalCount) || 0;
+  return total ? Math.max(Math.ceil(total / rows), 1) : 1;
 }
 
 function normalizeImageUrl(value: string) {
@@ -366,23 +387,59 @@ export async function POST(request: Request) {
       });
     }
 
-    const imagesByRestaurant: Record<string, string> = {};
-    let lastHeader: ApiHeader | undefined;
+    const imagesByRestaurant: Record<string, ImageCandidate> = {};
+    let restaurantImageHeader: ApiHeader | undefined;
+    let foodImageHeader: ApiHeader | undefined;
+
     for (const page of pages) {
-      const payload = await fetchPage<ImageRow>("/api/rstr/img", token, page, request.signal);
-      lastHeader = payload.header;
-      for (const row of payload.body ?? []) {
+      const restaurantImages = await fetchPage<RestaurantImageRow>("/api/rstr/img", token, page, request.signal);
+      restaurantImageHeader = restaurantImages.header;
+
+      for (const row of restaurantImages.body ?? []) {
         const restaurantId = String(row.RSTR_ID ?? "");
-        if (!restaurantIds.has(restaurantId) || imagesByRestaurant[restaurantId]) continue;
-        imagesByRestaurant[restaurantId] = normalizeImageUrl(String(row.RSTR_IMG_URL ?? ""));
+        const url = normalizeImageUrl(String(row.RSTR_IMG_URL ?? ""));
+        if (!restaurantIds.has(restaurantId) || !url || imagesByRestaurant[restaurantId]) continue;
+        imagesByRestaurant[restaurantId] = {
+          url,
+          source: "redtable_restaurant",
+          attribution: "서울관광재단 음식관광 OPEN API",
+          sourceUrl: BASE_URL,
+        };
+      }
+
+      await abortableSleep(250, request.signal);
+      const foodImages = await fetchPage<FoodImageRow>("/api/food/img", token, page, request.signal);
+      foodImageHeader = foodImages.header;
+
+      for (const row of foodImages.body ?? []) {
+        const restaurantId = String(row.RSTR_ID ?? "");
+        const url = normalizeImageUrl(String(row.FOOD_IMG_URL ?? ""));
+        if (!restaurantIds.has(restaurantId) || !url || imagesByRestaurant[restaurantId]) continue;
+        imagesByRestaurant[restaurantId] = {
+          url,
+          source: "redtable_food",
+          attribution: "서울관광재단 음식관광 OPEN API",
+          sourceUrl: BASE_URL,
+        };
       }
     }
 
     const lastPage = pages.at(-1) ?? startPage;
+    const totalPages = Math.max(pageCount(restaurantImageHeader), pageCount(foodImageHeader));
     return NextResponse.json({
       imagesByRestaurant,
-      nextPage: nextPage(lastHeader, lastPage),
-      stats: { scannedFrom: startPage, scannedTo: lastPage, totalCount: Number(lastHeader?.totalCount) || 0 },
+      nextPage: lastPage >= totalPages ? null : lastPage + 1,
+      stats: {
+        scannedFrom: startPage,
+        scannedTo: lastPage,
+        totalPages,
+        restaurantImageCount: Number(restaurantImageHeader?.totalCount) || 0,
+        foodImageCount: Number(foodImageHeader?.totalCount) || 0,
+        totalCount: Math.max(
+          Number(restaurantImageHeader?.totalCount) || 0,
+          Number(foodImageHeader?.totalCount) || 0,
+        ),
+      },
     });
   } catch (error) {
     if (request.signal.aborted || isAbortError(error)) {
