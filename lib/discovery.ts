@@ -16,7 +16,11 @@ export type DiscoveryMenu = {
 export type DiscoveryRestaurant = {
   id: string;
   name: string;
+  nameEn: string;
+  nameJa: string;
   roadAddress: string;
+  roadAddressEn: string;
+  roadAddressJa: string;
   address: string;
   latitude: number | null;
   longitude: number | null;
@@ -24,6 +28,8 @@ export type DiscoveryRestaurant = {
   category: string;
   licenseType: string;
   introduction: string;
+  introductionEn: string;
+  introductionJa: string;
   regionKey: string;
   searchKeyword: string;
   imageUrl: string;
@@ -34,7 +40,11 @@ export type DiscoveryRestaurant = {
 type RestaurantRow = {
   source_id: string;
   name: string;
+  name_en: string | null;
+  name_ja: string | null;
   road_address: string | null;
+  road_address_en: string | null;
+  road_address_ja: string | null;
   address: string | null;
   latitude: number | string | null;
   longitude: number | string | null;
@@ -42,6 +52,8 @@ type RestaurantRow = {
   category: string | null;
   license_type: string | null;
   introduction: string | null;
+  introduction_en: string | null;
+  introduction_ja: string | null;
   region_key: string | null;
   search_keyword: string | null;
   image_url: string | null;
@@ -58,6 +70,8 @@ type MenuRow = {
   is_specialty: boolean | null;
 };
 
+const RESTAURANT_COLUMNS = "source_id,name,name_en,name_ja,road_address,road_address_en,road_address_ja,address,latitude,longitude,phone,category,license_type,introduction,introduction_en,introduction_ja,region_key,search_keyword,image_url,updated_at";
+
 function optionalNumber(value: number | string | null) {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : null;
@@ -67,7 +81,11 @@ function mapRestaurant(row: RestaurantRow, menus: DiscoveryMenu[]): DiscoveryRes
   return {
     id: String(row.source_id),
     name: row.name,
+    nameEn: row.name_en ?? "",
+    nameJa: row.name_ja ?? "",
     roadAddress: row.road_address ?? "",
+    roadAddressEn: row.road_address_en ?? "",
+    roadAddressJa: row.road_address_ja ?? "",
     address: row.address ?? "",
     latitude: optionalNumber(row.latitude),
     longitude: optionalNumber(row.longitude),
@@ -75,6 +93,8 @@ function mapRestaurant(row: RestaurantRow, menus: DiscoveryMenu[]): DiscoveryRes
     category: row.category ?? "",
     licenseType: row.license_type ?? "",
     introduction: row.introduction ?? "",
+    introductionEn: row.introduction_en ?? "",
+    introductionJa: row.introduction_ja ?? "",
     regionKey: row.region_key ?? "",
     searchKeyword: row.search_keyword ?? "",
     imageUrl: row.image_url ?? "",
@@ -100,14 +120,14 @@ export async function loadDiscoveryRestaurants(limit = 500): Promise<DiscoveryRe
 
   const { data: restaurantData, error: restaurantError } = await supabase
     .from("public_data_restaurants")
-    .select("source_id,name,road_address,address,latitude,longitude,phone,category,license_type,introduction,region_key,search_keyword,image_url,updated_at")
+    .select(RESTAURANT_COLUMNS)
     .in("region_key", ACTIVE_REGIONS)
     .order("updated_at", { ascending: false })
     .limit(limit);
 
   if (restaurantError) throw new Error(`공개 식당 조회 실패: ${restaurantError.message}`);
 
-  const restaurants = (restaurantData ?? []) as RestaurantRow[];
+  const restaurants = (restaurantData ?? []) as unknown as RestaurantRow[];
   const ids = restaurants.map((row) => String(row.source_id));
   if (!ids.length) return [];
 
@@ -138,7 +158,7 @@ export async function loadDiscoveryRestaurant(id: string): Promise<DiscoveryRest
 
   const { data: restaurantData, error: restaurantError } = await supabase
     .from("public_data_restaurants")
-    .select("source_id,name,road_address,address,latitude,longitude,phone,category,license_type,introduction,region_key,search_keyword,image_url,updated_at")
+    .select(RESTAURANT_COLUMNS)
     .eq("source_id", id)
     .in("region_key", ACTIVE_REGIONS)
     .maybeSingle();
@@ -156,5 +176,5 @@ export async function loadDiscoveryRestaurant(id: string): Promise<DiscoveryRest
 
   const menus = ((menuData ?? []) as MenuRow[]).map(mapMenu);
   if (!menus.length) return null;
-  return mapRestaurant(restaurantData as RestaurantRow, menus);
+  return mapRestaurant(restaurantData as unknown as RestaurantRow, menus);
 }
