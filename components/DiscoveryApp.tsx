@@ -300,7 +300,7 @@ export default function DiscoveryApp({ initialStores }: { initialStores: Discove
                 <h1>{localizedRestaurantName(selectedStore, language)}</h1>
                 <p>{localizedAddress(selectedStore, language)}</p>
                 <div className="detail-panel-actions">
-                  <a href={googleMapUrl(selectedStore)} target="_blank" rel="noreferrer">Google Maps</a>
+                  <a href={`${googleMapUrl(selectedStore)}&hl=${language}`} target="_blank" rel="noreferrer">Google Maps</a>
                   <a href={naverMapUrl(selectedStore)} target="_blank" rel="noreferrer">Naver Map</a>
                   {selectedStore.phone && <a href={`tel:${selectedStore.phone}`}>{copy.call}</a>}
                 </div>
