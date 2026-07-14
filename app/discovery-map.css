@@ -1,0 +1,120 @@
+/* NAVER Dynamic Map and readability refinements */
+.discovery-map {
+  background: #f4efe8;
+}
+
+.naver-map-marker {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 3px solid #fff;
+  border-radius: 50% 50% 50% 12px;
+  background: #e84b35;
+  box-shadow: 0 5px 14px rgba(103, 39, 26, .28);
+  transform: rotate(-45deg);
+  transition: width .15s ease, height .15s ease, box-shadow .15s ease;
+}
+
+.naver-map-marker > span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ffd455;
+  transform: rotate(45deg);
+}
+
+.naver-map-marker.selected {
+  width: 38px;
+  height: 38px;
+  border-width: 4px;
+  background: #ff8a2b;
+  box-shadow: 0 0 0 5px rgba(255, 212, 85, .5), 0 8px 20px rgba(103, 39, 26, .32);
+}
+
+.naver-map-marker.selected > span {
+  width: 11px;
+  height: 11px;
+  background: #fff4bf;
+}
+
+.naver-map-cluster {
+  display: grid;
+  place-items: center;
+  min-width: 46px;
+  min-height: 46px;
+  padding: 0 10px;
+  border: 4px solid rgba(255,255,255,.94);
+  border-radius: 999px;
+  color: #fff;
+  background: linear-gradient(145deg, #e84b35, #ff8a2b);
+  box-shadow: 0 8px 22px rgba(103, 39, 26, .25);
+}
+
+.naver-map-cluster strong {
+  font-size: 14px;
+  font-weight: 950;
+  letter-spacing: -.03em;
+}
+
+.naver-map-status {
+  position: absolute;
+  z-index: 500;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  color: #806e67;
+  background: #f4efe8;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.naver-map-status.error {
+  color: #9f2d21;
+  background: #fff1e8;
+}
+
+/* Previously undersized desktop text */
+.discovery-brand small { font-size: 10.5px; }
+.currency-header-button { font-size: 11px; }
+.discovery-search input { font-size: 13px; }
+.filter-block > span { font-size: 9.5px; }
+.filter-scroll button { height: 33px; font-size: 10.5px; }
+.discovery-list-heading strong { font-size: 14px; }
+.discovery-list-heading span { font-size: 10.5px; }
+.discovery-card-topline { font-size: 9px; }
+.discovery-address { font-size: 10.5px; }
+.menu-preview-row { font-size: 10.5px; }
+.discovery-empty button { font-size: 11px; }
+.map-selected-card span { font-size: 9px; }
+.map-selected-card strong { font-size: 15px; }
+.map-selected-card small { font-size: 10.5px; }
+.detail-panel-kicker span { font-size: 9.5px; }
+.detail-panel-header > p { font-size: 11.5px; }
+.detail-panel-actions a { min-height: 36px; font-size: 10.5px; }
+.detail-overview-card span { font-size: 9px; }
+.detail-overview-card p { font-size: 11.5px; }
+.menu-panel-heading span { font-size: 9px; }
+.menu-panel-heading > button { font-size: 9.5px; }
+.inline-menu-row h2 { font-size: 15px; }
+.inline-price strong { font-size: 13px; }
+.inline-price small { font-size: 9.5px; }
+.featured-chip { font-size: 8.5px; }
+.show-staff-button { font-size: 9.5px; }
+.staff-display-card small { font-size: 9.5px; }
+.staff-display-card em { font-size: 10.5px; }
+.detail-data-note { font-size: 9.5px; }
+.restaurant-cover-label > span { font-size: 8.5px; }
+
+@media (max-width: 900px) {
+  .mobile-panel-tabs button { font-size: 11px; }
+  .naver-map-cluster { transform: scale(.9); }
+}
+
+@media (max-width: 560px) {
+  .public-language-toggle button { font-size: 11px; }
+  .discovery-address, .menu-preview-row { font-size: 10px; }
+  .map-selected-card strong { font-size: 14px; }
+  .map-selected-card small { font-size: 10px; }
+}
