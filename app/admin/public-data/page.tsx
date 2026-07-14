@@ -1,7 +1,13 @@
 import PublicDataCollector from "@/components/PublicDataCollector";
+import RedTableTokenSwitcher from "@/components/RedTableTokenSwitcher";
 
 export const metadata = { title: "서울 음식관광 OPEN API | MapForYou" };
 
 export default function PublicDataAdminPage() {
-  return <PublicDataCollector />;
+  return (
+    <>
+      <RedTableTokenSwitcher />
+      <PublicDataCollector />
+    </>
+  );
 }
