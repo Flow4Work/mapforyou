@@ -1,0 +1,180 @@
+/* Public restaurant discovery */
+.discovery-page { min-height: 100vh; background: #f6f5ef; }
+.discovery-header { position: sticky; top: 0; z-index: 500; display: flex; justify-content: space-between; align-items: center; width: min(1480px, calc(100% - 40px)); margin: 0 auto; padding: 16px 0; background: rgba(246,245,239,.92); backdrop-filter: blur(16px); }
+.discovery-brand { display: flex; align-items: center; gap: 11px; font-weight: 850; letter-spacing: -.035em; }
+.discovery-brand > span:last-child { display: flex; flex-direction: column; line-height: 1.05; }
+.discovery-brand small { margin-top: 4px; color: var(--muted); font-size: 9px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.public-language-toggle { display: flex; gap: 3px; padding: 4px; border: 1px solid #dedfd8; border-radius: 12px; background: rgba(255,255,255,.76); }
+.public-language-toggle button { min-width: 52px; padding: 8px 11px; border: 0; border-radius: 8px; color: var(--muted); background: transparent; font-size: 12px; font-weight: 850; }
+.public-language-toggle button.active { color: white; background: #1c352a; }
+
+.discovery-intro { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 50px; width: min(1480px, calc(100% - 40px)); margin: 0 auto; padding: 48px 0 36px; }
+.discovery-intro h1 { margin: 0; font-size: clamp(42px, 5.2vw, 78px); line-height: .99; letter-spacing: -.065em; }
+.discovery-intro h1 span { display: block; }
+.discovery-intro > div:first-child > p:last-child { max-width: 700px; margin: 24px 0 0; color: var(--muted); font-size: 16px; line-height: 1.7; }
+.discovery-stat { display: flex; flex-direction: column; align-items: flex-end; padding-bottom: 8px; }
+.discovery-stat strong { font-size: 52px; line-height: 1; letter-spacing: -.06em; }
+.discovery-stat span { max-width: 190px; margin-top: 8px; color: var(--muted); font-size: 11px; line-height: 1.45; text-align: right; }
+
+.discovery-filters { display: grid; grid-template-columns: minmax(280px, 1fr) auto auto; align-items: center; gap: 10px; width: min(1480px, calc(100% - 40px)); margin: 0 auto 18px; }
+.discovery-search { display: flex; align-items: center; gap: 10px; height: 48px; padding: 0 15px; border: 1px solid #dddeda; border-radius: 15px; background: white; }
+.discovery-search > span { color: #718075; font-size: 25px; transform: rotate(-15deg); }
+.discovery-search input { width: 100%; border: 0; outline: 0; background: transparent; }
+.discovery-search input::placeholder { color: #9b9f99; }
+.filter-scroll { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+.filter-scroll::-webkit-scrollbar { display: none; }
+.filter-scroll button { flex: 0 0 auto; height: 42px; padding: 0 14px; border: 1px solid #dedfd8; border-radius: 12px; color: #69706a; background: rgba(255,255,255,.75); font-size: 11px; font-weight: 800; white-space: nowrap; }
+.filter-scroll button.active { border-color: #1c352a; color: white; background: #1c352a; }
+.category-filter button.active { border-color: #c5e75f; color: #183225; background: #dffd75; }
+
+.discovery-layout { display: grid; grid-template-columns: minmax(390px, 470px) minmax(0, 1fr); gap: 16px; width: min(1480px, calc(100% - 40px)); margin: 0 auto; align-items: start; }
+.discovery-list-panel { min-width: 0; height: calc(100vh - 210px); min-height: 650px; padding: 18px 10px 18px 0; overflow: hidden; }
+.discovery-list-heading { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; margin-bottom: 12px; padding: 0 5px; }
+.discovery-list-heading strong { font-size: 17px; }
+.discovery-list-heading span { color: var(--muted); font-size: 9px; text-align: right; }
+.discovery-list { height: calc(100% - 32px); padding: 0 6px 50px 0; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #c9cec6 transparent; }
+.discovery-card { display: grid; grid-template-columns: 132px minmax(0, 1fr); gap: 15px; margin-bottom: 10px; padding: 10px; border: 1px solid #e0e2dc; border-radius: 19px; background: rgba(255,255,255,.86); transition: border-color .15s, box-shadow .15s, transform .15s; cursor: pointer; }
+.discovery-card:hover { transform: translateY(-1px); border-color: #bfc9bc; box-shadow: 0 12px 30px rgba(24,39,30,.07); }
+.discovery-card.selected { border-color: #325846; box-shadow: 0 0 0 2px rgba(44,84,65,.10); }
+.discovery-card-body { min-width: 0; padding: 3px 3px 3px 0; }
+.discovery-card-topline { display: flex; justify-content: space-between; gap: 10px; color: #607165; font-size: 9px; font-weight: 850; text-transform: uppercase; letter-spacing: .05em; }
+.discovery-card-topline small { color: #969b95; white-space: nowrap; }
+.discovery-card h2 { margin: 7px 0 5px; overflow: hidden; font-size: 20px; letter-spacing: -.045em; text-overflow: ellipsis; white-space: nowrap; }
+.discovery-address { margin: 0 0 10px; overflow: hidden; color: var(--muted); font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+.menu-preview-list { display: grid; gap: 5px; }
+.menu-preview-list > div { display: flex; justify-content: space-between; gap: 10px; font-size: 10px; }
+.menu-preview-list span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.menu-preview-list strong { flex: 0 0 auto; }
+.view-menu-link { display: inline-flex; align-items: center; gap: 7px; margin-top: 11px; color: #315b47; font-size: 10px; font-weight: 900; }
+.view-menu-link span { transition: transform .15s; }
+.view-menu-link:hover span { transform: translateX(3px); }
+.discovery-empty { display: grid; place-items: center; min-height: 320px; padding: 30px; border: 1px dashed #ccd0ca; border-radius: 20px; text-align: center; background: rgba(255,255,255,.55); }
+.discovery-empty button { padding: 10px 13px; border: 0; border-radius: 10px; background: #1d392c; color: white; }
+
+.discovery-map-panel { position: sticky; top: 82px; height: calc(100vh - 102px); min-height: 650px; overflow: hidden; border: 1px solid #dcded7; border-radius: 24px; background: #e9ede5; box-shadow: 0 20px 55px rgba(28,43,34,.09); }
+.discovery-map-wrap, .discovery-map, .discovery-map-loading { position: relative; width: 100%; height: 100%; }
+.discovery-map-loading, .detail-map-loading { display: grid; place-items: center; color: var(--muted); background: #e9ede5; }
+.discovery-map .leaflet-control-attribution { font-size: 8px; }
+.discovery-map .leaflet-tooltip { border: 0; border-radius: 8px; color: #1d3027; font-size: 10px; font-weight: 750; box-shadow: 0 5px 15px rgba(20,30,24,.12); }
+.map-selected-card { position: absolute; z-index: 450; left: 18px; right: 18px; bottom: 18px; display: flex; justify-content: space-between; align-items: center; gap: 18px; padding: 15px 16px; border: 1px solid rgba(255,255,255,.7); border-radius: 16px; background: rgba(255,255,255,.94); box-shadow: 0 12px 35px rgba(19,31,24,.14); backdrop-filter: blur(14px); }
+.map-selected-card > div { display: flex; min-width: 0; flex-direction: column; gap: 4px; }
+.map-selected-card span { color: #738077; font-size: 8px; font-weight: 850; text-transform: uppercase; letter-spacing: .08em; }
+.map-selected-card strong, .map-selected-card small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.map-selected-card strong { font-size: 15px; }
+.map-selected-card small { color: var(--muted); font-size: 9px; }
+.map-selected-card > a { flex: 0 0 auto; padding: 10px 12px; border-radius: 10px; color: white; background: #1c382b; font-size: 10px; font-weight: 850; }
+
+.restaurant-cover { position: relative; display: flex; min-height: 400px; overflow: hidden; align-items: flex-end; padding: 24px; border-radius: 26px; color: white; background-size: cover; background-position: center; }
+.restaurant-cover-compact { width: 132px; min-height: 154px; padding: 12px; border-radius: 14px; }
+.restaurant-cover-icon { position: absolute; inset: 0; display: grid; place-items: center; padding-bottom: 20px; font-size: 52px; filter: drop-shadow(0 7px 12px rgba(20,30,24,.16)); }
+.restaurant-cover-compact .restaurant-cover-icon { font-size: 34px; }
+.restaurant-cover-label { position: relative; z-index: 2; display: flex; flex-direction: column; gap: 7px; }
+.restaurant-cover-label span { width: fit-content; padding: 6px 8px; border-radius: 999px; background: rgba(17,31,23,.36); font-size: 8px; font-weight: 900; text-transform: uppercase; letter-spacing: .08em; backdrop-filter: blur(7px); }
+.restaurant-cover-label strong { font-size: clamp(28px, 4vw, 50px); letter-spacing: -.05em; }
+.restaurant-cover-compact .restaurant-cover-label strong { display: none; }
+.cover-cafe { background: radial-gradient(circle at 72% 25%, #efc689, transparent 28%), linear-gradient(145deg,#7e4c32,#2d4b3d); }
+.cover-korean { background: radial-gradient(circle at 25% 24%, #f4c268, transparent 25%), linear-gradient(145deg,#b45e35,#3e3e2d); }
+.cover-japanese { background: radial-gradient(circle at 70% 20%, #ffdfae, transparent 28%), linear-gradient(145deg,#8d3c42,#243c3a); }
+.cover-chinese { background: radial-gradient(circle at 68% 24%, #ffc56d, transparent 25%), linear-gradient(145deg,#b54032,#46251f); }
+.cover-meat { background: radial-gradient(circle at 70% 24%, #d78865, transparent 26%), linear-gradient(145deg,#69372f,#1e352b); }
+.cover-dessert { background: radial-gradient(circle at 72% 20%, #ffe5c4, transparent 28%), linear-gradient(145deg,#d18f8e,#586e59); }
+.cover-other { background: radial-gradient(circle at 68% 24%, #d9e69d, transparent 27%), linear-gradient(145deg,#52735e,#273b32); }
+
+.discovery-footer { display: flex; justify-content: space-between; gap: 30px; width: min(1480px, calc(100% - 40px)); margin: 0 auto; padding: 32px 0 40px; color: var(--muted); font-size: 9px; }
+.discovery-footer strong { color: var(--ink); font-size: 12px; }
+.discovery-footer span { max-width: 600px; text-align: right; line-height: 1.6; }
+
+/* Public restaurant detail */
+.detail-page { min-height: 100vh; padding: 0 24px 90px; background: #f6f5ef; }
+.detail-topbar { display: flex; justify-content: space-between; align-items: center; width: min(1240px, 100%); margin: 0 auto; padding: 18px 0; }
+.detail-topbar > a { color: #395848; font-size: 12px; font-weight: 850; }
+.detail-hero-grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(360px, .85fr); gap: 18px; width: min(1240px, 100%); margin: 0 auto; }
+.detail-hero-grid > .restaurant-cover { min-height: 500px; }
+.detail-hero-copy { display: flex; flex-direction: column; justify-content: flex-end; min-height: 500px; padding: clamp(28px, 4vw, 55px); border-radius: 26px; color: white; background: #1d352b; }
+.detail-kicker { color: #c5d9ca; font-size: 10px; font-weight: 850; text-transform: uppercase; letter-spacing: .12em; }
+.detail-hero-copy h1 { margin: 15px 0 10px; font-size: clamp(42px, 6vw, 78px); line-height: .98; letter-spacing: -.07em; }
+.detail-hero-copy > p { margin: 0; color: #bdcbc2; font-size: 13px; }
+.detail-quick-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 45px; }
+.detail-quick-stats div { display: flex; flex-direction: column; gap: 6px; padding: 17px; border: 1px solid rgba(255,255,255,.12); border-radius: 15px; background: rgba(255,255,255,.055); }
+.detail-quick-stats strong { font-size: 27px; }
+.detail-quick-stats span { color: #bdcbc2; font-size: 9px; }
+.detail-content-grid { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 28px; width: min(1240px, 100%); margin: 36px auto 0; }
+.detail-main-column { min-width: 0; }
+.detail-section-heading { margin: 0 0 20px; }
+.detail-section-heading > span { color: #6a7b70; font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: .13em; }
+.detail-section-heading h2 { max-width: 760px; margin: 8px 0 0; font-size: clamp(22px, 3vw, 34px); line-height: 1.35; letter-spacing: -.04em; }
+.menu-heading { margin-top: 48px; }
+.detail-menu-list { display: grid; gap: 10px; }
+.detail-menu-card { padding: 21px; border: 1px solid #dedfd9; border-radius: 18px; background: white; }
+.detail-menu-main { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; }
+.detail-menu-main h3 { margin: 6px 0 0; font-size: 20px; line-height: 1.3; letter-spacing: -.03em; }
+.detail-menu-main > strong { flex: 0 0 auto; font-size: 14px; }
+.featured-chip { display: inline-flex; padding: 5px 7px; border-radius: 99px; color: #684d18; background: #fff0b9; font-size: 8px; font-weight: 900; text-transform: uppercase; }
+.show-staff-button { margin-top: 15px; padding: 8px 10px; border: 0; border-radius: 9px; color: #315b47; background: #edf3e8; font-size: 9px; font-weight: 900; }
+.staff-display-card { display: flex; flex-direction: column; gap: 9px; margin-top: 13px; padding: 20px; border-radius: 14px; color: white; background: #1c352a; text-align: center; }
+.staff-display-card small { color: #bdcbc2; font-size: 9px; }
+.staff-display-card strong { font-size: 25px; }
+.staff-display-card span { color: #dffd75; font-size: 15px; font-weight: 850; }
+.order-phrase-section { margin-top: 50px; padding: 26px; border-radius: 22px; background: #e9f0df; }
+.phrase-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
+.phrase-buttons button { padding: 10px 12px; border: 1px solid #cad6c3; border-radius: 10px; color: #365342; background: rgba(255,255,255,.72); font-size: 10px; font-weight: 800; }
+.phrase-buttons button.active { border-color: #1c352a; color: white; background: #1c352a; }
+.phrase-display { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; padding: 22px; border-radius: 14px; color: white; background: #1c352a; text-align: center; }
+.phrase-display small { color: #bdcbc2; font-size: 9px; }
+.phrase-display strong { font-size: 27px; }
+.detail-side-column { min-width: 0; }
+.detail-info-card { padding: 22px; border: 1px solid #dedfd9; border-radius: 20px; background: white; }
+.detail-info-card > span { color: #718077; font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: .12em; }
+.detail-info-card h2 { margin: 10px 0 20px; font-size: 17px; line-height: 1.45; }
+.detail-action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.detail-action-grid a { padding: 11px; border-radius: 10px; color: #294b3a; background: #edf2e9; font-size: 10px; font-weight: 850; text-align: center; }
+.detail-action-grid a.full { grid-column: 1 / -1; }
+.detail-mini-map { height: 340px; margin-top: 12px; overflow: hidden; border: 1px solid #dedfd9; border-radius: 20px; }
+.detail-mini-map .map-selected-card { display: none; }
+.detail-data-note { margin-top: 12px; padding: 14px; border-radius: 13px; color: #52665a; background: #e8eee5; font-size: 9px; line-height: 1.55; }
+
+@media (max-width: 1050px) {
+  .discovery-filters { grid-template-columns: 1fr; }
+  .discovery-layout { grid-template-columns: 400px minmax(0, 1fr); }
+  .detail-content-grid { grid-template-columns: minmax(0, 1fr) 320px; }
+}
+
+@media (max-width: 800px) {
+  .discovery-header { width: calc(100% - 28px); }
+  .discovery-intro { grid-template-columns: 1fr; width: calc(100% - 28px); padding: 34px 0 26px; }
+  .discovery-intro h1 { font-size: clamp(40px, 12vw, 62px); }
+  .discovery-intro > div:first-child > p:last-child { font-size: 14px; }
+  .discovery-stat { display: none; }
+  .discovery-filters { width: calc(100% - 28px); }
+  .discovery-layout { display: flex; width: 100%; flex-direction: column; gap: 0; }
+  .discovery-map-panel { position: relative; top: auto; order: -1; width: calc(100% - 28px); height: 43vh; min-height: 330px; margin: 4px auto 14px; border-radius: 20px; }
+  .discovery-list-panel { width: 100%; height: auto; min-height: 0; padding: 6px 14px 30px; overflow: visible; }
+  .discovery-list { height: auto; padding-right: 0; overflow: visible; }
+  .map-selected-card { left: 10px; right: 10px; bottom: 10px; }
+  .discovery-footer { width: calc(100% - 28px); flex-direction: column; }
+  .discovery-footer span { text-align: left; }
+  .detail-page { padding: 0 14px 60px; }
+  .detail-hero-grid { grid-template-columns: 1fr; }
+  .detail-hero-grid > .restaurant-cover, .detail-hero-copy { min-height: 390px; }
+  .detail-content-grid { grid-template-columns: 1fr; }
+  .detail-side-column { order: -1; }
+}
+
+@media (max-width: 520px) {
+  .discovery-brand small { display: none; }
+  .public-language-toggle button { min-width: 45px; }
+  .discovery-card { grid-template-columns: 104px minmax(0, 1fr); gap: 11px; padding: 8px; }
+  .restaurant-cover-compact { width: 104px; min-height: 142px; }
+  .discovery-card h2 { font-size: 18px; }
+  .menu-preview-list > div:nth-child(2) { display: none; }
+  .discovery-list-heading span { display: none; }
+  .map-selected-card small { display: none; }
+  .detail-topbar { padding: 14px 0; }
+  .detail-hero-grid > .restaurant-cover { min-height: 330px; }
+  .detail-hero-copy { min-height: 340px; padding: 26px; }
+  .detail-hero-copy h1 { font-size: 48px; }
+  .detail-quick-stats { margin-top: 30px; }
+  .detail-menu-main { flex-direction: column; gap: 10px; }
+  .detail-action-grid { grid-template-columns: 1fr; }
+  .detail-action-grid a.full { grid-column: auto; }
+}
