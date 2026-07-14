@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
+import "leaflet/dist/leaflet.css";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "MapForYou",
-  description: "Korean menus translated into English and Japanese",
+  title: "MapForYou | Translated Seoul Menus",
+  description: "Explore Seoul restaurants on a map and read English and Japanese menus before you visit.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="ko"><body>{children}</body></html>;
+  return <html lang="en"><body>{children}</body></html>;
 }
