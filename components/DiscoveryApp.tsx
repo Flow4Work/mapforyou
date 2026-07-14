@@ -1,15 +1,19 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import RestaurantCover from "@/components/RestaurantCover";
 import type { DiscoveryRestaurant } from "@/lib/discovery";
 import {
   broadCategory,
+  categoryIcon,
   categoryLabel,
+  googleMapUrl,
+  localizedAddress,
+  localizedIntroduction,
   localizedMenuName,
-  priceLabel,
+  localizedRestaurantName,
+  naverMapUrl,
   regionLabel,
   type BroadCategory,
   type PublicLanguage,
@@ -22,42 +26,109 @@ const DiscoveryMap = dynamic(() => import("@/components/DiscoveryMap"), {
 
 const CATEGORY_ORDER: BroadCategory[] = ["cafe", "korean", "meat", "japanese", "chinese", "dessert", "other"];
 
+type ExchangeRates = {
+  usdPerKrw: number;
+  jpyPerKrw: number;
+  date: string;
+  source: string;
+  isFallback: boolean;
+};
+
+const FALLBACK_RATES: ExchangeRates = {
+  usdPerKrw: 0.00072,
+  jpyPerKrw: 0.108,
+  date: "reference estimate",
+  source: "fallback",
+  isFallback: true,
+};
+
 export default function DiscoveryApp({ initialStores }: { initialStores: DiscoveryRestaurant[] }) {
   const [language, setLanguage] = useState<PublicLanguage>("en");
   const [search, setSearch] = useState("");
   const [region, setRegion] = useState("all");
   const [category, setCategory] = useState<"all" | BroadCategory>("all");
   const [selectedId, setSelectedId] = useState(initialStores[0]?.id ?? "");
+  const [showConvertedPrice, setShowConvertedPrice] = useState(false);
+  const [rates, setRates] = useState<ExchangeRates>(FALLBACK_RATES);
+  const [revealedMenuId, setRevealedMenuId] = useState("");
+  const [mobilePanel, setMobilePanel] = useState<"places" | "menu">("places");
 
   const copy = language === "ja"
     ? {
-        eyebrow: "SEOUL FOOD MAP",
-        title: "読めるメニューから、\n行きたいお店を探す。",
-        description: "聖水・弘大の飲食店を地図で探し、翻訳済みのメニューと価格を来店前に確認できます。",
+        tagline: "読めるメニューから探す、ソウルのフードマップ",
         search: "店名・メニューを検索",
-        allAreas: "すべてのエリア",
+        areas: "エリア",
+        allAreas: "すべて",
+        food: "料理",
         allFood: "すべて",
-        results: "店舗",
-        menuCount: "メニュー",
-        viewMenu: "メニューを見る",
+        recommendations: "おすすめ店舗",
+        places: "店舗",
+        menus: "メニュー",
         noResults: "条件に合うお店がありません。",
         reset: "条件をリセット",
-        dataNote: "メニューと価格は公開データを整理して表示しています。店舗で変更される場合があります。",
+        details: "店舗情報",
+        directions: "地図を開く",
+        call: "電話",
+        about: "このお店について",
+        menuTitle: "翻訳メニュー",
+        featured: "おすすめ",
+        showStaff: "スタッフに見せる",
+        closeStaff: "閉じる",
+        staffHelp: "この画面をスタッフに見せてください",
+        orderPhrase: "これを一つお願いします",
+        convertOn: "円の目安で見る",
+        convertOff: "ウォンで見る",
+        noPrice: "価格未確認",
+        dataNotice: "公開データを整理した参考情報です。価格・営業情報は店舗で変更される場合があります。",
+        exchangeNotice: "参考為替",
+        listTab: "お店",
+        menuTab: "メニュー",
       }
     : {
-        eyebrow: "SEOUL FOOD MAP",
-        title: "Find the place.\nRead the menu first.",
-        description: "Explore restaurants in Seongsu and Hongdae on a map, then check translated menus and prices before you visit.",
+        tagline: "A Seoul food map built around menus you can read",
         search: "Search restaurants or menus",
-        allAreas: "All areas",
-        allFood: "All food",
-        results: "places",
-        menuCount: "menus",
-        viewMenu: "View menu",
+        areas: "Area",
+        allAreas: "All",
+        food: "Food",
+        allFood: "All",
+        recommendations: "Recommended places",
+        places: "places",
+        menus: "menus",
         noResults: "No restaurants match these filters.",
         reset: "Reset filters",
-        dataNote: "Menus and prices are organized from public data and may change at the restaurant.",
+        details: "Place details",
+        directions: "Open maps",
+        call: "Call",
+        about: "About this place",
+        menuTitle: "Translated menu",
+        featured: "Featured",
+        showStaff: "Show to staff",
+        closeStaff: "Close Korean",
+        staffHelp: "Show this screen to the staff",
+        orderPhrase: "One of this, please",
+        convertOn: "Estimate in USD",
+        convertOff: "Show in won",
+        noPrice: "Price unavailable",
+        dataNotice: "This is reference information organized from public data. Prices and operating details may change at the restaurant.",
+        exchangeNotice: "Reference rate",
+        listTab: "Places",
+        menuTab: "Menu",
       };
+
+  useEffect(() => {
+    let active = true;
+    fetch("/api/exchange-rates")
+      .then((response) => response.json())
+      .then((data: ExchangeRates) => {
+        if (active && Number.isFinite(data.usdPerKrw) && Number.isFinite(data.jpyPerKrw)) setRates(data);
+      })
+      .catch(() => undefined);
+    return () => { active = false; };
+  }, []);
+
+  useEffect(() => {
+    setShowConvertedPrice(false);
+  }, [language]);
 
   const regions = useMemo(() => [...new Set(initialStores.map((store) => store.regionKey).filter(Boolean))], [initialStores]);
   const categories = useMemo(() => {
@@ -72,20 +143,26 @@ export default function DiscoveryApp({ initialStores }: { initialStores: Discove
       if (category !== "all" && broadCategory(store) !== category) return false;
       if (!query) return true;
 
-      const menuText = store.menus
-        .flatMap((menu) => [menu.nameKo, menu.nameEn, menu.nameJa])
-        .join(" ");
-      return `${store.name} ${store.category} ${store.roadAddress} ${menuText}`.toLowerCase().includes(query);
+      const menuText = store.menus.flatMap((menu) => [menu.nameKo, menu.nameEn, menu.nameJa]).join(" ");
+      const localizedText = `${localizedRestaurantName(store, language)} ${localizedAddress(store, language)}`;
+      return `${store.name} ${store.category} ${store.roadAddress} ${localizedText} ${menuText}`.toLowerCase().includes(query);
     });
-  }, [initialStores, region, category, search]);
+  }, [initialStores, region, category, search, language]);
 
   useEffect(() => {
-    if (!filteredStores.some((store) => store.id === selectedId)) {
-      setSelectedId(filteredStores[0]?.id ?? "");
-    }
+    if (!filteredStores.some((store) => store.id === selectedId)) setSelectedId(filteredStores[0]?.id ?? "");
   }, [filteredStores, selectedId]);
 
-  const handleSelect = useCallback((id: string) => setSelectedId(id), []);
+  const selectedStore = useMemo(
+    () => filteredStores.find((store) => store.id === selectedId) ?? filteredStores[0] ?? null,
+    [filteredStores, selectedId],
+  );
+
+  const handleSelect = useCallback((id: string) => {
+    setSelectedId(id);
+    setRevealedMenuId("");
+    setMobilePanel("menu");
+  }, []);
 
   function resetFilters() {
     setSearch("");
@@ -93,59 +170,82 @@ export default function DiscoveryApp({ initialStores }: { initialStores: Discove
     setCategory("all");
   }
 
+  function formatPrice(price: number) {
+    if (!price) return copy.noPrice;
+    if (!showConvertedPrice) return `₩${price.toLocaleString("en-US")}`;
+    if (language === "ja") return `約 ¥${Math.round(price * rates.jpyPerKrw).toLocaleString("ja-JP")}`;
+    const value = price * rates.usdPerKrw;
+    return `≈ $${value.toLocaleString("en-US", { minimumFractionDigits: value < 10 ? 2 : 0, maximumFractionDigits: 2 })}`;
+  }
+
+  const rateTooltip = language === "ja"
+    ? `${copy.exchangeNotice} (${rates.date}): 100円 ≈ ₩${Math.round(100 / rates.jpyPerKrw).toLocaleString("ja-JP")}。カード会社・両替所・更新時刻により実際の金額と異なる場合があります。`
+    : `${copy.exchangeNotice} (${rates.date}): $1 ≈ ₩${Math.round(1 / rates.usdPerKrw).toLocaleString("en-US")}. The final card or cash rate may differ by provider and time.`;
+
   return (
     <main className="discovery-page">
       <header className="discovery-header">
-        <Link className="discovery-brand" href="/">
+        <div className="discovery-brand">
           <span className="brand-mark">M</span>
-          <span>MapForYou<small>Translated Seoul Menus</small></span>
-        </Link>
-        <div className="public-language-toggle" aria-label="Language">
-          <button className={language === "en" ? "active" : ""} onClick={() => setLanguage("en")}>EN</button>
-          <button className={language === "ja" ? "active" : ""} onClick={() => setLanguage("ja")}>日本語</button>
+          <span>MapForYou<small>{copy.tagline}</small></span>
+        </div>
+        <div className="header-actions">
+          <button
+            className={`currency-header-button ${showConvertedPrice ? "active" : ""}`}
+            type="button"
+            title={rateTooltip}
+            onClick={() => setShowConvertedPrice((current) => !current)}
+          >
+            {showConvertedPrice ? copy.convertOff : copy.convertOn}<span aria-hidden="true">ⓘ</span>
+          </button>
+          <div className="public-language-toggle" aria-label="Language">
+            <button className={language === "en" ? "active" : ""} onClick={() => setLanguage("en")}>EN</button>
+            <button className={language === "ja" ? "active" : ""} onClick={() => setLanguage("ja")}>日本語</button>
+          </div>
         </div>
       </header>
 
-      <section className="discovery-intro">
-        <div>
-          <p className="eyebrow">{copy.eyebrow}</p>
-          <h1>{copy.title.split("\n").map((line) => <span key={line}>{line}</span>)}</h1>
-          <p>{copy.description}</p>
-        </div>
-        <div className="discovery-stat">
-          <strong>{initialStores.length}</strong>
-          <span>{language === "ja" ? "翻訳メニュー掲載店" : "restaurants with translated menus"}</span>
-        </div>
-      </section>
+      <nav className="mobile-panel-tabs" aria-label="Mobile panels">
+        <button className={mobilePanel === "places" ? "active" : ""} onClick={() => setMobilePanel("places")}>{copy.listTab}</button>
+        <button className={mobilePanel === "menu" ? "active" : ""} onClick={() => setMobilePanel("menu")}>{copy.menuTab}</button>
+      </nav>
 
-      <section className="discovery-filters" aria-label="Restaurant filters">
-        <label className="discovery-search">
-          <span>⌕</span>
-          <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder={copy.search} />
-        </label>
-        <div className="filter-scroll">
-          <button className={region === "all" ? "active" : ""} onClick={() => setRegion("all")}>{copy.allAreas}</button>
-          {regions.map((item) => (
-            <button className={region === item ? "active" : ""} key={item} onClick={() => setRegion(item)}>
-              {regionLabel(item, language)}
-            </button>
-          ))}
-        </div>
-        <div className="filter-scroll category-filter">
-          <button className={category === "all" ? "active" : ""} onClick={() => setCategory("all")}>{copy.allFood}</button>
-          {categories.map((item) => (
-            <button className={category === item ? "active" : ""} key={item} onClick={() => setCategory(item)}>
-              {categoryLabel(item, language)}
-            </button>
-          ))}
-        </div>
-      </section>
+      <section className="discovery-workspace">
+        <aside className={`discovery-list-panel ${mobilePanel !== "places" ? "mobile-panel-hidden" : ""}`}>
+          <div className="list-controls">
+            <label className="discovery-search">
+              <span>⌕</span>
+              <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder={copy.search} />
+            </label>
 
-      <section className="discovery-layout">
-        <div className="discovery-list-panel">
+            <div className="filter-block">
+              <span>{copy.areas}</span>
+              <div className="filter-scroll">
+                <button className={region === "all" ? "active" : ""} onClick={() => setRegion("all")}>{copy.allAreas}</button>
+                {regions.map((item) => (
+                  <button className={region === item ? "active" : ""} key={item} onClick={() => setRegion(item)}>
+                    {regionLabel(item, language)}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="filter-block">
+              <span>{copy.food}</span>
+              <div className="filter-scroll category-filter">
+                <button className={category === "all" ? "active" : ""} onClick={() => setCategory("all")}>{copy.allFood}</button>
+                {categories.map((item) => (
+                  <button className={category === item ? "active" : ""} key={item} onClick={() => setCategory(item)}>
+                    {categoryIcon(item)} {categoryLabel(item, language)}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
           <div className="discovery-list-heading">
-            <strong>{filteredStores.length} {copy.results}</strong>
-            <span>{language === "ja" ? "ピンを選ぶと地図が移動します" : "Select a card to focus the map"}</span>
+            <strong>{copy.recommendations}</strong>
+            <span>{filteredStores.length} {copy.places}</span>
           </div>
 
           {!filteredStores.length ? (
@@ -156,47 +256,114 @@ export default function DiscoveryApp({ initialStores }: { initialStores: Discove
           ) : (
             <div className="discovery-list">
               {filteredStores.map((store) => {
-                const selected = selectedId === store.id;
-                const sampleMenus = store.menus.slice(0, 2);
+                const selected = selectedStore?.id === store.id;
+                const sampleMenu = store.menus[0];
                 const storeCategory = broadCategory(store);
                 return (
-                  <article className={`discovery-card ${selected ? "selected" : ""}`} key={store.id} onClick={() => handleSelect(store.id)}>
+                  <button className={`discovery-card ${selected ? "selected" : ""}`} type="button" key={store.id} onClick={() => handleSelect(store.id)}>
                     <RestaurantCover store={store} language={language} compact />
-                    <div className="discovery-card-body">
-                      <div className="discovery-card-topline">
+                    <span className="discovery-card-body">
+                      <span className="discovery-card-topline">
                         <span>{regionLabel(store.regionKey, language)} · {categoryLabel(storeCategory, language)}</span>
-                        <small>{store.menus.length} {copy.menuCount}</small>
-                      </div>
-                      <h2>{store.name}</h2>
-                      <p className="discovery-address">{store.roadAddress || store.address}</p>
-                      <div className="menu-preview-list">
-                        {sampleMenus.map((menu) => (
-                          <div key={menu.id}>
-                            <span>{localizedMenuName(menu, language)}</span>
-                            <strong>{priceLabel(menu.price, language)}</strong>
-                          </div>
-                        ))}
-                      </div>
-                      <Link className="view-menu-link" href={`/place/${store.id}`} onClick={(event) => event.stopPropagation()}>
-                        {copy.viewMenu} <span>→</span>
-                      </Link>
-                    </div>
-                  </article>
+                        <small>{store.menus.length} {copy.menus}</small>
+                      </span>
+                      <strong className="restaurant-card-name">{localizedRestaurantName(store, language)}</strong>
+                      <span className="discovery-address">{localizedAddress(store, language)}</span>
+                      {sampleMenu && (
+                        <span className="menu-preview-row">
+                          <span>{localizedMenuName(sampleMenu, language)}</span>
+                          <strong>{formatPrice(sampleMenu.price)}</strong>
+                        </span>
+                      )}
+                    </span>
+                  </button>
                 );
               })}
             </div>
           )}
-        </div>
+        </aside>
 
-        <div className="discovery-map-panel">
-          <DiscoveryMap stores={filteredStores} selectedId={selectedId} language={language} onSelect={handleSelect} />
-        </div>
+        <section className="discovery-map-panel">
+          <DiscoveryMap stores={filteredStores} selectedId={selectedStore?.id ?? ""} language={language} onSelect={handleSelect} />
+        </section>
+
+        <aside className={`restaurant-detail-panel ${mobilePanel !== "menu" ? "mobile-panel-hidden" : ""}`}>
+          {selectedStore ? (
+            <div className="restaurant-detail-scroll">
+              <RestaurantCover store={selectedStore} language={language} />
+
+              <div className="detail-panel-header">
+                <div className="detail-panel-kicker">
+                  <span>{regionLabel(selectedStore.regionKey, language)}</span>
+                  <span>{categoryLabel(broadCategory(selectedStore), language)}</span>
+                </div>
+                <h1>{localizedRestaurantName(selectedStore, language)}</h1>
+                <p>{localizedAddress(selectedStore, language)}</p>
+                <div className="detail-panel-actions">
+                  <a href={googleMapUrl(selectedStore)} target="_blank" rel="noreferrer">Google Maps</a>
+                  <a href={naverMapUrl(selectedStore)} target="_blank" rel="noreferrer">Naver Map</a>
+                  {selectedStore.phone && <a href={`tel:${selectedStore.phone}`}>{copy.call}</a>}
+                </div>
+              </div>
+
+              <section className="detail-overview-card">
+                <span>{copy.about}</span>
+                <p>{localizedIntroduction(selectedStore, language)}</p>
+              </section>
+
+              <div className="menu-panel-heading">
+                <div>
+                  <span>{copy.menuTitle}</span>
+                  <strong>{selectedStore.menus.length} {copy.menus}</strong>
+                </div>
+                <button
+                  className={showConvertedPrice ? "active" : ""}
+                  type="button"
+                  title={rateTooltip}
+                  onClick={() => setShowConvertedPrice((current) => !current)}
+                >
+                  {showConvertedPrice ? copy.convertOff : copy.convertOn} ⓘ
+                </button>
+              </div>
+
+              <div className="inline-menu-list">
+                {selectedStore.menus.map((menu) => {
+                  const revealed = revealedMenuId === menu.id;
+                  return (
+                    <article className="inline-menu-card" key={menu.id}>
+                      <div className="inline-menu-row">
+                        <div>
+                          {menu.isSpecialty && <span className="featured-chip">{copy.featured}</span>}
+                          <h2>{localizedMenuName(menu, language)}</h2>
+                        </div>
+                        <div className="inline-price">
+                          <strong>{formatPrice(menu.price)}</strong>
+                          {showConvertedPrice && menu.price > 0 && <small>₩{menu.price.toLocaleString("en-US")}</small>}
+                        </div>
+                      </div>
+                      <button className="show-staff-button" type="button" onClick={() => setRevealedMenuId(revealed ? "" : menu.id)}>
+                        {revealed ? copy.closeStaff : copy.showStaff}
+                      </button>
+                      {revealed && (
+                        <div className="staff-display-card">
+                          <small>{copy.staffHelp}</small>
+                          <strong>{menu.nameKo}</strong>
+                          <span>이 메뉴 하나 주세요.</span>
+                          <em>{copy.orderPhrase}</em>
+                        </div>
+                      )}
+                    </article>
+                  );
+                })}
+              </div>
+
+              <p className="detail-data-note">ⓘ {copy.dataNotice}<br />{rateTooltip}</p>
+            </div>
+          ) : (
+            <div className="detail-panel-empty">{copy.noResults}</div>
+          )}
+        </aside>
       </section>
-
-      <footer className="discovery-footer">
-        <strong>MapForYou</strong>
-        <span>{copy.dataNote}</span>
-      </footer>
     </main>
   );
 }
