@@ -1,3 +1,5 @@
+create extension if not exists pgcrypto;
+
 create table if not exists public.stores (
   kakao_place_id text primary key,
   slug text unique not null,
@@ -15,7 +17,7 @@ create table if not exists public.stores (
   menu_check_status text default 'unchecked',
   menu_evidence text,
   translation_status text default 'not-started',
-  publish_status text default 'draft',
+  publish_status text default 'draft' check (publish_status in ('draft', 'published')),
   checked_at timestamptz,
   updated_at timestamptz default now()
 );
@@ -37,17 +39,120 @@ create table if not exists public.menus (
   unique(kakao_place_id, menu_id)
 );
 
+create table if not exists public.public_data_restaurants (
+  source_id text primary key,
+  source_name text not null default 'seoul_tourism_redtable',
+  name text not null,
+  road_address text,
+  address text,
+  latitude double precision,
+  longitude double precision,
+  phone text,
+  category text,
+  license_type text,
+  introduction text,
+  image_url text,
+  region_key text,
+  search_keyword text,
+  publish_status text not null default 'draft' check (publish_status in ('draft', 'published', 'needs_recheck')),
+  source_checked_at timestamptz not null default now(),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists public.public_data_menus (
+  menu_id text primary key,
+  restaurant_id text not null references public.public_data_restaurants(source_id) on delete cascade,
+  sort_order integer not null default 0,
+  name_ko text,
+  name_en text,
+  name_ja text,
+  description_ko text,
+  description_en text,
+  description_ja text,
+  price integer,
+  is_specialty boolean not null default false,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists public.public_data_collection_runs (
+  id uuid primary key default gen_random_uuid(),
+  region_key text,
+  search_keyword text,
+  target_count integer not null default 100,
+  found_count integer not null default 0,
+  status text not null default 'running' check (status in ('running', 'completed', 'failed', 'cancelled')),
+  error_message text,
+  started_at timestamptz not null default now(),
+  completed_at timestamptz
+);
+
+create table if not exists public.app_settings (
+  key text primary key,
+  value text not null,
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists public_data_restaurants_region_idx on public.public_data_restaurants(region_key);
+create index if not exists public_data_restaurants_publish_idx on public.public_data_restaurants(publish_status);
+create index if not exists public_data_menus_restaurant_idx on public.public_data_menus(restaurant_id);
+create index if not exists public_data_runs_started_idx on public.public_data_collection_runs(started_at desc);
+
 alter table public.stores enable row level security;
 alter table public.menus enable row level security;
+alter table public.public_data_restaurants enable row level security;
+alter table public.public_data_menus enable row level security;
+alter table public.public_data_collection_runs enable row level security;
+alter table public.app_settings enable row level security;
 
+drop policy if exists "Public can read published stores" on public.stores;
 create policy "Public can read published stores"
 on public.stores for select
 using (publish_status = 'published');
 
+drop policy if exists "Public can read menus of published stores" on public.menus;
 create policy "Public can read menus of published stores"
 on public.menus for select
-using (exists (
-  select 1 from public.stores
-  where stores.kakao_place_id = menus.kakao_place_id
-  and stores.publish_status = 'published'
-));
+using (
+  exists (
+    select 1 from public.stores
+    where stores.kakao_place_id = menus.kakao_place_id
+      and stores.publish_status = 'published'
+  )
+);
+
+drop policy if exists "Public can read published public-data restaurants" on public.public_data_restaurants;
+create policy "Public can read published public-data restaurants"
+on public.public_data_restaurants for select
+using (publish_status = 'published');
+
+drop policy if exists "Public can read menus of published public-data restaurants" on public.public_data_menus;
+create policy "Public can read menus of published public-data restaurants"
+on public.public_data_menus for select
+using (
+  exists (
+    select 1 from public.public_data_restaurants
+    where public_data_restaurants.source_id = public_data_menus.restaurant_id
+      and public_data_restaurants.publish_status = 'published'
+  )
+);
+
+drop policy if exists "Block public collection run access" on public.public_data_collection_runs;
+create policy "Block public collection run access"
+on public.public_data_collection_runs
+for all
+to anon, authenticated
+using (false)
+with check (false);
+
+drop policy if exists "Block public app settings access" on public.app_settings;
+create policy "Block public app settings access"
+on public.app_settings
+for all
+to anon, authenticated
+using (false)
+with check (false);
+
+revoke all on public.public_data_collection_runs from anon, authenticated;
+revoke all on public.app_settings from anon, authenticated;
