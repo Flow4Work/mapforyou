@@ -107,6 +107,54 @@
 .detail-data-note { font-size: 9.5px; }
 .restaurant-cover-label > span { font-size: 8.5px; }
 
+/* English names need word separation, not squeezed tracking. */
+.restaurant-card-name {
+  display: -webkit-box;
+  margin-top: 5px;
+  overflow: hidden;
+  font-weight: 800;
+  line-height: 1.28;
+  letter-spacing: .005em;
+  overflow-wrap: break-word;
+  white-space: normal;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.restaurant-detail-panel .restaurant-cover-label strong {
+  max-width: 100%;
+  font-weight: 820;
+  line-height: 1.14;
+  letter-spacing: -.005em;
+  overflow-wrap: break-word;
+}
+
+.detail-panel-header h1 {
+  font-weight: 820;
+  line-height: 1.16;
+  letter-spacing: -.008em;
+  overflow-wrap: break-word;
+}
+
+.inline-menu-row h2 {
+  font-weight: 780;
+  line-height: 1.36;
+  letter-spacing: .002em;
+  overflow-wrap: break-word;
+}
+
+.map-selected-card strong {
+  display: -webkit-box;
+  max-width: 100%;
+  overflow: hidden;
+  font-weight: 820;
+  line-height: 1.24;
+  letter-spacing: .002em;
+  white-space: normal;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
 @media (max-width: 900px) {
   .mobile-panel-tabs button { font-size: 11px; }
   .naver-map-cluster { transform: scale(.9); }
