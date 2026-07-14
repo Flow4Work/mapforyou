@@ -57,16 +57,49 @@ type MenuRow = {
 
 type ImageRow = { RSTR_ID?: string | number; RSTR_IMG_URL?: string };
 
+type MenuResult = {
+  menuId: string;
+  nameKo: string;
+  nameEn: string;
+  nameJa: string;
+  price: number;
+  isSpecialty: boolean;
+};
+
 class UpstreamError extends Error {
   status: number;
-  constructor(message: string, status = 502) {
+  retryAfterSeconds?: number;
+
+  constructor(message: string, status = 502, retryAfterSeconds?: number) {
     super(message);
     this.status = status;
+    this.retryAfterSeconds = retryAfterSeconds;
   }
 }
 
-function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+function isAbortError(error: unknown) {
+  return error instanceof DOMException && error.name === "AbortError";
+}
+
+function abortableSleep(ms: number, signal: AbortSignal) {
+  return new Promise<void>((resolve, reject) => {
+    if (signal.aborted) {
+      reject(new DOMException("Aborted", "AbortError"));
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      signal.removeEventListener("abort", onAbort);
+      resolve();
+    }, ms);
+
+    const onAbort = () => {
+      clearTimeout(timer);
+      reject(new DOMException("Aborted", "AbortError"));
+    };
+
+    signal.addEventListener("abort", onAbort, { once: true });
+  });
 }
 
 async function resolveToken(provided?: string) {
@@ -85,44 +118,42 @@ async function resolveToken(provided?: string) {
   return String(data.value);
 }
 
-async function fetchPage<T>(path: string, token: string, pageNo: number): Promise<ApiPayload<T>> {
+async function fetchPage<T>(path: string, token: string, pageNo: number, signal: AbortSignal): Promise<ApiPayload<T>> {
   const url = new URL(path, BASE_URL);
   url.searchParams.set("serviceKey", token);
   url.searchParams.set("pageNo", String(pageNo));
 
-  for (let attempt = 0; attempt < 4; attempt += 1) {
-    const response = await fetch(url, {
-      cache: "no-store",
-      signal: AbortSignal.timeout(25_000),
-    });
+  const response = await fetch(url, {
+    cache: "no-store",
+    signal,
+    headers: { accept: "application/json" },
+  });
 
-    if (response.status === 429) {
-      if (attempt === 3) {
-        throw new UpstreamError(`${path} 요청 제한이 계속되고 있습니다. 잠시 후 자동 수집을 다시 실행하세요.`, 429);
-      }
-      const retryAfter = Number(response.headers.get("retry-after"));
-      const waitMs = Number.isFinite(retryAfter) && retryAfter > 0
-        ? Math.min(retryAfter * 1000, 15_000)
-        : [2_000, 5_000, 10_000][attempt];
-      await sleep(waitMs);
-      continue;
-    }
-
-    if (response.status >= 500 && attempt < 2) {
-      await sleep([1_500, 4_000][attempt]);
-      continue;
-    }
-
+  const text = await response.text();
+  let payload: ApiPayload<T> = {};
+  try {
+    payload = text ? JSON.parse(text) as ApiPayload<T> : {};
+  } catch {
     if (!response.ok) throw new UpstreamError(`${path} 응답 오류 (${response.status})`, response.status);
-
-    const payload = (await response.json()) as ApiPayload<T>;
-    if (payload.header?.resultCode && payload.header.resultCode !== "00") {
-      throw new UpstreamError(payload.header.resultMsg || `${path} 조회에 실패했습니다.`, 502);
-    }
-    return payload;
+    throw new UpstreamError(`${path} 응답 형식이 올바르지 않습니다.`, 502);
   }
 
-  throw new UpstreamError(`${path} 조회에 실패했습니다.`, 502);
+  const resultCode = payload.header?.resultCode;
+  const resultMessage = payload.header?.resultMsg;
+  if (response.status === 429 || resultCode === "22") {
+    const retryAfter = Number(response.headers.get("retry-after"));
+    throw new UpstreamError(
+      resultMessage || "OPEN API 요청 한도가 초과되었습니다.",
+      429,
+      Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter : undefined,
+    );
+  }
+
+  if (!response.ok) throw new UpstreamError(`${path} 응답 오류 (${response.status})`, response.status);
+  if (resultCode && resultCode !== "00") {
+    throw new UpstreamError(resultMessage || `${path} 조회에 실패했습니다.`, 502);
+  }
+  return payload;
 }
 
 async function getStoredRestaurantIds() {
@@ -164,7 +195,7 @@ export async function POST(request: Request) {
   try {
     const body = (await request.json()) as {
       token?: string;
-      mode?: "restaurants" | "menus" | "images";
+      mode?: "restaurants" | "menus-ko" | "menu-translations" | "images";
       pageNo?: number;
       pagesPerBatch?: number;
       regionKey?: string;
@@ -177,7 +208,7 @@ export async function POST(request: Request) {
     const token = await resolveToken(body.token);
     const mode = body.mode ?? "restaurants";
     const startPage = Math.max(Number(body.pageNo) || 1, 1);
-    const maxBatch = mode === "menus" ? 2 : 3;
+    const maxBatch = mode === "restaurants" ? 2 : 1;
     const pagesPerBatch = Math.min(Math.max(Number(body.pagesPerBatch) || 1, 1), maxBatch);
     const pages = Array.from({ length: pagesPerBatch }, (_, index) => startPage + index);
 
@@ -191,12 +222,6 @@ export async function POST(request: Request) {
       const excludes = await getStoredRestaurantIds();
       for (const id of body.excludeIds ?? []) excludes.add(String(id));
 
-      const payloads: ApiPayload<RestaurantRow>[] = [];
-      for (const page of pages) {
-        payloads.push(await fetchPage<RestaurantRow>("/api/rstr", token, page));
-        await sleep(300);
-      }
-
       const restaurants: Array<{
         sourceId: string;
         name: string;
@@ -209,8 +234,14 @@ export async function POST(request: Request) {
         licenseType: string;
         introduction: string;
       }> = [];
+      let lastHeader: ApiHeader | undefined;
+      let rawCount = 0;
 
-      for (const payload of payloads) {
+      for (const page of pages) {
+        const payload = await fetchPage<RestaurantRow>("/api/rstr", token, page, request.signal);
+        lastHeader = payload.header;
+        rawCount += payload.body?.length ?? 0;
+
         for (const row of payload.body ?? []) {
           const sourceId = String(row.RSTR_ID ?? "");
           if (!sourceId || excludes.has(sourceId)) continue;
@@ -240,18 +271,19 @@ export async function POST(request: Request) {
             introduction: row.RSTR_INTRCN_CONT ?? "",
           });
         }
+
+        if (page !== pages.at(-1)) await abortableSleep(250, request.signal);
       }
 
-      const lastPayload = payloads.at(-1);
       const lastPage = pages.at(-1) ?? startPage;
       return NextResponse.json({
         restaurants,
-        nextPage: nextPage(lastPayload?.header, lastPage),
+        nextPage: nextPage(lastHeader, lastPage),
         stats: {
           scannedFrom: startPage,
           scannedTo: lastPage,
-          rawCount: payloads.reduce((sum, payload) => sum + (payload.body?.length ?? 0), 0),
-          totalCount: Number(lastPayload?.header?.totalCount) || 0,
+          rawCount,
+          totalCount: Number(lastHeader?.totalCount) || 0,
           excludedStoredCount: excludes.size,
         },
       });
@@ -260,43 +292,68 @@ export async function POST(request: Request) {
     const restaurantIds = new Set((body.restaurantIds ?? []).map(String));
     if (!restaurantIds.size) return NextResponse.json({ error: "메뉴를 연결할 식당이 없습니다." }, { status: 400 });
 
-    if (mode === "menus") {
-      const menusByRestaurant: Record<string, Array<{
-        menuId: string;
-        nameKo: string;
-        nameEn: string;
-        nameJa: string;
-        price: number;
-        isSpecialty: boolean;
-      }>> = {};
+    if (mode === "menus-ko") {
+      const menusByRestaurant: Record<string, MenuResult[]> = {};
+      let lastHeader: ApiHeader | undefined;
+      const matchedPages: number[] = [];
+
+      for (const page of pages) {
+        const ko = await fetchPage<MenuRow>("/api/menu/korean", token, page, request.signal);
+        lastHeader = ko.header;
+        let matched = false;
+
+        for (const row of ko.body ?? []) {
+          const restaurantId = String(row.RSTR_ID ?? "");
+          if (!restaurantIds.has(restaurantId)) continue;
+          const menuId = String(row.MENU_ID ?? "");
+          if (!menuId) continue;
+          matched = true;
+          (menusByRestaurant[restaurantId] ??= []).push({
+            menuId,
+            nameKo: String(row.MENU_NM ?? ""),
+            nameEn: "",
+            nameJa: "",
+            price: Number(row.MENU_PRICE ?? 0),
+            isSpecialty: String(row.SPCLT_MENU_YN ?? "N") === "Y",
+          });
+        }
+
+        if (matched) matchedPages.push(page);
+      }
+
+      const lastPage = pages.at(-1) ?? startPage;
+      return NextResponse.json({
+        menusByRestaurant,
+        matchedPages,
+        nextPage: nextPage(lastHeader, lastPage),
+        stats: { scannedFrom: startPage, scannedTo: lastPage, totalCount: Number(lastHeader?.totalCount) || 0 },
+      });
+    }
+
+    if (mode === "menu-translations") {
+      const menusByRestaurant: Record<string, MenuResult[]> = {};
       let lastHeader: ApiHeader | undefined;
 
       for (const page of pages) {
-        const ko = await fetchPage<MenuRow>("/api/menu/korean", token, page);
-        await sleep(220);
-        const en = await fetchPage<MenuRow>("/api/menu/eng", token, page);
-        await sleep(220);
-        const ja = await fetchPage<MenuRow>("/api/menu/jpnse", token, page);
-        await sleep(300);
-        lastHeader = ko.header;
+        const en = await fetchPage<MenuRow>("/api/menu/eng", token, page, request.signal);
+        await abortableSleep(450, request.signal);
+        const ja = await fetchPage<MenuRow>("/api/menu/jpnse", token, page, request.signal);
+        lastHeader = en.header;
 
-        const enById = new Map((en.body ?? []).map((row) => [String(row.MENU_ID ?? ""), row]));
         const jaById = new Map((ja.body ?? []).map((row) => [String(row.MENU_ID ?? ""), row]));
-
-        for (const koRow of ko.body ?? []) {
-          const restaurantId = String(koRow.RSTR_ID ?? "");
+        for (const enRow of en.body ?? []) {
+          const restaurantId = String(enRow.RSTR_ID ?? "");
           if (!restaurantIds.has(restaurantId)) continue;
-          const menuId = String(koRow.MENU_ID ?? "");
+          const menuId = String(enRow.MENU_ID ?? "");
           if (!menuId) continue;
-          const enRow = enById.get(menuId);
           const jaRow = jaById.get(menuId);
           (menusByRestaurant[restaurantId] ??= []).push({
             menuId,
-            nameKo: String(koRow.MENU_NM ?? ""),
-            nameEn: String(enRow?.MENU_NM ?? ""),
+            nameKo: "",
+            nameEn: String(enRow.MENU_NM ?? ""),
             nameJa: String(jaRow?.MENU_NM ?? ""),
-            price: Number(koRow.MENU_PRICE ?? enRow?.MENU_PRICE ?? jaRow?.MENU_PRICE ?? 0),
-            isSpecialty: String(koRow.SPCLT_MENU_YN ?? "N") === "Y",
+            price: Number(enRow.MENU_PRICE ?? jaRow?.MENU_PRICE ?? 0),
+            isSpecialty: String(enRow.SPCLT_MENU_YN ?? "N") === "Y",
           });
         }
       }
@@ -312,14 +369,13 @@ export async function POST(request: Request) {
     const imagesByRestaurant: Record<string, string> = {};
     let lastHeader: ApiHeader | undefined;
     for (const page of pages) {
-      const payload = await fetchPage<ImageRow>("/api/rstr/img", token, page);
+      const payload = await fetchPage<ImageRow>("/api/rstr/img", token, page, request.signal);
       lastHeader = payload.header;
       for (const row of payload.body ?? []) {
         const restaurantId = String(row.RSTR_ID ?? "");
         if (!restaurantIds.has(restaurantId) || imagesByRestaurant[restaurantId]) continue;
         imagesByRestaurant[restaurantId] = normalizeImageUrl(String(row.RSTR_IMG_URL ?? ""));
       }
-      await sleep(300);
     }
 
     const lastPage = pages.at(-1) ?? startPage;
@@ -329,9 +385,17 @@ export async function POST(request: Request) {
       stats: { scannedFrom: startPage, scannedTo: lastPage, totalCount: Number(lastHeader?.totalCount) || 0 },
     });
   } catch (error) {
+    if (request.signal.aborted || isAbortError(error)) {
+      return NextResponse.json({ error: "수집 요청이 취소되었습니다." }, { status: 499 });
+    }
+
     const status = error instanceof UpstreamError ? error.status : 500;
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "통합 수집에 실패했습니다." },
+      {
+        error: error instanceof Error ? error.message : "통합 수집에 실패했습니다.",
+        rateLimited: status === 429,
+        retryAfterSeconds: error instanceof UpstreamError ? error.retryAfterSeconds : undefined,
+      },
       { status },
     );
   }
