@@ -36,10 +36,13 @@ type CollectResponse = {
   menusByRestaurant?: Record<string, Menu[]>;
   matchedPages?: number[];
   nextPage?: number | null;
-  stats?: { scannedFrom?: number; scannedTo?: number; totalCount?: number; excludedStoredCount?: number };
+  stats?: {
+    scannedFrom?: number;
+    scannedTo?: number;
+    totalCount?: number;
+    excludedStoredCount?: number;
+  };
   error?: string;
-  rateLimited?: boolean;
-  retryAfterSeconds?: number;
 };
 
 type DatabaseResponse = {
@@ -53,6 +56,7 @@ type DatabaseResponse = {
 const LOCAL_KEY = "mapforyou-public-restaurant-sets";
 const TOTAL_TARGET = 100;
 const CHUNK_SIZE = 20;
+const API_PAGE_SIZE = 1000;
 
 function readLocal(): RestaurantSet[] {
   try {
@@ -108,6 +112,11 @@ function mergeMenus(current: Menu[], incoming: Menu[]) {
   return [...map.values()];
 }
 
+function buildScope(regionKey: string, customRegion: string, keyword: string) {
+  const region = regionKey === "custom" ? customRegion.trim() || "custom" : regionKey;
+  return `${region}:${keyword}`.toLowerCase().replace(/\s+/g, "_");
+}
+
 export default function PublicDataCollector() {
   const [regionKey, setRegionKey] = useState("seongsu");
   const [customRegion, setCustomRegion] = useState("");
@@ -125,7 +134,6 @@ export default function PublicDataCollector() {
 
   const cancelRef = useRef(false);
   const controllerRef = useRef<AbortController | null>(null);
-  const rateLimitBudgetRef = useRef(0);
 
   useEffect(() => {
     void loadDatabase();
@@ -170,38 +178,41 @@ export default function PublicDataCollector() {
 
   const selected = sets.find((store) => store.sourceId === selectedId) ?? visible[0] ?? null;
 
-  async function waitForRateLimit(seconds: number, signal: AbortSignal) {
-    for (let remaining = seconds; remaining > 0; remaining -= 1) {
-      setStage(`OPEN API 한도 대기 · ${remaining}초 후 자동 재시도`);
-      await abortableDelay(1000, signal);
+  async function collect(payload: Record<string, unknown>, signal: AbortSignal): Promise<CollectResponse> {
+    const response = await fetch("/api/redtable/collect", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+      signal,
+    });
+    const data = (await response.json()) as CollectResponse;
+
+    if (response.status === 429) {
+      throw new Error("OPEN API 한도가 초과됐습니다. 위에서 다른 API KEY로 교체한 뒤 다시 실행해주세요.");
+    }
+    if (!response.ok) throw new Error(data.error || "공공데이터 수집 실패");
+    return data;
+  }
+
+  async function loadScanPage(scope: string) {
+    try {
+      const response = await fetch(`/api/redtable/scan-state?scope=${encodeURIComponent(scope)}`, { cache: "no-store" });
+      const data = (await response.json()) as { page?: number };
+      return response.ok ? Math.max(Number(data.page) || 1, 1) : 1;
+    } catch {
+      return 1;
     }
   }
 
-  async function collect(payload: Record<string, unknown>, signal: AbortSignal): Promise<CollectResponse> {
-    while (true) {
-      const response = await fetch("/api/redtable/collect", {
+  async function saveScanPage(scope: string, page: number) {
+    try {
+      await fetch("/api/redtable/scan-state", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-        signal,
+        body: JSON.stringify({ scope, page: Math.max(page, 1) }),
       });
-      const data = (await response.json()) as CollectResponse;
-
-      if (response.status === 429) {
-        if (rateLimitBudgetRef.current <= 0) {
-          throw new Error("OPEN API의 현재 사용 한도가 초과됐습니다. 이미 저장된 데이터는 유지됩니다.");
-        }
-
-        const retryNumber = 3 - rateLimitBudgetRef.current;
-        const fallbackSeconds = retryNumber === 1 ? 60 : 180;
-        const waitSeconds = Math.max(Number(data.retryAfterSeconds) || fallbackSeconds, fallbackSeconds);
-        rateLimitBudgetRef.current -= 1;
-        await waitForRateLimit(waitSeconds, signal);
-        continue;
-      }
-
-      if (!response.ok) throw new Error(data.error || "공공데이터 수집 실패");
-      return data;
+    } catch {
+      // 검색은 계속 진행하고 다음 실행에서만 1페이지부터 재개합니다.
     }
   }
 
@@ -235,30 +246,36 @@ export default function PublicDataCollector() {
     setDbConnected(true);
   }
 
-  async function saveStoreChunk(
-    restaurants: Restaurant[],
+  async function saveMatchedChunk(
+    ids: string[],
+    candidates: Map<string, Restaurant>,
+    menuMap: Map<string, Menu[]>,
     savedMap: Map<string, RestaurantSet>,
-    newIds: Set<string>,
+    collectedIds: Set<string>,
   ) {
     const now = new Date().toISOString();
-    const stores = restaurants.map((restaurant) => ({
-      ...restaurant,
-      imageUrl: "",
-      menus: [],
-      savedAt: now,
-    } satisfies RestaurantSet));
+    const stores = ids.flatMap((id) => {
+      const restaurant = candidates.get(id);
+      const menus = menuMap.get(id) ?? [];
+      if (!restaurant || !menus.length) return [];
 
-    for (const store of stores) {
-      savedMap.set(store.sourceId, store);
-      newIds.add(store.sourceId);
-    }
+      const store: RestaurantSet = {
+        ...restaurant,
+        imageUrl: savedMap.get(id)?.imageUrl ?? "",
+        menus,
+        savedAt: now,
+      };
+      savedMap.set(id, store);
+      collectedIds.add(id);
+      return [store];
+    });
 
-    persistLocal(savedMap, [...newIds]);
-    await saveDatabase(stores, newIds.size >= TOTAL_TARGET ? "completed" : "running");
+    if (!stores.length) return;
+    persistLocal(savedMap, [...collectedIds]);
+    await saveDatabase(stores, collectedIds.size >= TOTAL_TARGET ? "completed" : "running");
     setDbTotalCount((count) => count + stores.length);
     setSelectedId((current) => current || stores[0]?.sourceId || "");
-    setProgress(Math.min(40, Math.round((newIds.size / TOTAL_TARGET) * 40)));
-    setStage(`가게 ${newIds.size}/${TOTAL_TARGET}곳 DB 저장 완료 · 메뉴는 뒤에서 연결`);
+    setStage(`메뉴 확인 가게 ${collectedIds.size}/${TOTAL_TARGET}곳 · ${stores.length}곳 Supabase 저장 완료`);
   }
 
   async function saveMenuChanges(
@@ -269,7 +286,6 @@ export default function PublicDataCollector() {
   ) {
     const now = new Date().toISOString();
     const changed: RestaurantSet[] = [];
-
     for (const id of ids) {
       const current = savedMap.get(id);
       if (!current) continue;
@@ -277,7 +293,6 @@ export default function PublicDataCollector() {
       savedMap.set(id, updated);
       changed.push(updated);
     }
-
     if (!changed.length) return;
     persistLocal(savedMap, latest);
     await saveDatabase(changed, "running");
@@ -287,7 +302,6 @@ export default function PublicDataCollector() {
     const controller = new AbortController();
     controllerRef.current = controller;
     cancelRef.current = false;
-    rateLimitBudgetRef.current = 2;
     setRunning(true);
     setProgress(1);
     setMessage("");
@@ -295,16 +309,21 @@ export default function PublicDataCollector() {
 
     const fresh = await loadDatabase();
     const savedMap = new Map(fresh.map((store) => [store.sourceId, store]));
-    const newIds = new Set<string>();
+    const candidates = new Map<string, Restaurant>();
+    const menuMap = new Map<string, Menu[]>();
+    const collectedIds = new Set<string>();
+    const pendingIds: string[] = [];
+    const pendingSet = new Set<string>();
+    const matchedPages = new Set<number>();
+    const scope = buildScope(regionKey, customRegion, keyword);
 
     try {
-      setStage(`기존 DB ${fresh.length.toLocaleString()}곳 제외 · 새 가게부터 빠르게 찾는 중`);
-      const pending: Restaurant[] = [];
-      const pendingIds = new Set<string>();
+      setStage(`기존 DB ${fresh.length.toLocaleString()}곳 제외 · 지역 후보 전체 확인 중`);
       let restaurantPage: number | null = 1;
       let restaurantRuns = 0;
+      let restaurantTotalPages = 1;
 
-      while (restaurantPage && newIds.size < TOTAL_TARGET && restaurantRuns < 120) {
+      while (restaurantPage && restaurantRuns < 200) {
         const data = await collect({
           mode: "restaurants",
           pageNo: restaurantPage,
@@ -312,87 +331,105 @@ export default function PublicDataCollector() {
           regionKey,
           customRegion,
           keyword,
-          excludeIds: [...newIds],
         }, controller.signal);
 
         for (const restaurant of data.restaurants ?? []) {
-          if (savedMap.has(restaurant.sourceId) || pendingIds.has(restaurant.sourceId)) continue;
-          pending.push(restaurant);
-          pendingIds.add(restaurant.sourceId);
+          if (!savedMap.has(restaurant.sourceId)) candidates.set(restaurant.sourceId, restaurant);
         }
 
-        while (pending.length >= CHUNK_SIZE && newIds.size < TOTAL_TARGET) {
-          const chunk = pending.splice(0, Math.min(CHUNK_SIZE, TOTAL_TARGET - newIds.size));
-          chunk.forEach((restaurant) => pendingIds.delete(restaurant.sourceId));
-          await saveStoreChunk(chunk, savedMap, newIds);
-          if (newIds.size < TOTAL_TARGET) await abortableDelay(1500, controller.signal);
-        }
-
-        restaurantPage = data.nextPage ?? null;
+        const totalCount = Number(data.stats?.totalCount ?? 0);
+        if (totalCount > 0) restaurantTotalPages = Math.max(Math.ceil(totalCount / API_PAGE_SIZE), 1);
         restaurantRuns += 1;
-        setStage(`새 가게 후보 확인 중 · 저장 ${newIds.size}/${TOTAL_TARGET}곳 · API ${data.stats?.scannedTo ?? restaurantRuns}페이지`);
-        await abortableDelay(450, controller.signal);
+        restaurantPage = data.nextPage ?? null;
+        setProgress(Math.min(20, 2 + Math.round((restaurantRuns / restaurantTotalPages) * 18)));
+        setStage(`지역 후보 ${candidates.size.toLocaleString()}곳 · 식당 API ${restaurantRuns}/${restaurantTotalPages}페이지`);
+        await abortableDelay(300, controller.signal);
       }
 
-      if (pending.length && newIds.size < TOTAL_TARGET) {
-        const chunk = pending.splice(0, TOTAL_TARGET - newIds.size);
-        await saveStoreChunk(chunk, savedMap, newIds);
-      }
+      if (!candidates.size) throw new Error("조건에 맞고 아직 저장되지 않은 가게가 없습니다.");
 
-      if (!newIds.size) throw new Error("조건에 맞는 새로운 가게를 찾지 못했습니다.");
+      let menuPage = await loadScanPage(scope);
+      let startPage = menuPage;
+      let menuTotalPages = 1;
+      let pagesVisited = 0;
+      let wrapped = false;
 
-      const pendingExistingIds = fresh
-        .filter((store) => store.menus.length === 0 || store.menus.some((menu) => !menu.nameEn || !menu.nameJa))
-        .map((store) => store.sourceId);
-      const menuTargetIds = [...new Set([...pendingExistingIds, ...newIds])];
-      const menuTargetSet = new Set(menuTargetIds);
-      const menuMap = new Map<string, Menu[]>();
-      for (const id of menuTargetIds) menuMap.set(id, savedMap.get(id)?.menus ?? []);
+      setProgress(21);
+      setStage(`후보 ${candidates.size.toLocaleString()}곳 중 실제 메뉴가 있는 가게를 찾는 중`);
 
-      const storesWithMenus = new Set(
-        menuTargetIds.filter((id) => (menuMap.get(id)?.length ?? 0) > 0),
-      );
-      const matchedPages = new Set<number>();
-      let menuPage: number | null = 1;
-      let menuRuns = 0;
-
-      setProgress(42);
-      setStage(`가게 저장 완료 · 한국어 메뉴를 낮은 속도로 연결 중`);
-
-      while (menuPage && storesWithMenus.size < menuTargetIds.length && menuRuns < 700) {
+      while (collectedIds.size < TOTAL_TARGET) {
         const currentPage = menuPage;
         const data = await collect({
           mode: "menus-ko",
           pageNo: currentPage,
           pagesPerBatch: 1,
-          restaurantIds: menuTargetIds,
+          restaurantIds: [...candidates.keys()],
         }, controller.signal);
 
-        const changedIds: string[] = [];
+        const totalCount = Number(data.stats?.totalCount ?? 0);
+        if (totalCount > 0) menuTotalPages = Math.max(Math.ceil(totalCount / API_PAGE_SIZE), 1);
+        if (startPage > menuTotalPages) {
+          startPage = 1;
+          menuPage = 1;
+        }
+
+        const matchedIds: string[] = [];
         for (const [id, incoming] of Object.entries(data.menusByRestaurant ?? {})) {
-          if (!menuTargetSet.has(id)) continue;
+          if (!candidates.has(id) || collectedIds.has(id)) continue;
           menuMap.set(id, mergeMenus(menuMap.get(id) ?? [], incoming));
-          storesWithMenus.add(id);
-          changedIds.push(id);
+          if (!pendingSet.has(id)) {
+            pendingSet.add(id);
+            pendingIds.push(id);
+            matchedIds.push(id);
+          }
         }
-        for (const page of data.matchedPages ?? []) matchedPages.add(page);
+        if (matchedIds.length) matchedPages.add(currentPage);
 
-        if (changedIds.length) {
-          await saveMenuChanges(changedIds, menuMap, savedMap, [...newIds]);
+        while (pendingIds.length >= CHUNK_SIZE && collectedIds.size < TOTAL_TARGET) {
+          const chunk = pendingIds.splice(0, Math.min(CHUNK_SIZE, TOTAL_TARGET - collectedIds.size));
+          chunk.forEach((id) => pendingSet.delete(id));
+          await saveMatchedChunk(chunk, candidates, menuMap, savedMap, collectedIds);
+          if (collectedIds.size < TOTAL_TARGET) await abortableDelay(1200, controller.signal);
         }
 
-        menuPage = data.nextPage ?? null;
-        menuRuns += 1;
-        const menuRatio = menuTargetIds.length ? storesWithMenus.size / menuTargetIds.length : 1;
-        setProgress(Math.min(86, 42 + Math.round(menuRatio * 44)));
-        setStage(`한국어 메뉴 연결 ${storesWithMenus.size}/${menuTargetIds.length}곳 · API ${data.stats?.scannedTo ?? menuRuns}페이지`);
-        await abortableDelay(750, controller.signal);
+        pagesVisited += 1;
+        const next = data.nextPage ?? null;
+        if (next) {
+          menuPage = next;
+        } else if (!wrapped && startPage > 1) {
+          wrapped = true;
+          menuPage = 1;
+        } else {
+          break;
+        }
+
+        if (wrapped && menuPage >= startPage) break;
+        if (pagesVisited % 3 === 0) await saveScanPage(scope, menuPage);
+
+        const matchProgress = (collectedIds.size / TOTAL_TARGET) * 52;
+        const scanProgress = Math.min(pagesVisited / Math.max(menuTotalPages, 1), 1) * 12;
+        setProgress(Math.min(84, 21 + Math.round(matchProgress + scanProgress)));
+        setStage(
+          `메뉴 있는 가게 ${collectedIds.size}/${TOTAL_TARGET}곳 · 대기 ${pendingIds.length}곳 · 메뉴 API ${currentPage}/${menuTotalPages}페이지`,
+        );
+        await abortableDelay(650, controller.signal);
       }
 
+      if (pendingIds.length && collectedIds.size < TOTAL_TARGET) {
+        const chunk = pendingIds.splice(0, TOTAL_TARGET - collectedIds.size);
+        chunk.forEach((id) => pendingSet.delete(id));
+        await saveMatchedChunk(chunk, candidates, menuMap, savedMap, collectedIds);
+      }
+
+      await saveScanPage(scope, menuPage > menuTotalPages ? 1 : menuPage);
+      if (!collectedIds.size) {
+        throw new Error("이 지역의 후보 가게에서 연결 가능한 한국어 메뉴를 찾지 못했습니다.");
+      }
+
+      const pagesToTranslate = [...matchedPages].sort((a, b) => a - b);
       let translatedStores = 0;
       let translationLimited = false;
-      const pagesToTranslate = [...matchedPages].sort((a, b) => a - b);
-      setProgress(88);
+      setProgress(86);
 
       for (let index = 0; index < pagesToTranslate.length; index += 1) {
         try {
@@ -400,22 +437,23 @@ export default function PublicDataCollector() {
             mode: "menu-translations",
             pageNo: pagesToTranslate[index],
             pagesPerBatch: 1,
-            restaurantIds: menuTargetIds,
+            restaurantIds: [...collectedIds],
           }, controller.signal);
 
           const changedIds: string[] = [];
           for (const [id, incoming] of Object.entries(data.menusByRestaurant ?? {})) {
+            if (!collectedIds.has(id)) continue;
             menuMap.set(id, mergeMenus(menuMap.get(id) ?? [], incoming));
             changedIds.push(id);
           }
           if (changedIds.length) {
             translatedStores += changedIds.length;
-            await saveMenuChanges(changedIds, menuMap, savedMap, [...newIds]);
+            await saveMenuChanges(changedIds, menuMap, savedMap, [...collectedIds]);
           }
 
-          setProgress(Math.min(99, 88 + Math.round(((index + 1) / Math.max(pagesToTranslate.length, 1)) * 11)));
+          setProgress(Math.min(99, 86 + Math.round(((index + 1) / Math.max(pagesToTranslate.length, 1)) * 13)));
           setStage(`영어·일본어 메뉴 보강 ${index + 1}/${pagesToTranslate.length}페이지`);
-          await abortableDelay(1200, controller.signal);
+          await abortableDelay(1000, controller.signal);
         } catch (error) {
           if (cancelRef.current || isAbortError(error)) throw error;
           translationLimited = true;
@@ -424,22 +462,22 @@ export default function PublicDataCollector() {
       }
 
       await loadDatabase();
-      setLatestIds([...newIds]);
+      setLatestIds([...collectedIds]);
+      setSelectedId([...collectedIds][0] ?? "");
       setProgress(100);
       setStage(translationLimited ? "가게·한국어 메뉴 저장 완료" : "자동 수집 완료");
       setMessage(
         translationLimited
-          ? `새 가게 ${newIds.size}곳과 한국어 메뉴를 저장했습니다. 영어·일본어는 API 한도 복구 후 다음 실행에서 자동 보강됩니다.`
-          : `새 가게 ${newIds.size}곳을 저장하고, 메뉴 ${storesWithMenus.size}곳·번역 ${translatedStores}건을 자동 반영했습니다.`,
+          ? `메뉴가 확인된 새 가게 ${collectedIds.size}곳을 저장했습니다. 영·일 메뉴는 다음 실행에서 이어서 보강됩니다.`
+          : `메뉴가 확인된 새 가게 ${collectedIds.size}곳과 영·일 메뉴 ${translatedStores}건을 Supabase에 반영했습니다.`,
       );
     } catch (error) {
       if (cancelRef.current || isAbortError(error)) {
         setStage("수집 중지 완료");
         setMessage("중지했습니다. 이미 Supabase에 저장된 가게와 메뉴는 그대로 유지됩니다.");
       } else {
-        const text = error instanceof Error ? error.message : "통합 수집에 실패했습니다.";
         setStage("수집 일시 중단");
-        setMessage(text);
+        setMessage(error instanceof Error ? error.message : "통합 수집에 실패했습니다.");
       }
     } finally {
       controllerRef.current = null;
@@ -470,8 +508,8 @@ export default function PublicDataCollector() {
       <div style={{ display: "flex", justifyContent: "space-between", gap: 16, alignItems: "center", marginBottom: 24 }}>
         <div>
           <p className="eyebrow">PUBLIC DATA ADMIN</p>
-          <h1 style={{ margin: "0 0 8px" }}>버튼 한 번으로 새 가게 100곳</h1>
-          <p style={{ margin: 0, color: "var(--muted)" }}>가게를 먼저 저장해 바로 보여주고, 메뉴와 번역은 API 한도를 아끼며 뒤에서 보강합니다.</p>
+          <h1 style={{ margin: "0 0 8px" }}>메뉴가 확인된 새 가게 100곳</h1>
+          <p style={{ margin: 0, color: "var(--muted)" }}>지역 후보 전체를 확인한 뒤 실제 한국어 메뉴가 있는 가게만 20곳씩 Supabase에 저장합니다.</p>
         </div>
         <Link className="ghost-button" href="/admin">기존 Admin</Link>
       </div>
@@ -506,14 +544,14 @@ export default function PublicDataCollector() {
           </label>
           <label className="field">
             <span>자동 실행</span>
-            <input readOnly value="가게 20곳씩 저장 → 메뉴 → 번역" />
-            <small>기존 가게는 제외하며, 버튼은 한 번만 누릅니다.</small>
+            <input readOnly value="후보 전체 → 메뉴 확인 → 20곳씩 저장" />
+            <small>지난 메뉴 검색 페이지부터 이어서 진행하며 기존 가게는 제외합니다.</small>
           </label>
         </div>
 
         <div className="action-row">
           <button className="primary-button" disabled={running || !dbConnected || !tokenConfigured} onClick={() => void collectAll()}>
-            {running ? "자동 수집 진행 중…" : "중복 제외 새 가게 100곳 자동 수집"}
+            {running ? "자동 수집 진행 중…" : "메뉴 있는 새 가게 100곳 자동 수집"}
           </button>
           {running && <button className="secondary-button" onClick={stopRun}>즉시 중지</button>}
           <button className="ghost-button" disabled={running} onClick={() => void loadDatabase()}>DB 다시 불러오기</button>
@@ -527,7 +565,7 @@ export default function PublicDataCollector() {
           <div style={{ height: 10, borderRadius: 999, background: "var(--line)", overflow: "hidden" }}>
             <div style={{ width: `${progress}%`, height: "100%", background: "var(--green)", transition: "width .25s ease" }} />
           </div>
-          <p className="fine-print">현재 Supabase 누적 {dbTotalCount.toLocaleString()}곳 · 가게는 20곳마다 즉시 저장되고 메뉴는 발견 즉시 업데이트됩니다.</p>
+          <p className="fine-print">현재 Supabase 누적 {dbTotalCount.toLocaleString()}곳 · 메뉴가 확인된 가게만 20곳 단위로 즉시 저장됩니다.</p>
         </div>
         {message && <div className="notice">{message}</div>}
       </section>
@@ -539,7 +577,7 @@ export default function PublicDataCollector() {
         </div>
 
         {!visible.length ? (
-          <div className="empty-state"><strong>아직 표시할 가게가 없습니다.</strong><span>가게 20곳이 모이는 순간 메뉴보다 먼저 이곳에 나타납니다.</span></div>
+          <div className="empty-state"><strong>아직 표시할 가게가 없습니다.</strong><span>메뉴가 확인된 첫 20곳이 저장되는 순간 이곳에 나타납니다.</span></div>
         ) : (
           <div style={{ display: "grid", gridTemplateColumns: "minmax(250px, .75fr) minmax(0, 1.25fr)", gap: 18 }}>
             <div style={{ display: "grid", gap: 8, alignContent: "start", maxHeight: 720, overflowY: "auto", paddingRight: 4 }}>
@@ -547,7 +585,7 @@ export default function PublicDataCollector() {
                 <button key={store.sourceId} onClick={() => setSelectedId(store.sourceId)} style={{ textAlign: "left", border: selected?.sourceId === store.sourceId ? "2px solid var(--green)" : "1px solid var(--line)", borderRadius: 14, padding: 14, background: "white" }}>
                   <strong>{store.name}</strong>
                   <div style={{ marginTop: 5, fontSize: 13, color: "var(--muted)" }}>
-                    {store.category || store.licenseType || "업태 미확인"} · {store.menus.length ? `메뉴 ${store.menus.length}개` : "메뉴 연결 대기"}
+                    {store.category || store.licenseType || "업태 미확인"} · 메뉴 {store.menus.length}개
                   </div>
                 </button>
               ))}
@@ -562,22 +600,18 @@ export default function PublicDataCollector() {
                   <p style={{ margin: "0 0 4px", color: "var(--muted)" }}>{selected.roadAddress || selected.address || "주소 없음"}</p>
                   <p style={{ margin: "0 0 18px", color: "var(--muted)" }}>{selected.phone || "전화번호 없음"}</p>
 
-                  {!selected.menus.length ? (
-                    <div className="notice">가게 정보는 Supabase에 저장됐습니다. 메뉴는 낮은 속도로 자동 연결 중입니다.</div>
-                  ) : (
-                    <div style={{ display: "grid", gap: 10 }}>
-                      {selected.menus.map((menu) => (
-                        <div key={menu.menuId} style={{ border: "1px solid var(--line)", borderRadius: 12, padding: 14 }}>
-                          <div style={{ display: "flex", justifyContent: "space-between", gap: 16 }}>
-                            <strong>{menu.nameKo || menu.nameEn || menu.nameJa || "메뉴명 확인 필요"}</strong>
-                            <strong>{priceLabel(menu.price)}</strong>
-                          </div>
-                          <div style={{ marginTop: 7, color: "var(--muted)", fontSize: 13 }}>{menu.nameEn || "영문 보강 대기"}</div>
-                          <div style={{ marginTop: 3, color: "var(--muted)", fontSize: 13 }}>{menu.nameJa || "일문 보강 대기"}</div>
+                  <div style={{ display: "grid", gap: 10 }}>
+                    {selected.menus.map((menu) => (
+                      <div key={menu.menuId} style={{ border: "1px solid var(--line)", borderRadius: 12, padding: 14 }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", gap: 16 }}>
+                          <strong>{menu.nameKo || menu.nameEn || menu.nameJa || "메뉴명 확인 필요"}</strong>
+                          <strong>{priceLabel(menu.price)}</strong>
                         </div>
-                      ))}
-                    </div>
-                  )}
+                        <div style={{ marginTop: 7, color: "var(--muted)", fontSize: 13 }}>{menu.nameEn || "영문 보강 대기"}</div>
+                        <div style={{ marginTop: 3, color: "var(--muted)", fontSize: 13 }}>{menu.nameJa || "일문 보강 대기"}</div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </article>
             )}
