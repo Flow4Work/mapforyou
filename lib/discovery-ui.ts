@@ -7,15 +7,48 @@ const INITIAL_ROMAN = ["g", "kk", "n", "d", "tt", "r", "m", "b", "pp", "s", "ss"
 const VOWEL_ROMAN = ["a", "ae", "ya", "yae", "eo", "e", "yeo", "ye", "o", "wa", "wae", "oe", "yo", "u", "wo", "we", "wi", "yu", "eu", "ui", "i"];
 const FINAL_ROMAN = ["", "k", "k", "ks", "n", "nj", "nh", "t", "l", "lk", "lm", "lb", "ls", "lt", "lp", "lh", "m", "p", "ps", "t", "t", "ng", "t", "t", "k", "t", "p", "h"];
 
-const ENGLISH_BRANDS: Array<[RegExp, string]> = [
-  [/써브웨이/g, "Subway"],
-  [/롯데리아/g, "Lotteria"],
+const ENGLISH_TERMS: Array<[RegExp, string]> = [
   [/파리바게뜨/g, "Paris Baguette"],
   [/이디야커피/g, "Ediya Coffee"],
-  [/이삭토스트/g, "Isaac Toast"],
   [/멕시카나치킨/g, "Mexicana Chicken"],
   [/페리카나치킨/g, "Pelicana Chicken"],
+  [/이삭토스트/g, "Isaac Toast"],
+  [/써브웨이/g, "Subway"],
+  [/롯데리아/g, "Lotteria"],
   [/둘둘치킨/g, "Two Two Chicken"],
+  [/손칼국수/g, "Hand-cut Noodles"],
+  [/중국집/g, "Chinese Restaurant"],
+  [/베이커리/g, "Bakery"],
+  [/삼겹살/g, "Samgyeopsal"],
+  [/떡볶이/g, "Tteokbokki"],
+  [/설렁탕/g, "Seolleongtang"],
+  [/칼국수/g, "Kalguksu"],
+  [/돈까스/g, "Pork Cutlet"],
+  [/아이스크림/g, "Ice Cream"],
+  [/반점/g, "Chinese Restaurant"],
+  [/식당/g, "Restaurant"],
+  [/카페/g, "Cafe"],
+  [/커피/g, "Coffee"],
+  [/치킨/g, "Chicken"],
+  [/피자/g, "Pizza"],
+  [/버거/g, "Burger"],
+  [/마을/g, "Maeul"],
+  [/국밥/g, "Gukbap"],
+  [/찌개/g, "Jjigae"],
+  [/갈비/g, "Galbi"],
+  [/곱창/g, "Gopchang"],
+  [/족발/g, "Jokbal"],
+  [/보쌈/g, "Bossam"],
+  [/냉면/g, "Naengmyeon"],
+  [/김밥/g, "Gimbap"],
+  [/초밥/g, "Sushi"],
+  [/스시/g, "Sushi"],
+  [/라멘/g, "Ramen"],
+  [/우동/g, "Udon"],
+  [/막창/g, "Makchang"],
+  [/포차/g, "Pocha"],
+  [/브루어리/g, "Brewery"],
+  [/펍/g, "Pub"],
 ];
 
 const JAPANESE_BRANDS: Array<[RegExp, string]> = [
@@ -24,10 +57,48 @@ const JAPANESE_BRANDS: Array<[RegExp, string]> = [
   [/파리바게뜨/g, "パリバゲット"],
   [/이디야커피/g, "イディヤコーヒー"],
   [/이삭토스트/g, "イサックトースト"],
-  [/멕시카나치킨/g, "メキシカーナチキン"],
-  [/페리카나치킨/g, "ペリカナチキン"],
+  [/멕시카나チキン/g, "メキシカーナチキン"],
+  [/페리카나치킨/g, "ペリカーナチキン"],
   [/둘둘치킨/g, "トゥドゥルチキン"],
 ];
+
+const KNOWN_ENGLISH_MENUS: Record<string, string> = {
+  "묵은지 매운갈비찜": "Aged Kimchi Spicy Braised Short Ribs",
+  "묵은지매운갈비찜": "Aged Kimchi Spicy Braised Short Ribs",
+  "불고기 짜장면": "Bulgogi Black Bean Noodles",
+  "불고기짜장면": "Bulgogi Black Bean Noodles",
+  "불고기 짬뽕": "Bulgogi Spicy Seafood Noodle Soup",
+  "불고기짬뽕": "Bulgogi Spicy Seafood Noodle Soup",
+  "김치찌개": "Kimchi Stew",
+  "된장찌개": "Soybean Paste Stew",
+  "순두부찌개": "Soft Tofu Stew",
+  "제육볶음": "Spicy Stir-fried Pork",
+  "돼지갈비": "Pork Ribs",
+  "소갈비": "Beef Short Ribs",
+  "갈비찜": "Braised Short Ribs",
+  "삼겹살": "Pork Belly",
+  "비빔밥": "Bibimbap",
+  "불고기": "Bulgogi",
+  "냉면": "Cold Noodles",
+  "칼국수": "Knife-cut Noodles",
+  "보쌈": "Bossam",
+  "족발": "Jokbal",
+  "떡볶이": "Spicy Rice Cakes",
+  "김밥": "Gimbap",
+};
+
+const KNOWN_ENGLISH_PLACES: Record<string, string> = {
+  "성수": "Seongsu",
+  "성수역": "Seongsu Station",
+  "서울숲": "Seoul Forest",
+  "왕십리": "Wangsimni",
+  "홍대": "Hongdae",
+  "연남": "Yeonnam",
+  "합정": "Hapjeong",
+  "망원": "Mangwon",
+  "뚝섬": "Ttukseom",
+  "건대": "Konkuk Univ.",
+};
 
 function romanizeHangul(value: string) {
   return [...value].map((character) => {
@@ -52,18 +123,75 @@ function cleanRomanized(value: string) {
 export function romanizeKorean(value: string) {
   let working = value;
   const protectedValues: string[] = [];
-  for (const [pattern, replacement] of ENGLISH_BRANDS) {
+  for (const [pattern, replacement] of ENGLISH_TERMS) {
     working = working.replace(pattern, () => {
-      const token = `__BRAND_${protectedValues.length}__`;
+      const token = `__TERM_${protectedValues.length}__`;
       protectedValues.push(replacement);
-      return token;
+      return ` ${token} `;
     });
   }
   let result = cleanRomanized(romanizeHangul(working));
   protectedValues.forEach((replacement, index) => {
-    result = result.replace(`__BRAND_${index}__`, replacement);
+    result = result.replace(`__TERM_${index}__`, replacement);
   });
-  return result;
+  return cleanRomanized(result);
+}
+
+function normalizeEnglishText(value: string) {
+  const collapsed = value
+    .replace(/\s+/g, " ")
+    .replace(/\(\s*/g, " (")
+    .replace(/\s*\)/g, ")")
+    .replace(/\bbul\s*gogi\b/gi, "Bulgogi")
+    .replace(/\bjjajangmyeon\b/gi, "Jajangmyeon")
+    .replace(/\bjjajang\b/gi, "Jajang")
+    .replace(/\bjjamppong\b/gi, "Jjamppong")
+    .replace(/\bmukeunji\s+maeun\s*galbijjim\b/gi, "Aged Kimchi Spicy Braised Short Ribs")
+    .replace(/\bmukeunji\s+maeungalbijjim\b/gi, "Aged Kimchi Spicy Braised Short Ribs")
+    .replace(/\bmaeun\s*galbijjim\b/gi, "Spicy Braised Short Ribs")
+    .trim();
+
+  if (!collapsed) return collapsed;
+  if (collapsed === collapsed.toLowerCase()) {
+    return collapsed.replace(/(^|[\s(/-])([a-z])/g, (_, prefix: string, letter: string) => `${prefix}${letter.toUpperCase()}`);
+  }
+  return collapsed.replace(/^([a-z])/, (letter) => letter.toUpperCase());
+}
+
+function englishPlaceName(value: string) {
+  if (KNOWN_ENGLISH_PLACES[value]) return KNOWN_ENGLISH_PLACES[value];
+  if (value.endsWith("역")) {
+    const base = value.slice(0, -1);
+    return `${KNOWN_ENGLISH_PLACES[base] || romanizeKorean(base)} Station`;
+  }
+  return romanizeKorean(value);
+}
+
+function englishBranchLabel(value: string) {
+  if (value.endsWith("본점")) {
+    const place = value.slice(0, -2);
+    return place ? `${englishPlaceName(place)} Main Branch` : "Main Branch";
+  }
+  if (value.endsWith("점")) {
+    const place = value.slice(0, -1);
+    return place ? `${englishPlaceName(place)} Branch` : "Branch";
+  }
+  return romanizeKorean(value);
+}
+
+function fallbackEnglishRestaurantName(value: string) {
+  const match = value.trim().match(/^(.*?)\s*\((.*?)\)\s*$/);
+  if (!match) return romanizeKorean(value);
+  const base = romanizeKorean(match[1]);
+  const branch = englishBranchLabel(match[2]);
+  return `${base} – ${branch}`;
+}
+
+function englishNameNeedsRepair(value: string) {
+  const compact = value.replace(/[^A-Za-z]/g, "");
+  return /[가-힣]/.test(value)
+    || /seongsuyeokjeom|seoulsupjeom|wangsimnibonjeom|bonjeom/i.test(value)
+    || (!value.includes(" ") && compact.length >= 16);
 }
 
 const KANA_ROWS: Record<string, string[]> = {
@@ -173,7 +301,9 @@ export function categoryIcon(category: BroadCategory) {
 
 export function localizedRestaurantName(store: Pick<DiscoveryRestaurant, "name" | "nameEn" | "nameJa">, language: PublicLanguage) {
   if (language === "ja") return store.nameJa || koreanToKatakana(store.name);
-  return store.nameEn || romanizeKorean(store.name);
+  const supplied = store.nameEn?.trim();
+  if (supplied && !englishNameNeedsRepair(supplied)) return normalizeEnglishText(supplied);
+  return fallbackEnglishRestaurantName(store.name);
 }
 
 function fallbackAddress(value: string, language: PublicLanguage) {
@@ -184,7 +314,10 @@ function fallbackAddress(value: string, language: PublicLanguage) {
       .replace("ソンドング", "城東区")
       .replace("マポグ", "麻浦区");
   }
-  return romanizeKorean(value)
+  return romanizeHangul(value)
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/(^|\s)([a-z])/g, (_, prefix: string, letter: string) => `${prefix}${letter.toUpperCase()}`)
     .replace("Seoulteukbyeolsi", "Seoul")
     .replace("Seongdonggu", "Seongdong-gu")
     .replace("Mapogu", "Mapo-gu");
@@ -202,7 +335,10 @@ export function localizedIntroduction(store: Pick<DiscoveryRestaurant, "introduc
 
 export function localizedMenuName(menu: { nameKo: string; nameEn: string; nameJa: string }, language: PublicLanguage) {
   if (language === "ja") return menu.nameJa || (menu.nameKo ? koreanToKatakana(menu.nameKo) : menu.nameEn);
-  return menu.nameEn || (menu.nameKo ? romanizeKorean(menu.nameKo) : menu.nameJa);
+  const known = KNOWN_ENGLISH_MENUS[menu.nameKo?.replace(/\s+/g, " ").trim()];
+  if (known) return known;
+  if (menu.nameEn) return normalizeEnglishText(menu.nameEn);
+  return menu.nameKo ? romanizeKorean(menu.nameKo) : normalizeEnglishText(menu.nameJa);
 }
 
 export function priceLabel(price: number, language: PublicLanguage) {
@@ -220,9 +356,8 @@ export function regionLabel(regionKey: string, language: PublicLanguage) {
 }
 
 export function googleMapUrl(store: DiscoveryRestaurant) {
-  const query = store.latitude != null && store.longitude != null
-    ? `${store.latitude},${store.longitude}`
-    : `${store.name} ${store.roadAddress || store.address}`;
+  const address = store.roadAddress || store.address;
+  const query = [store.name, address].filter(Boolean).join(", ");
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
 }
 
