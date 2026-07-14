@@ -4,6 +4,8 @@ import { getSupabaseServerClient } from "@/lib/supabase";
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
+const TOKEN_SETTING_KEY = "seoul_tourism_api_token";
+
 type Menu = {
   menuId: string;
   nameKo: string;
@@ -36,17 +38,38 @@ function toNumber(value: string) {
 
 export async function GET() {
   const supabase = getSupabaseServerClient();
-  if (!supabase) return NextResponse.json({ connected: false, restaurants: [] });
+  if (!supabase) {
+    return NextResponse.json({ connected: false, tokenConfigured: false, totalCount: 0, restaurants: [] });
+  }
 
-  const { data: restaurants, error } = await supabase
-    .from("public_data_restaurants")
-    .select("*")
-    .order("updated_at", { ascending: false })
-    .limit(500);
+  const [restaurantResult, countResult, tokenResult] = await Promise.all([
+    supabase
+      .from("public_data_restaurants")
+      .select("*")
+      .order("updated_at", { ascending: false })
+      .limit(500),
+    supabase
+      .from("public_data_restaurants")
+      .select("source_id", { count: "exact", head: true }),
+    supabase
+      .from("app_settings")
+      .select("key")
+      .eq("key", TOKEN_SETTING_KEY)
+      .maybeSingle(),
+  ]);
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (restaurantResult.error) {
+    return NextResponse.json({ error: restaurantResult.error.message }, { status: 500 });
+  }
+  if (countResult.error) {
+    return NextResponse.json({ error: countResult.error.message }, { status: 500 });
+  }
+  if (tokenResult.error) {
+    return NextResponse.json({ error: tokenResult.error.message }, { status: 500 });
+  }
 
-  const ids = (restaurants ?? []).map((row) => row.source_id);
+  const restaurants = restaurantResult.data ?? [];
+  const ids = restaurants.map((row) => row.source_id);
   const { data: menus, error: menuError } = ids.length
     ? await supabase.from("public_data_menus").select("*").in("restaurant_id", ids).order("sort_order")
     : { data: [], error: null };
@@ -62,7 +85,9 @@ export async function GET() {
 
   return NextResponse.json({
     connected: true,
-    restaurants: (restaurants ?? []).map((row) => ({
+    tokenConfigured: Boolean(tokenResult.data?.key),
+    totalCount: countResult.count ?? restaurants.length,
+    restaurants: restaurants.map((row) => ({
       sourceId: row.source_id,
       name: row.name,
       roadAddress: row.road_address ?? "",
@@ -156,12 +181,15 @@ export async function POST(request: Request) {
       found_count: restaurants.length,
       status: body.status || "completed",
       error_message: body.errorMessage || null,
-      completed_at: now,
+      completed_at: body.status === "running" ? null : now,
     });
     if (runError) throw runError;
 
     return NextResponse.json({ connected: true, saved: restaurants.length, menus: menuRows.length });
   } catch (error) {
-    return NextResponse.json({ error: error instanceof Error ? error.message : "Supabase 저장에 실패했습니다." }, { status: 500 });
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Supabase 저장에 실패했습니다." },
+      { status: 500 },
+    );
   }
 }
