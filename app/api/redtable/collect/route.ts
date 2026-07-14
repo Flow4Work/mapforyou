@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
+import { getSupabaseServerClient } from "@/lib/supabase";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
 const BASE_URL = "https://seoul.openapi.redtable.global";
+const TOKEN_SETTING_KEY = "seoul_tourism_api_token";
 
 const REGION_ALIASES: Record<string, string[]> = {
   seongsu: ["성동구", "성수동"],
@@ -29,10 +31,7 @@ type ApiHeader = {
   totalCount?: number;
 };
 
-type ApiPayload<T> = {
-  header?: ApiHeader;
-  body?: T[];
-};
+type ApiPayload<T> = { header?: ApiHeader; body?: T[] };
 
 type RestaurantRow = {
   RSTR_ID?: string | number;
@@ -54,30 +53,94 @@ type MenuRow = {
   MENU_PRICE?: string | number | null;
   SPCLT_MENU_YN?: string | null;
   RSTR_ID?: string | number;
-  RSTR_NM?: string;
 };
 
-type ImageRow = {
-  RSTR_ID?: string | number;
-  RSTR_IMG_URL?: string;
-};
+type ImageRow = { RSTR_ID?: string | number; RSTR_IMG_URL?: string };
+
+class UpstreamError extends Error {
+  status: number;
+  constructor(message: string, status = 502) {
+    super(message);
+    this.status = status;
+  }
+}
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function resolveToken(provided?: string) {
+  if (provided?.trim()) return provided.trim();
+  const supabase = getSupabaseServerClient();
+  if (!supabase) throw new UpstreamError("Supabase 연결이 없어 저장된 API 토큰을 읽지 못했습니다.", 503);
+
+  const { data, error } = await supabase
+    .from("app_settings")
+    .select("value")
+    .eq("key", TOKEN_SETTING_KEY)
+    .maybeSingle();
+
+  if (error) throw new UpstreamError(`저장된 API 토큰 조회 실패: ${error.message}`, 503);
+  if (!data?.value) throw new UpstreamError("서울관광재단 API 토큰이 저장되지 않았습니다.", 400);
+  return String(data.value);
+}
 
 async function fetchPage<T>(path: string, token: string, pageNo: number): Promise<ApiPayload<T>> {
   const url = new URL(path, BASE_URL);
   url.searchParams.set("serviceKey", token);
   url.searchParams.set("pageNo", String(pageNo));
 
-  const response = await fetch(url, {
-    cache: "no-store",
-    signal: AbortSignal.timeout(25_000),
-  });
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    const response = await fetch(url, {
+      cache: "no-store",
+      signal: AbortSignal.timeout(25_000),
+    });
 
-  if (!response.ok) throw new Error(`${path} 응답 오류 (${response.status})`);
-  const payload = (await response.json()) as ApiPayload<T>;
-  if (payload.header?.resultCode && payload.header.resultCode !== "00") {
-    throw new Error(payload.header.resultMsg || `${path} 조회에 실패했습니다.`);
+    if (response.status === 429) {
+      if (attempt === 3) {
+        throw new UpstreamError(`${path} 요청 제한이 계속되고 있습니다. 잠시 후 자동 수집을 다시 실행하세요.`, 429);
+      }
+      const retryAfter = Number(response.headers.get("retry-after"));
+      const waitMs = Number.isFinite(retryAfter) && retryAfter > 0
+        ? Math.min(retryAfter * 1000, 15_000)
+        : [2_000, 5_000, 10_000][attempt];
+      await sleep(waitMs);
+      continue;
+    }
+
+    if (response.status >= 500 && attempt < 2) {
+      await sleep([1_500, 4_000][attempt]);
+      continue;
+    }
+
+    if (!response.ok) throw new UpstreamError(`${path} 응답 오류 (${response.status})`, response.status);
+
+    const payload = (await response.json()) as ApiPayload<T>;
+    if (payload.header?.resultCode && payload.header.resultCode !== "00") {
+      throw new UpstreamError(payload.header.resultMsg || `${path} 조회에 실패했습니다.`, 502);
+    }
+    return payload;
   }
-  return payload;
+
+  throw new UpstreamError(`${path} 조회에 실패했습니다.`, 502);
+}
+
+async function getStoredRestaurantIds() {
+  const supabase = getSupabaseServerClient();
+  if (!supabase) return new Set<string>();
+
+  const ids = new Set<string>();
+  const pageSize = 1000;
+  for (let start = 0; start < 20_000; start += pageSize) {
+    const { data, error } = await supabase
+      .from("public_data_restaurants")
+      .select("source_id")
+      .range(start, start + pageSize - 1);
+    if (error) throw new UpstreamError(`기존 식당 목록 조회 실패: ${error.message}`, 503);
+    for (const row of data ?? []) ids.add(String(row.source_id));
+    if ((data?.length ?? 0) < pageSize) break;
+  }
+  return ids;
 }
 
 function includesAny(value: string, needles: string[]) {
@@ -111,13 +174,11 @@ export async function POST(request: Request) {
       restaurantIds?: string[];
     };
 
-    const token = body.token?.trim();
-    if (!token) return NextResponse.json({ error: "서울관광재단 API 토큰을 입력하세요." }, { status: 400 });
-
+    const token = await resolveToken(body.token);
     const mode = body.mode ?? "restaurants";
     const startPage = Math.max(Number(body.pageNo) || 1, 1);
-    const maxBatch = mode === "menus" ? 5 : 10;
-    const pagesPerBatch = Math.min(Math.max(Number(body.pagesPerBatch) || maxBatch, 1), maxBatch);
+    const maxBatch = mode === "menus" ? 2 : 3;
+    const pagesPerBatch = Math.min(Math.max(Number(body.pagesPerBatch) || 1, 1), maxBatch);
     const pages = Array.from({ length: pagesPerBatch }, (_, index) => startPage + index);
 
     if (mode === "restaurants") {
@@ -127,9 +188,15 @@ export async function POST(request: Request) {
       const regionNeedles = aliases.filter(Boolean);
       const keyword = body.keyword?.trim() || "전체";
       const categoryNeedles = CATEGORY_ALIASES[keyword] ?? [keyword];
-      const excludes = new Set((body.excludeIds ?? []).map(String));
+      const excludes = await getStoredRestaurantIds();
+      for (const id of body.excludeIds ?? []) excludes.add(String(id));
 
-      const payloads = await Promise.all(pages.map((page) => fetchPage<RestaurantRow>("/api/rstr", token, page)));
+      const payloads: ApiPayload<RestaurantRow>[] = [];
+      for (const page of pages) {
+        payloads.push(await fetchPage<RestaurantRow>("/api/rstr", token, page));
+        await sleep(300);
+      }
+
       const restaurants: Array<{
         sourceId: string;
         name: string;
@@ -185,6 +252,7 @@ export async function POST(request: Request) {
           scannedTo: lastPage,
           rawCount: payloads.reduce((sum, payload) => sum + (payload.body?.length ?? 0), 0),
           totalCount: Number(lastPayload?.header?.totalCount) || 0,
+          excludedStoredCount: excludes.size,
         },
       });
     }
@@ -193,15 +261,6 @@ export async function POST(request: Request) {
     if (!restaurantIds.size) return NextResponse.json({ error: "메뉴를 연결할 식당이 없습니다." }, { status: 400 });
 
     if (mode === "menus") {
-      const bundles = await Promise.all(pages.map(async (page) => {
-        const [ko, en, ja] = await Promise.all([
-          fetchPage<MenuRow>("/api/menu/korean", token, page),
-          fetchPage<MenuRow>("/api/menu/eng", token, page),
-          fetchPage<MenuRow>("/api/menu/jpnse", token, page),
-        ]);
-        return { page, ko, en, ja };
-      }));
-
       const menusByRestaurant: Record<string, Array<{
         menuId: string;
         nameKo: string;
@@ -210,68 +269,70 @@ export async function POST(request: Request) {
         price: number;
         isSpecialty: boolean;
       }>> = {};
+      let lastHeader: ApiHeader | undefined;
 
-      for (const bundle of bundles) {
-        const enById = new Map((bundle.en.body ?? []).map((row) => [String(row.MENU_ID ?? ""), row]));
-        const jaById = new Map((bundle.ja.body ?? []).map((row) => [String(row.MENU_ID ?? ""), row]));
+      for (const page of pages) {
+        const ko = await fetchPage<MenuRow>("/api/menu/korean", token, page);
+        await sleep(220);
+        const en = await fetchPage<MenuRow>("/api/menu/eng", token, page);
+        await sleep(220);
+        const ja = await fetchPage<MenuRow>("/api/menu/jpnse", token, page);
+        await sleep(300);
+        lastHeader = ko.header;
 
-        for (const ko of bundle.ko.body ?? []) {
-          const restaurantId = String(ko.RSTR_ID ?? "");
+        const enById = new Map((en.body ?? []).map((row) => [String(row.MENU_ID ?? ""), row]));
+        const jaById = new Map((ja.body ?? []).map((row) => [String(row.MENU_ID ?? ""), row]));
+
+        for (const koRow of ko.body ?? []) {
+          const restaurantId = String(koRow.RSTR_ID ?? "");
           if (!restaurantIds.has(restaurantId)) continue;
-          const menuId = String(ko.MENU_ID ?? "");
+          const menuId = String(koRow.MENU_ID ?? "");
           if (!menuId) continue;
-          const en = enById.get(menuId);
-          const ja = jaById.get(menuId);
-          const menu = {
+          const enRow = enById.get(menuId);
+          const jaRow = jaById.get(menuId);
+          (menusByRestaurant[restaurantId] ??= []).push({
             menuId,
-            nameKo: String(ko.MENU_NM ?? ""),
-            nameEn: String(en?.MENU_NM ?? ""),
-            nameJa: String(ja?.MENU_NM ?? ""),
-            price: Number(ko.MENU_PRICE ?? en?.MENU_PRICE ?? ja?.MENU_PRICE ?? 0),
-            isSpecialty: String(ko.SPCLT_MENU_YN ?? "N") === "Y",
-          };
-          (menusByRestaurant[restaurantId] ??= []).push(menu);
+            nameKo: String(koRow.MENU_NM ?? ""),
+            nameEn: String(enRow?.MENU_NM ?? ""),
+            nameJa: String(jaRow?.MENU_NM ?? ""),
+            price: Number(koRow.MENU_PRICE ?? enRow?.MENU_PRICE ?? jaRow?.MENU_PRICE ?? 0),
+            isSpecialty: String(koRow.SPCLT_MENU_YN ?? "N") === "Y",
+          });
         }
       }
 
-      const lastPayload = bundles.at(-1)?.ko;
       const lastPage = pages.at(-1) ?? startPage;
       return NextResponse.json({
         menusByRestaurant,
-        nextPage: nextPage(lastPayload?.header, lastPage),
-        stats: {
-          scannedFrom: startPage,
-          scannedTo: lastPage,
-          totalCount: Number(lastPayload?.header?.totalCount) || 0,
-        },
+        nextPage: nextPage(lastHeader, lastPage),
+        stats: { scannedFrom: startPage, scannedTo: lastPage, totalCount: Number(lastHeader?.totalCount) || 0 },
       });
     }
 
-    const payloads = await Promise.all(pages.map((page) => fetchPage<ImageRow>("/api/rstr/img", token, page)));
     const imagesByRestaurant: Record<string, string> = {};
-    for (const payload of payloads) {
+    let lastHeader: ApiHeader | undefined;
+    for (const page of pages) {
+      const payload = await fetchPage<ImageRow>("/api/rstr/img", token, page);
+      lastHeader = payload.header;
       for (const row of payload.body ?? []) {
         const restaurantId = String(row.RSTR_ID ?? "");
         if (!restaurantIds.has(restaurantId) || imagesByRestaurant[restaurantId]) continue;
         imagesByRestaurant[restaurantId] = normalizeImageUrl(String(row.RSTR_IMG_URL ?? ""));
       }
+      await sleep(300);
     }
 
-    const lastPayload = payloads.at(-1);
     const lastPage = pages.at(-1) ?? startPage;
     return NextResponse.json({
       imagesByRestaurant,
-      nextPage: nextPage(lastPayload?.header, lastPage),
-      stats: {
-        scannedFrom: startPage,
-        scannedTo: lastPage,
-        totalCount: Number(lastPayload?.header?.totalCount) || 0,
-      },
+      nextPage: nextPage(lastHeader, lastPage),
+      stats: { scannedFrom: startPage, scannedTo: lastPage, totalCount: Number(lastHeader?.totalCount) || 0 },
     });
   } catch (error) {
+    const status = error instanceof UpstreamError ? error.status : 500;
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "통합 수집에 실패했습니다." },
-      { status: 500 },
+      { status },
     );
   }
 }
