@@ -2,6 +2,8 @@ import "server-only";
 
 import { getSupabaseServerClient } from "@/lib/supabase";
 
+const ACTIVE_REGIONS = ["seongsu", "hongdae"];
+
 export type DiscoveryMenu = {
   id: string;
   nameKo: string;
@@ -99,6 +101,7 @@ export async function loadDiscoveryRestaurants(limit = 500): Promise<DiscoveryRe
   const { data: restaurantData, error: restaurantError } = await supabase
     .from("public_data_restaurants")
     .select("source_id,name,road_address,address,latitude,longitude,phone,category,license_type,introduction,region_key,search_keyword,image_url,updated_at")
+    .in("region_key", ACTIVE_REGIONS)
     .order("updated_at", { ascending: false })
     .limit(limit);
 
@@ -137,6 +140,7 @@ export async function loadDiscoveryRestaurant(id: string): Promise<DiscoveryRest
     .from("public_data_restaurants")
     .select("source_id,name,road_address,address,latitude,longitude,phone,category,license_type,introduction,region_key,search_keyword,image_url,updated_at")
     .eq("source_id", id)
+    .in("region_key", ACTIVE_REGIONS)
     .maybeSingle();
 
   if (restaurantError) throw new Error(`식당 조회 실패: ${restaurantError.message}`);
