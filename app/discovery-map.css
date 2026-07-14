@@ -43,12 +43,18 @@
   height: 18px;
 }
 
-/* Every restaurant uses one simple fork-and-knife symbol. */
 .naver-map-marker-icon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Only uncategorized restaurants use the standard fork-and-knife symbol. */
+.naver-map-marker.category-restaurant .naver-map-marker-icon svg {
   display: none;
 }
 
-.naver-map-marker-icon::before {
+.naver-map-marker.category-restaurant .naver-map-marker-icon::before {
   width: 100%;
   height: 100%;
   content: "";
