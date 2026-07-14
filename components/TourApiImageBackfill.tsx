@@ -16,11 +16,34 @@ type BatchResult = Status & {
   saved?: number;
   noMatch?: number;
   noImage?: number;
+  failed?: number;
+  retryable?: boolean;
   samples?: Array<{ name: string; result: string }>;
 };
 
 function isAbortError(error: unknown) {
   return error instanceof DOMException && error.name === "AbortError";
+}
+
+function delay(ms: number, signal: AbortSignal) {
+  return new Promise<void>((resolve, reject) => {
+    if (signal.aborted) {
+      reject(new DOMException("Aborted", "AbortError"));
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      signal.removeEventListener("abort", onAbort);
+      resolve();
+    }, ms);
+
+    const onAbort = () => {
+      window.clearTimeout(timer);
+      reject(new DOMException("Aborted", "AbortError"));
+    };
+
+    signal.addEventListener("abort", onAbort, { once: true });
+  });
 }
 
 export default function TourApiImageBackfill() {
@@ -30,7 +53,7 @@ export default function TourApiImageBackfill() {
   const [running, setRunning] = useState(false);
   const [message, setMessage] = useState("");
   const [stage, setStage] = useState("TourAPI 연결 확인 중");
-  const [stats, setStats] = useState({ processed: 0, matched: 0, saved: 0, noMatch: 0, noImage: 0 });
+  const [stats, setStats] = useState({ processed: 0, matched: 0, saved: 0, noMatch: 0, noImage: 0, failed: 0 });
   const [samples, setSamples] = useState<Array<{ name: string; result: string }>>([]);
   const controllerRef = useRef<AbortController | null>(null);
 
@@ -109,7 +132,7 @@ export default function TourApiImageBackfill() {
     setRunning(true);
     setMessage("");
     setSamples([]);
-    setStats({ processed: 0, matched: 0, saved: 0, noMatch: 0, noImage: 0 });
+    setStats({ processed: 0, matched: 0, saved: 0, noMatch: 0, noImage: 0, failed: 0 });
 
     let stoppedForNoProgress = false;
     try {
@@ -126,6 +149,7 @@ export default function TourApiImageBackfill() {
           saved: current.saved + Number(data.saved ?? 0),
           noMatch: current.noMatch + Number(data.noMatch ?? 0),
           noImage: current.noImage + Number(data.noImage ?? 0),
+          failed: current.failed + Number(data.failed ?? 0),
         }));
         setSamples((current) => [...(data.samples ?? []), ...current].slice(0, 12));
 
@@ -138,12 +162,14 @@ export default function TourApiImageBackfill() {
           stoppedForNoProgress = true;
           break;
         }
+
+        if (remaining > 0) await delay(900, controller.signal);
       }
 
       const finalStatus = await loadStatus();
-      setStage(stoppedForNoProgress ? "TourAPI 일부 가게 처리 중단" : "TourAPI 이미지 보강 완료");
+      setStage(stoppedForNoProgress ? "TourAPI 진행 상태 확인 필요" : "TourAPI 이미지 보강 완료");
       setMessage(stoppedForNoProgress
-        ? `같은 가게에서 API 오류가 반복돼 자동 실행을 멈췄습니다. 현재 대기 ${finalStatus?.remainingUnchecked ?? 0}곳입니다.`
+        ? `처리 목록이 두 번 연속 줄지 않아 안전하게 멈췄습니다. 현재 대기 ${finalStatus?.remainingUnchecked ?? 0}곳입니다.`
         : `TourAPI 확인을 마쳤습니다. 현재 사진 없는 가게는 ${finalStatus?.missing ?? 0}곳입니다.`);
       window.dispatchEvent(new CustomEvent("mapforyou:images-updated"));
     } catch (error) {
@@ -151,7 +177,7 @@ export default function TourApiImageBackfill() {
         setStage("TourAPI 이미지 보강 중지");
         setMessage("중지했습니다. 이미 연결된 사진은 유지됩니다.");
       } else {
-        setStage("TourAPI 이미지 보강 오류");
+        setStage("TourAPI 일시 중단");
         setMessage(error instanceof Error ? error.message : "TourAPI 이미지 보강 실패");
       }
     } finally {
@@ -240,7 +266,7 @@ export default function TourApiImageBackfill() {
 
         {(stats.processed > 0 || samples.length > 0) && (
           <div style={{ marginTop: 14, padding: 14, borderRadius: 14, background: "#f5f7f0", fontSize: 12 }}>
-            <strong>처리 {stats.processed} · 매칭 {stats.matched} · 사진 연결 {stats.saved} · 매칭 없음 {stats.noMatch} · 이미지 없음 {stats.noImage}</strong>
+            <strong>처리 {stats.processed} · 매칭 {stats.matched} · 사진 연결 {stats.saved} · 매칭 없음 {stats.noMatch} · 이미지 없음 {stats.noImage} · 건너뜀 {stats.failed}</strong>
             {samples.length > 0 && (
               <div style={{ display: "grid", gap: 5, marginTop: 10, color: "var(--muted)" }}>
                 {samples.map((sample, index) => <span key={`${sample.name}-${index}`}>{sample.name} — {sample.result}</span>)}
