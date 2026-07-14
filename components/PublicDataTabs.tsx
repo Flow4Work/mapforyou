@@ -1,6 +1,14 @@
 import Link from "next/link";
 
-export default function PublicDataTabs({ active }: { active: "collect" | "images" }) {
+type AdminTab = "collect" | "images" | "analytics";
+
+const tabs: Array<{ key: AdminTab; href: string; label: string }> = [
+  { key: "collect", href: "/admin/public-data", label: "가게·메뉴 수집" },
+  { key: "images", href: "/admin/public-data/images", label: "사진 보강·직접 확인" },
+  { key: "analytics", href: "/admin/public-data/analytics", label: "이용 현황" },
+];
+
+export default function PublicDataTabs({ active }: { active: AdminTab }) {
   return (
     <nav
       aria-label="공공데이터 관리자 메뉴"
@@ -13,22 +21,17 @@ export default function PublicDataTabs({ active }: { active: "collect" | "images
         overflowX: "auto",
       }}
     >
-      <Link
-        href="/admin/public-data"
-        className={active === "collect" ? "primary-button" : "ghost-button"}
-        aria-current={active === "collect" ? "page" : undefined}
-        style={{ whiteSpace: "nowrap" }}
-      >
-        가게·메뉴 수집
-      </Link>
-      <Link
-        href="/admin/public-data/images"
-        className={active === "images" ? "primary-button" : "ghost-button"}
-        aria-current={active === "images" ? "page" : undefined}
-        style={{ whiteSpace: "nowrap" }}
-      >
-        사진 보강·직접 확인
-      </Link>
+      {tabs.map((tab) => (
+        <Link
+          key={tab.key}
+          href={tab.href}
+          className={active === tab.key ? "primary-button" : "ghost-button"}
+          aria-current={active === tab.key ? "page" : undefined}
+          style={{ whiteSpace: "nowrap" }}
+        >
+          {tab.label}
+        </Link>
+      ))}
     </nav>
   );
 }
