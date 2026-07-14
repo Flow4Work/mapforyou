@@ -1,10 +1,15 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useMemo, useRef } from "react";
 import L from "leaflet";
 import type { DiscoveryRestaurant } from "@/lib/discovery";
-import { localizedMenuName, priceLabel, type PublicLanguage } from "@/lib/discovery-ui";
+import {
+  localizedMenuName,
+  localizedRestaurantName,
+  priceLabel,
+  regionLabel,
+  type PublicLanguage,
+} from "@/lib/discovery-ui";
 
 export default function DiscoveryMap({
   stores,
@@ -31,9 +36,10 @@ export default function DiscoveryMap({
       preferCanvas: true,
     }).setView([37.55, 127.04], 13);
 
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      maxZoom: 19,
-      attribution: "&copy; OpenStreetMap contributors",
+    L.tileLayer("https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png", {
+      maxZoom: 20,
+      subdomains: "abcd",
+      attribution: "&copy; OpenStreetMap contributors &copy; CARTO",
     }).addTo(map);
     L.control.zoom({ position: "bottomright" }).addTo(map);
 
@@ -67,13 +73,17 @@ export default function DiscoveryMap({
       const selected = store.id === selectedId;
       const marker = L.circleMarker(point, {
         radius: selected ? 10 : 7,
-        color: selected ? "#173b2d" : "#ffffff",
+        color: selected ? "#8f271c" : "#ffffff",
         weight: selected ? 4 : 3,
-        fillColor: selected ? "#dffd75" : "#244d3d",
+        fillColor: selected ? "#ffcf45" : "#e64b35",
         fillOpacity: 1,
       });
 
-      marker.bindTooltip(store.name, { direction: "top", offset: [0, -8], opacity: 0.92 });
+      marker.bindTooltip(localizedRestaurantName(store, language), {
+        direction: "top",
+        offset: [0, -8],
+        opacity: 0.96,
+      });
       marker.on("click", () => onSelect(store.id));
       marker.addTo(layer);
     }
@@ -81,14 +91,14 @@ export default function DiscoveryMap({
     if (points.length === 1) {
       map.setView(points[0], 15, { animate: false });
     } else if (points.length > 1) {
-      map.fitBounds(L.latLngBounds(points), { padding: [42, 42], maxZoom: 15, animate: false });
+      map.fitBounds(L.latLngBounds(points), { padding: [38, 38], maxZoom: 15, animate: false });
     }
-  }, [stores, selectedId, onSelect]);
+  }, [stores, selectedId, language, onSelect]);
 
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !selectedStore || selectedStore.latitude == null || selectedStore.longitude == null) return;
-    map.flyTo([selectedStore.latitude, selectedStore.longitude], Math.max(map.getZoom(), 15), { duration: 0.45 });
+    map.flyTo([selectedStore.latitude, selectedStore.longitude], Math.max(map.getZoom(), 15), { duration: 0.38 });
   }, [selectedStore]);
 
   const firstMenu = selectedStore?.menus[0];
@@ -97,14 +107,11 @@ export default function DiscoveryMap({
     <div className="discovery-map-wrap">
       <div className="discovery-map" ref={containerRef} />
       {selectedStore && (
-        <div className="map-selected-card">
-          <div>
-            <span>{language === "ja" ? "選択したお店" : "Selected restaurant"}</span>
-            <strong>{selectedStore.name}</strong>
-            {firstMenu && <small>{localizedMenuName(firstMenu, language)} · {priceLabel(firstMenu.price, language)}</small>}
-          </div>
-          <Link href={`/place/${selectedStore.id}`}>{language === "ja" ? "メニュー" : "View menu"}</Link>
-        </div>
+        <button className="map-selected-card" type="button" onClick={() => onSelect(selectedStore.id)}>
+          <span>{regionLabel(selectedStore.regionKey, language)}</span>
+          <strong>{localizedRestaurantName(selectedStore, language)}</strong>
+          {firstMenu && <small>{localizedMenuName(firstMenu, language)} · {priceLabel(firstMenu.price, language)}</small>}
+        </button>
       )}
     </div>
   );
