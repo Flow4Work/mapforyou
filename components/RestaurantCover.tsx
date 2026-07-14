@@ -2,7 +2,13 @@
 
 import { useEffect, useState } from "react";
 import type { DiscoveryRestaurant } from "@/lib/discovery";
-import { broadCategory, categoryIcon, categoryLabel, type PublicLanguage } from "@/lib/discovery-ui";
+import {
+  broadCategory,
+  categoryIcon,
+  categoryLabel,
+  localizedRestaurantName,
+  type PublicLanguage,
+} from "@/lib/discovery-ui";
 
 export default function RestaurantCover({
   store,
@@ -42,13 +48,13 @@ export default function RestaurantCover({
       {hasImage && (
         <span
           aria-hidden="true"
-          style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(17,25,20,.02), rgba(17,25,20,.58))" }}
+          style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(43,20,13,.02), rgba(43,20,13,.62))" }}
         />
       )}
       {!hasImage && <span className="restaurant-cover-icon">{categoryIcon(category)}</span>}
       <div className="restaurant-cover-label" style={{ position: "relative", zIndex: 1 }}>
         <span>{categoryLabel(category, language)}</span>
-        {!compact && <strong>{store.name}</strong>}
+        {!compact && <strong>{localizedRestaurantName(store, language)}</strong>}
       </div>
     </div>
   );
