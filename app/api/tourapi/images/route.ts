@@ -95,6 +95,14 @@ function arrayItems<T>(payload: TourPayload<T>) {
   return Array.isArray(item) ? item : [item];
 }
 
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function isTemporaryTourError(message: string) {
+  return /(LIMITED_NUMBER|TOO_MANY|429|503|504|timeout|timed out|fetch failed|ECONNRESET|응답 형식 오류|일시|트래픽|요청.*초과|서비스.*불가)/i.test(message);
+}
+
 async function resolveSettings() {
   const supabase = getSupabaseServerClient();
   if (!supabase) throw new Error("Supabase 연결이 없습니다.");
@@ -124,20 +132,31 @@ async function tourFetch<T>(path: string, key: string, params: Record<string, st
   url.searchParams.set("_type", "json");
   for (const [name, value] of Object.entries(params)) url.searchParams.set(name, String(value));
 
-  const response = await fetch(url, { cache: "no-store", headers: { accept: "application/json" } });
-  const text = await response.text();
-  let payload: TourPayload<T>;
-  try {
-    payload = JSON.parse(text) as TourPayload<T>;
-  } catch {
-    throw new Error(`TourAPI ${path} 응답 형식 오류 (${response.status})`);
+  let lastError: Error | null = null;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      const response = await fetch(url, { cache: "no-store", headers: { accept: "application/json" } });
+      const text = await response.text();
+      let payload: TourPayload<T>;
+      try {
+        payload = JSON.parse(text) as TourPayload<T>;
+      } catch {
+        throw new Error(`TourAPI ${path} 응답 형식 오류 (${response.status})`);
+      }
+
+      const code = payload.response?.header?.resultCode;
+      if (!response.ok || (code && code !== "0000")) {
+        throw new Error(payload.response?.header?.resultMsg || `TourAPI ${path} 호출 실패 (${response.status})`);
+      }
+      return payload;
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error("TourAPI 호출 실패");
+      if (!isTemporaryTourError(lastError.message) || attempt === 2) break;
+      await sleep(700 * (attempt + 1));
+    }
   }
 
-  const code = payload.response?.header?.resultCode;
-  if (!response.ok || (code && code !== "0000")) {
-    throw new Error(payload.response?.header?.resultMsg || `TourAPI ${path} 호출 실패`);
-  }
-  return payload;
+  throw lastError ?? new Error(`TourAPI ${path} 호출 실패`);
 }
 
 function candidateScore(store: StoreRow, item: SearchItem) {
@@ -296,15 +315,19 @@ export async function POST(request: Request) {
       .filter((store) => !String(store.image_url ?? "").trim() && !checkedIds.has(String(store.source_id)))
       .slice(0, limit);
 
+    let attempted = 0;
     let matched = 0;
     let saved = 0;
     let noMatch = 0;
     let noImage = 0;
+    let failed = 0;
+    let upstreamError = "";
     const samples: Array<{ name: string; result: string }> = [];
     const now = new Date().toISOString();
 
     for (const store of targets) {
       const id = String(store.source_id);
+      attempted += 1;
       try {
         const match = await findContent(store, key);
         if (!match) {
@@ -342,7 +365,16 @@ export async function POST(request: Request) {
         checkedIds.add(id);
         samples.push({ name: store.name, result: `${image.label} 연결` });
       } catch (error) {
-        samples.push({ name: store.name, result: error instanceof Error ? error.message : "처리 실패" });
+        const message = error instanceof Error ? error.message : "처리 실패";
+        samples.push({ name: store.name, result: message });
+
+        if (isTemporaryTourError(message)) {
+          upstreamError = message;
+          break;
+        }
+
+        failed += 1;
+        checkedIds.add(id);
       }
     }
 
@@ -352,15 +384,32 @@ export async function POST(request: Request) {
       updated_at: now,
     }, { onConflict: "key" });
 
-    return NextResponse.json({
-      processed: targets.length,
+    const responseBody = {
+      processed: attempted,
       matched,
       saved,
       noMatch,
       noImage,
+      failed,
       samples,
       ...(await statusSnapshot()),
-    });
+    };
+
+    if (upstreamError) {
+      const rateLimited = /(LIMITED_NUMBER|TOO_MANY|429|트래픽|요청.*초과)/i.test(upstreamError);
+      return NextResponse.json(
+        {
+          ...responseBody,
+          error: rateLimited
+            ? "TourAPI 요청이 잠시 몰려 자동 실행을 멈췄습니다. 잠시 뒤 다시 실행해주세요."
+            : `TourAPI 일시 오류로 중단했습니다: ${upstreamError}`,
+          retryable: true,
+        },
+        { status: rateLimited ? 429 : 503 },
+      );
+    }
+
+    return NextResponse.json(responseBody);
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "TourAPI 이미지 보강 실패" },
