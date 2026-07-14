@@ -2,22 +2,50 @@
 
 import { useEffect, useRef, useState } from "react";
 
-const API_PAGE_SIZE = 1000;
-const CURSOR_SCOPE = "images_all";
+const CURSOR_SCOPE = "images_all_v2";
+
+type MissingStore = {
+  sourceId: string;
+  name: string;
+  address: string;
+  category: string;
+  regionKey: string;
+};
+
+type ImageCandidate = {
+  url: string;
+  source: string;
+  attribution?: string;
+  sourceUrl?: string;
+};
 
 type ImageStatus = {
   total?: number;
   withImage?: number;
   withoutImage?: number;
   missingIds?: string[];
+  missingStores?: MissingStore[];
+  sourceCounts?: Record<string, number>;
   error?: string;
 };
 
 type CollectResponse = {
-  imagesByRestaurant?: Record<string, string>;
+  imagesByRestaurant?: Record<string, ImageCandidate>;
   nextPage?: number | null;
-  stats?: { scannedTo?: number; totalCount?: number };
+  stats?: {
+    scannedTo?: number;
+    totalCount?: number;
+    totalPages?: number;
+    restaurantImageCount?: number;
+    foodImageCount?: number;
+  };
   error?: string;
+};
+
+type ManualDraft = {
+  imageUrl: string;
+  sourceUrl: string;
+  attribution: string;
 };
 
 function isAbortError(error: unknown) {
@@ -45,12 +73,30 @@ function delay(ms: number, signal: AbortSignal) {
   });
 }
 
+function searchQuery(store: MissingStore) {
+  return `${store.name} ${store.address}`.trim();
+}
+
+function googleMapsUrl(store: MissingStore) {
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(searchQuery(store))}`;
+}
+
+function googleImageUrl(store: MissingStore) {
+  return `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(`${searchQuery(store)} 음식 사진`)}`;
+}
+
+function officialSearchUrl(store: MissingStore) {
+  return `https://www.google.com/search?q=${encodeURIComponent(`${searchQuery(store)} 공식 인스타그램`)}`;
+}
+
 export default function PublicDataImageBackfill() {
   const [status, setStatus] = useState<ImageStatus>({});
   const [running, setRunning] = useState(false);
   const [progress, setProgress] = useState(0);
   const [stage, setStage] = useState("사진 현황 확인 중");
   const [message, setMessage] = useState("");
+  const [manualDrafts, setManualDrafts] = useState<Record<string, ManualDraft>>({});
+  const [savingId, setSavingId] = useState("");
   const controllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
@@ -95,7 +141,7 @@ export default function PublicDataImageBackfill() {
     }
   }
 
-  async function saveImages(imagesByRestaurant: Record<string, string>) {
+  async function saveImages(imagesByRestaurant: Record<string, ImageCandidate>) {
     const response = await fetch("/api/public-data/images", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -118,7 +164,7 @@ export default function PublicDataImageBackfill() {
     if (response.status === 429) {
       throw new Error("OPEN API 한도가 초과됐습니다. 위에서 다른 API KEY로 교체한 뒤 다시 실행해주세요.");
     }
-    if (!response.ok) throw new Error(data.error || "식당 사진 조회 실패");
+    if (!response.ok) throw new Error(data.error || "식당·음식 사진 조회 실패");
     return data;
   }
 
@@ -146,13 +192,12 @@ export default function PublicDataImageBackfill() {
     let wrapped = false;
 
     try {
-      setStage(`사진 없는 가게 ${remaining.size}곳 · 이미지 API 검색 시작`);
+      setStage(`사진 없는 가게 ${remaining.size}곳 · 식당사진+음식사진 검색 시작`);
 
       while (remaining.size > 0) {
         const currentPage = page;
         const data = await collectImages(currentPage, [...remaining], controller.signal);
-        const totalCount = Number(data.stats?.totalCount ?? 0);
-        if (totalCount > 0) totalPages = Math.max(Math.ceil(totalCount / API_PAGE_SIZE), 1);
+        totalPages = Math.max(Number(data.stats?.totalPages ?? 1), 1);
 
         if (startPage > totalPages) {
           startPage = 1;
@@ -161,7 +206,9 @@ export default function PublicDataImageBackfill() {
         }
 
         const found = Object.fromEntries(
-          Object.entries(data.imagesByRestaurant ?? {}).filter(([id, url]) => remaining.has(id) && Boolean(url)),
+          Object.entries(data.imagesByRestaurant ?? {}).filter(([id, image]) =>
+            remaining.has(id) && /^https?:\/\//i.test(String(image?.url ?? "")),
+          ),
         );
 
         if (Object.keys(found).length) {
@@ -187,18 +234,16 @@ export default function PublicDataImageBackfill() {
         const scanRatio = Math.min(visited / Math.max(totalPages, 1), 1);
         const foundRatio = targetIds.length ? foundTotal / targetIds.length : 1;
         setProgress(Math.min(98, Math.round(scanRatio * 55 + foundRatio * 43)));
-        setStage(
-          `사진 연결 ${foundTotal}/${targetIds.length}곳 · 이미지 API ${currentPage}/${totalPages}페이지`,
-        );
+        setStage(`사진 연결 ${foundTotal}/${targetIds.length}곳 · 통합 이미지 API ${currentPage}/${totalPages}페이지`);
         await delay(750, controller.signal);
       }
 
       await saveCursor(page > totalPages ? 1 : page);
       const finalStatus = await loadStatus();
       setProgress(100);
-      setStage("사진 보강 실행 완료");
+      setStage("자동 사진 보강 완료");
       setMessage(
-        `이번 실행에서 ${foundTotal}곳의 사진을 연결했습니다. API에 사진이 없는 가게 ${finalStatus?.withoutImage ?? remaining.size}곳은 기본 이미지로 표시하면 됩니다.`,
+        `이번 실행에서 ${foundTotal}곳을 연결했습니다. 남은 ${finalStatus?.withoutImage ?? remaining.size}곳은 아래 검색 링크로 확인해 직접 등록하면 됩니다.`,
       );
       window.dispatchEvent(new CustomEvent("mapforyou:images-updated"));
     } catch (error) {
@@ -220,15 +265,62 @@ export default function PublicDataImageBackfill() {
     controllerRef.current?.abort();
   }
 
+  function updateDraft(sourceId: string, field: keyof ManualDraft, value: string) {
+    setManualDrafts((current) => ({
+      ...current,
+      [sourceId]: {
+        imageUrl: current[sourceId]?.imageUrl ?? "",
+        sourceUrl: current[sourceId]?.sourceUrl ?? "",
+        attribution: current[sourceId]?.attribution ?? "",
+        [field]: value,
+      },
+    }));
+  }
+
+  async function saveManualImage(store: MissingStore) {
+    const draft = manualDrafts[store.sourceId];
+    if (!draft?.imageUrl.trim()) {
+      setMessage(`${store.name}: 이미지 URL을 먼저 입력해주세요.`);
+      return;
+    }
+
+    setSavingId(store.sourceId);
+    setMessage("");
+    try {
+      const updated = await saveImages({
+        [store.sourceId]: {
+          url: draft.imageUrl.trim(),
+          source: "manual_authorized",
+          attribution: draft.attribution.trim(),
+          sourceUrl: draft.sourceUrl.trim(),
+        },
+      });
+      if (!updated) throw new Error("이미지 저장 대상 가게를 찾지 못했습니다.");
+      setManualDrafts((current) => {
+        const next = { ...current };
+        delete next[store.sourceId];
+        return next;
+      });
+      setMessage(`${store.name} 사진을 Supabase에 저장했습니다.`);
+      window.dispatchEvent(new CustomEvent("mapforyou:images-updated"));
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "이미지 저장 실패");
+    } finally {
+      setSavingId("");
+    }
+  }
+
+  const missingStores = status.missingStores ?? [];
+
   return (
     <div style={{ maxWidth: 1180, margin: "20px auto 0", padding: "0 20px" }}>
       <section className="card" style={{ padding: 20 }}>
         <div className="section-heading" style={{ marginBottom: 14 }}>
           <div>
             <span>STORE PHOTOS</span>
-            <h2 style={{ marginBottom: 4 }}>기존·신규 가게 사진 보강</h2>
+            <h2 style={{ marginBottom: 4 }}>성수·홍대 사진 보강</h2>
             <p style={{ margin: 0, color: "var(--muted)", fontSize: 13 }}>
-              저장된 식당 ID로 공식 이미지 API를 조회해 사진 URL만 추가합니다. 메뉴와 주소는 변경하지 않습니다.
+              REDTABLE 식당 사진을 먼저 찾고, 없으면 같은 식당의 음식 사진을 대표 이미지로 연결합니다.
             </p>
           </div>
           <strong>{status.withImage ?? 0}/{status.total ?? 0}곳 연결</strong>
@@ -240,7 +332,7 @@ export default function PublicDataImageBackfill() {
             disabled={running || !status.withoutImage}
             onClick={() => void startBackfill()}
           >
-            {running ? "사진 자동 보강 중…" : `사진 없는 ${status.withoutImage ?? 0}곳 자동 보강`}
+            {running ? "식당·음식 사진 검색 중…" : `사진 없는 ${status.withoutImage ?? 0}곳 자동 보강`}
           </button>
           {running && <button className="text-button" onClick={stopBackfill}>즉시 중지</button>}
           <button className="ghost-button" disabled={running} onClick={() => void loadStatus()}>현황 새로고침</button>
@@ -258,6 +350,81 @@ export default function PublicDataImageBackfill() {
           </p>
         </div>
         {message && <div className="notice">{message}</div>}
+      </section>
+
+      <section className="card" style={{ padding: 20 }}>
+        <div className="section-heading" style={{ marginBottom: 14 }}>
+          <div>
+            <span>MANUAL RESEARCH</span>
+            <h2 style={{ marginBottom: 4 }}>남은 가게 직접 확인</h2>
+            <p style={{ margin: 0, color: "var(--muted)", fontSize: 13 }}>
+              검색 결과를 열어 공식 계정·사장 제공·직접 촬영 등 사용 가능한 사진만 등록합니다.
+            </p>
+          </div>
+          <strong>최대 30곳 표시</strong>
+        </div>
+
+        {!missingStores.length ? (
+          <div className="empty-state compact"><strong>직접 확인할 가게가 없습니다.</strong></div>
+        ) : (
+          <div style={{ display: "grid", gap: 12 }}>
+            {missingStores.map((store) => {
+              const draft = manualDrafts[store.sourceId] ?? { imageUrl: "", sourceUrl: "", attribution: "" };
+              return (
+                <article key={store.sourceId} style={{ padding: 16, border: "1px solid var(--line)", borderRadius: 16 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", gap: 14, alignItems: "flex-start", flexWrap: "wrap" }}>
+                    <div>
+                      <strong style={{ display: "block", marginBottom: 5 }}>{store.name}</strong>
+                      <span style={{ color: "var(--muted)", fontSize: 12 }}>{store.address}</span>
+                    </div>
+                    <div style={{ display: "flex", gap: 7, flexWrap: "wrap" }}>
+                      <a className="mini-button" href={googleMapsUrl(store)} target="_blank" rel="noreferrer">Google Maps</a>
+                      <a className="mini-button" href={googleImageUrl(store)} target="_blank" rel="noreferrer">이미지 검색</a>
+                      <a className="mini-button" href={officialSearchUrl(store)} target="_blank" rel="noreferrer">공식 계정 검색</a>
+                    </div>
+                  </div>
+
+                  <div className="form-grid" style={{ marginTop: 14 }}>
+                    <label className="field field-wide">
+                      <span>사용 가능한 이미지 직접 URL</span>
+                      <input
+                        value={draft.imageUrl}
+                        onChange={(event) => updateDraft(store.sourceId, "imageUrl", event.target.value)}
+                        placeholder="https://...jpg"
+                      />
+                    </label>
+                    <label className="field">
+                      <span>원본 페이지 URL</span>
+                      <input
+                        value={draft.sourceUrl}
+                        onChange={(event) => updateDraft(store.sourceId, "sourceUrl", event.target.value)}
+                        placeholder="공식 홈페이지·인스타 게시물"
+                      />
+                    </label>
+                    <label className="field">
+                      <span>출처 표시</span>
+                      <input
+                        value={draft.attribution}
+                        onChange={(event) => updateDraft(store.sourceId, "attribution", event.target.value)}
+                        placeholder="매장 제공 / 직접 촬영 / 출처명"
+                      />
+                    </label>
+                  </div>
+
+                  <div className="action-row" style={{ marginTop: 12 }}>
+                    <button
+                      className="primary-button"
+                      disabled={savingId === store.sourceId || !draft.imageUrl.trim()}
+                      onClick={() => void saveManualImage(store)}
+                    >
+                      {savingId === store.sourceId ? "저장 중…" : "이 사진 저장"}
+                    </button>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        )}
       </section>
     </div>
   );
