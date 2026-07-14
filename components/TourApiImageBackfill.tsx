@@ -85,7 +85,7 @@ export default function TourApiImageBackfill() {
     const response = await fetch("/api/tourapi/images", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ limit: 6 }),
+      body: JSON.stringify({ limit: 4 }),
       signal,
     });
     const data = (await response.json()) as BatchResult;
@@ -111,9 +111,10 @@ export default function TourApiImageBackfill() {
     setSamples([]);
     setStats({ processed: 0, matched: 0, saved: 0, noMatch: 0, noImage: 0 });
 
+    let stoppedForNoProgress = false;
     try {
       let remaining = latest.remainingUnchecked;
-      let emptyRuns = 0;
+      let stagnantRuns = 0;
       while (remaining > 0) {
         setStage(`TourAPI에서 ${remaining}곳의 음식·대표 이미지를 확인 중`);
         const data = await runBatch(controller.signal);
@@ -128,16 +129,22 @@ export default function TourApiImageBackfill() {
         }));
         setSamples((current) => [...(data.samples ?? []), ...current].slice(0, 12));
 
-        const processed = Number(data.processed ?? 0);
-        remaining = Number(data.remainingUnchecked ?? 0);
-        if (!processed) emptyRuns += 1;
-        else emptyRuns = 0;
-        if (emptyRuns >= 2) break;
+        const nextRemaining = Number(data.remainingUnchecked ?? 0);
+        if (nextRemaining >= remaining) stagnantRuns += 1;
+        else stagnantRuns = 0;
+        remaining = nextRemaining;
+
+        if (stagnantRuns >= 2) {
+          stoppedForNoProgress = true;
+          break;
+        }
       }
 
       const finalStatus = await loadStatus();
-      setStage("TourAPI 이미지 보강 완료");
-      setMessage(`TourAPI 확인을 마쳤습니다. 현재 사진 없는 가게는 ${finalStatus?.missing ?? 0}곳입니다.`);
+      setStage(stoppedForNoProgress ? "TourAPI 일부 가게 처리 중단" : "TourAPI 이미지 보강 완료");
+      setMessage(stoppedForNoProgress
+        ? `같은 가게에서 API 오류가 반복돼 자동 실행을 멈췄습니다. 현재 대기 ${finalStatus?.remainingUnchecked ?? 0}곳입니다.`
+        : `TourAPI 확인을 마쳤습니다. 현재 사진 없는 가게는 ${finalStatus?.missing ?? 0}곳입니다.`);
       window.dispatchEvent(new CustomEvent("mapforyou:images-updated"));
     } catch (error) {
       if (isAbortError(error)) {
@@ -181,7 +188,7 @@ export default function TourApiImageBackfill() {
       <section className="card" style={{ padding: 20 }}>
         <div className="section-heading" style={{ marginBottom: 14 }}>
           <div>
-            <span>TOUR API · SECOND SOURCE</span>
+            <span>STEP 2 · TOUR API</span>
             <h2 style={{ marginBottom: 4 }}>한국관광공사 이미지 보강</h2>
             <p style={{ margin: 0, color: "var(--muted)", fontSize: 13 }}>
               REDTABLE에 사진이 없는 성수·홍대 가게만 음식메뉴 이미지 → 대표 이미지 → 일반 이미지 순으로 확인합니다.
