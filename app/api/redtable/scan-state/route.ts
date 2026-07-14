@@ -7,7 +7,7 @@ const PREFIX = "redtable_menu_cursor:";
 
 function normalizeScope(value: unknown) {
   const scope = String(value ?? "").trim().toLowerCase();
-  if (!scope || scope.length > 120 || !/^[a-z0-9:_-]+$/.test(scope)) return null;
+  if (!scope || scope.length > 120 || !/^[\p{L}\p{N}:_-]+$/u.test(scope)) return null;
   return scope;
 }
 
