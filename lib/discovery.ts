@@ -33,6 +33,9 @@ export type DiscoveryRestaurant = {
   regionKey: string;
   searchKeyword: string;
   imageUrl: string;
+  imageSource: string;
+  imageAttribution: string;
+  imageSourceUrl: string;
   updatedAt: string;
   menus: DiscoveryMenu[];
 };
@@ -57,6 +60,9 @@ type RestaurantRow = {
   region_key: string | null;
   search_keyword: string | null;
   image_url: string | null;
+  image_source: string | null;
+  image_attribution: string | null;
+  image_source_url: string | null;
   updated_at: string;
 };
 
@@ -70,7 +76,7 @@ type MenuRow = {
   is_specialty: boolean | null;
 };
 
-const RESTAURANT_COLUMNS = "source_id,name,name_en,name_ja,road_address,road_address_en,road_address_ja,address,latitude,longitude,phone,category,license_type,introduction,introduction_en,introduction_ja,region_key,search_keyword,image_url,updated_at";
+const RESTAURANT_COLUMNS = "source_id,name,name_en,name_ja,road_address,road_address_en,road_address_ja,address,latitude,longitude,phone,category,license_type,introduction,introduction_en,introduction_ja,region_key,search_keyword,image_url,image_source,image_attribution,image_source_url,updated_at";
 
 function optionalNumber(value: number | string | null) {
   const parsed = Number(value);
@@ -98,6 +104,9 @@ function mapRestaurant(row: RestaurantRow, menus: DiscoveryMenu[]): DiscoveryRes
     regionKey: row.region_key ?? "",
     searchKeyword: row.search_keyword ?? "",
     imageUrl: row.image_url ?? "",
+    imageSource: row.image_source ?? "",
+    imageAttribution: row.image_attribution ?? "",
+    imageSourceUrl: row.image_source_url ?? "",
     updatedAt: row.updated_at,
     menus,
   };
