@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "leaflet/dist/leaflet.css";
 import "./globals.css";
+import "./discovery.css";
 
 export const metadata: Metadata = {
   title: "MapForYou | Translated Seoul Menus",
