@@ -1,13 +1,13 @@
-import FoursquareInstagramFinder from "@/components/NaverInstagramFinder";
+import NaverPlaceInstagramFinder from "@/components/NaverInstagramFinder";
 import PublicDataTabs from "@/components/PublicDataTabs";
 
-export const metadata = { title: "인스타그램 자동 수집 | MapForYou" };
+export const metadata = { title: "네이버 장소 인스타 자동 확인 | MapForYou" };
 
 export default function PublicDataInstagramPage() {
   return (
     <>
       <PublicDataTabs active="instagram" />
-      <FoursquareInstagramFinder />
+      <NaverPlaceInstagramFinder />
     </>
   );
 }
