@@ -123,7 +123,7 @@ function mapMenu(row: MenuRow): DiscoveryMenu {
   };
 }
 
-export async function loadDiscoveryRestaurants(limit = 500): Promise<DiscoveryRestaurant[]> {
+export async function loadDiscoveryRestaurants(limit = 1000): Promise<DiscoveryRestaurant[]> {
   const supabase = getSupabaseServerClient();
   if (!supabase) return [];
 
