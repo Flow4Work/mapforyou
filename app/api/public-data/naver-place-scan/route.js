@@ -51,10 +51,16 @@ function compact(value) {
     .replace(/[^0-9a-z가-힣]/g, "");
 }
 
+function cleanSearchName(value) {
+  return String(value || "")
+    .replace(/[()[\]{}]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 function baseName(value) {
   return compact(
-    String(value || "")
-      .replace(/\([^)]*\)|\[[^\]]*\]/g, " ")
+    cleanSearchName(value)
       .replace(/(?:성수점|홍대점|연남점|서울숲점|본점|직영점|지점)$/g, ""),
   );
 }
@@ -73,7 +79,7 @@ function selectedRegions(region) {
 }
 
 function naverSearchUrl(row) {
-  const query = `${row.name} ${row.road_address || row.address || ""}`.trim();
+  const query = `${cleanSearchName(row.name)} ${row.road_address || row.address || ""}`.trim();
   return `https://map.naver.com/p/search/${encodeURIComponent(query)}`;
 }
 
@@ -85,6 +91,7 @@ function extractPlaceId(value) {
     // Keep original text.
   }
   const patterns = [
+    /\/place\/(\d{5,})(?:[/?#]|$)/i,
     /\/entry\/place\/(\d{5,})/i,
     /pcmap\.place\.naver\.com\/(?:restaurant|cafe|place|hospital|hairshop|nailshop|accommodation)\/(\d{5,})/i,
     /[?&](?:placeId|id)=(\d{5,})/i,
@@ -117,7 +124,7 @@ function unwrapExternalUrl(rawValue, baseUrl) {
   if (!raw || /^(javascript:|mailto:|tel:|data:)/i.test(raw)) return null;
   try {
     let url = new URL(raw, baseUrl);
-    for (let depth = 0; depth < 2; depth += 1) {
+    for (let depth = 0; depth < 3; depth += 1) {
       if (!/(^|\.)naver\.com$|(^|\.)naver\.me$/i.test(url.hostname)) break;
       const nested = ["url", "u", "target", "link", "redirect", "redirectUrl"]
         .map((key) => url.searchParams.get(key))
@@ -162,8 +169,7 @@ async function waitForSearchFrame(page, timeoutMs = 8_000) {
     const frame = page.frames().find((item) => item.url().includes("pcmap.place.naver.com/place/list"));
     if (frame) {
       try {
-        const hasResults = await frame.evaluate(() => Boolean(document.body?.innerText?.trim()));
-        if (hasResults) return frame;
+        if ((await frame.evaluate(() => document.body?.innerText || "")).trim()) return frame;
       } catch {
         // Retry while loading.
       }
@@ -174,45 +180,34 @@ async function waitForSearchFrame(page, timeoutMs = 8_000) {
 }
 
 async function markBestResult(frame, row) {
-  const fullName = compact(row.name);
+  const fullName = compact(cleanSearchName(row.name));
   const shortName = baseName(row.name);
   const hints = addressHints(row.road_address || row.address || "");
   const phone = String(row.phone || "").replace(/\D/g, "");
 
   return frame.evaluate(({ fullName, shortName, hints, phone }) => {
-    const normalize = (value) =>
-      String(value || "")
-        .toLocaleLowerCase("ko-KR")
-        .replace(/&amp;/gi, "&")
-        .replace(/[^0-9a-z가-힣]/g, "");
+    const normalize = (value) => String(value || "")
+      .toLocaleLowerCase("ko-KR")
+      .replace(/&amp;/gi, "&")
+      .replace(/[^0-9a-z가-힣]/g, "");
 
-    const anchors = Array.from(document.querySelectorAll("a"));
     let bestAnchor = null;
     let bestScore = 0;
     let bestText = "";
 
-    for (const anchor of anchors) {
+    for (const anchor of Array.from(document.querySelectorAll("a[role='button'], a[href]"))) {
       const title = (anchor.innerText || anchor.textContent || "").replace(/\s+/g, " ").trim();
       if (!title || title.length > 160) continue;
-
-      let container = anchor.closest("li");
-      if (!container) {
-        let current = anchor.parentElement;
-        for (let depth = 0; current && depth < 5; depth += 1, current = current.parentElement) {
-          const currentText = (current.innerText || "").replace(/\s+/g, " ").trim();
-          if (currentText.length >= title.length && currentText.length <= 600) container = current;
-        }
-      }
-
+      const container = anchor.closest("li") || anchor.parentElement;
       const containerText = (container?.innerText || title).replace(/\s+/g, " ").trim();
       const titleBlob = normalize(title);
       const containerBlob = normalize(containerText);
       let score = 0;
 
-      if (fullName.length >= 2 && titleBlob.includes(fullName)) score += 100;
-      else if (fullName.length >= 2 && containerBlob.includes(fullName)) score += 80;
-      else if (shortName.length >= 2 && titleBlob.includes(shortName)) score += 55;
-      else if (shortName.length >= 2 && containerBlob.includes(shortName)) score += 45;
+      if (fullName.length >= 2 && titleBlob.includes(fullName)) score += 110;
+      else if (fullName.length >= 2 && containerBlob.includes(fullName)) score += 90;
+      else if (shortName.length >= 2 && titleBlob.includes(shortName)) score += 60;
+      else if (shortName.length >= 2 && containerBlob.includes(shortName)) score += 50;
       else continue;
 
       score += Math.min(30, hints.filter((hint) => containerBlob.includes(hint)).length * 10);
@@ -229,7 +224,7 @@ async function markBestResult(frame, row) {
     document.querySelectorAll("[data-mapforyou-match]").forEach((element) => {
       element.removeAttribute("data-mapforyou-match");
     });
-    if (!bestAnchor || bestScore < 55) return { marked: false, score: bestScore, text: bestText };
+    if (!bestAnchor || bestScore < 60) return { marked: false, score: bestScore, text: bestText };
     bestAnchor.setAttribute("data-mapforyou-match", "true");
     return { marked: true, score: bestScore, text: bestText };
   }, { fullName, shortName, hints, phone });
@@ -238,10 +233,8 @@ async function markBestResult(frame, row) {
 async function clickBestSearchResult(page, row) {
   const frame = await waitForSearchFrame(page);
   if (!frame) return { clicked: false, score: 0, text: "검색 결과 iframe을 불러오지 못함" };
-
   const marked = await markBestResult(frame, row);
   if (!marked.marked) return { clicked: false, score: marked.score, text: marked.text };
-
   const element = await frame.$("[data-mapforyou-match='true']");
   if (!element) return { clicked: false, score: marked.score, text: marked.text };
   await element.click();
@@ -251,43 +244,50 @@ async function clickBestSearchResult(page, row) {
 async function waitForPlaceId(page, timeoutMs = 9_000) {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
-    const values = [page.url(), ...page.frames().map((frame) => frame.url())];
-    for (const value of values) {
+    for (const value of [page.url(), ...page.frames().map((frame) => frame.url())]) {
       const placeId = extractPlaceId(value);
       if (placeId) return placeId;
     }
-    await delay(300);
+    await delay(250);
   }
   return null;
 }
 
-async function detailFrames(page, placeId) {
-  const deadline = Date.now() + 8_000;
+async function waitForDetailFrames(page, placeId, timeoutMs = 8_000) {
+  const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
     const frames = page.frames().filter((frame) => {
       const url = frame.url();
-      return url.includes(`/${placeId}/`) || url.includes(`/entry/place/${placeId}`);
+      return url.includes(`/${placeId}/`) || url.includes(`/place/${placeId}`);
     });
     if (frames.length) return frames;
     await delay(250);
   }
-  return page.frames();
+  return [];
 }
 
 async function collectDetailLinks(page, placeId, placeUrl) {
+  let frames = await waitForDetailFrames(page, placeId);
+  if (!frames.length) {
+    await page.goto(placeUrl, { waitUntil: "domcontentloaded", timeout: NAVIGATION_TIMEOUT_MS });
+    await delay(1_500);
+    frames = await waitForDetailFrames(page, placeId);
+  }
+
   const links = [];
   const htmlChunks = [];
-  const frames = await detailFrames(page, placeId);
-
-  for (const frame of frames) {
+  for (const frame of frames.length ? frames : page.frames()) {
     try {
       const frameLinks = await frame.evaluate(() =>
         Array.from(document.querySelectorAll("a[href]"))
-          .slice(0, 1000)
-          .map((anchor) => anchor.href),
+          .slice(0, 1200)
+          .map((anchor) => ({
+            href: anchor.href,
+            text: (anchor.innerText || anchor.textContent || "").replace(/\s+/g, " ").trim().slice(0, 200),
+          })),
       );
       links.push(...frameLinks);
-      htmlChunks.push((await frame.content()).slice(0, 700_000));
+      htmlChunks.push((await frame.content()).slice(0, 800_000));
     } catch {
       // Ignore detached frames.
     }
@@ -297,14 +297,19 @@ async function collectDetailLinks(page, placeId, placeUrl) {
   const instagramMatches = decodedHtml.match(/https?:\/\/(?:www\.)?instagram\.com\/[a-z0-9._]+/gi) || [];
 
   let directProfile = null;
-  let officialWebsite = null;
-  for (const raw of [...links, ...instagramMatches]) {
-    const external = unwrapExternalUrl(raw, placeUrl);
+  const websiteCandidates = [];
+  for (const item of links) {
+    const external = unwrapExternalUrl(item.href, placeUrl);
     if (!external) continue;
     directProfile ||= normalizeInstagramProfile(external);
-    if (!officialWebsite && isPublicWebsite(external)) officialWebsite = external;
+    if (isPublicWebsite(external)) {
+      websiteCandidates.push({ url: external, priority: /홈페이지|website|공식/i.test(item.text) ? 1 : 0 });
+    }
   }
-  return { directProfile, officialWebsite };
+  for (const match of instagramMatches) directProfile ||= normalizeInstagramProfile(match);
+
+  websiteCandidates.sort((a, b) => b.priority - a.priority);
+  return { directProfile, officialWebsite: websiteCandidates[0]?.url || null };
 }
 
 async function websiteInstagram(website) {
@@ -320,7 +325,7 @@ async function websiteInstagram(website) {
       },
     });
     if (!response.ok || !String(response.headers.get("content-type") || "").includes("text/html")) return null;
-    const html = (await response.text()).slice(0, 1_000_000).replace(/\\u002F/gi, "/").replace(/\\\//g, "/");
+    const html = (await response.text()).slice(0, 1_200_000).replace(/\\u002F/gi, "/").replace(/\\\//g, "/");
     const matches = html.match(/https?:\/\/(?:www\.)?instagram\.com\/[a-z0-9._]+/gi) || [];
     for (const match of matches) {
       const profile = normalizeInstagramProfile(match);
@@ -335,7 +340,7 @@ async function websiteInstagram(website) {
 async function inspectStore(page, row) {
   const searchUrl = naverSearchUrl(row);
   await page.goto(searchUrl, { waitUntil: "domcontentloaded", timeout: NAVIGATION_TIMEOUT_MS });
-  await delay(1_800);
+  await delay(1_500);
   if (await pageBlocked(page)) throw new NaverBlockedError();
 
   const clicked = await clickBestSearchResult(page, row);
@@ -357,11 +362,9 @@ async function inspectStore(page, row) {
   }
 
   const placeUrl = `https://map.naver.com/p/entry/place/${placeId}`;
-  await page.goto(placeUrl, { waitUntil: "domcontentloaded", timeout: NAVIGATION_TIMEOUT_MS });
-  await delay(1_600);
   if (await pageBlocked(page)) throw new NaverBlockedError();
-
   const { directProfile, officialWebsite } = await collectDetailLinks(page, placeId, placeUrl);
+
   if (directProfile) {
     return {
       placeId, placeUrl, searchUrl, officialWebsite, instagramUrl: directProfile.url,
@@ -425,13 +428,13 @@ export async function POST(request) {
     const body = await request.json();
     const region = ACTIVE_REGIONS.includes(body.region) ? body.region : "all";
     const limit = Math.min(Math.max(Number(body.limit) || MAX_BATCH_SIZE, 1), MAX_BATCH_SIZE);
-    const targetStatus = body.retry ? "not_found" : "unchecked";
+    const targetStatuses = body.retry ? ["not_found", "candidate"] : ["unchecked"];
 
     const { data, error } = await supabase
       .from("public_data_restaurants")
       .select("source_id,name,road_address,address,latitude,longitude,phone,category,region_key")
       .in("region_key", selectedRegions(region))
-      .eq("instagram_status", targetStatus)
+      .in("instagram_status", targetStatuses)
       .order(body.retry ? "instagram_checked_at" : "created_at", { ascending: true, nullsFirst: true })
       .limit(limit);
     if (error) throw error;
@@ -512,7 +515,7 @@ export async function POST(request) {
         processed += 1;
         if (result.placeId) placeResolved += 1;
         if (hasInstagram) found += 1;
-        await delay(700);
+        await delay(650);
       }
     } finally {
       if (page) await page.close().catch(() => undefined);
