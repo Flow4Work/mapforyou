@@ -179,36 +179,6 @@ async function findBestResult(frame, row) {
       .replace(/&amp;/gi, "&")
       .replace(/[^0-9a-z가-힣]/g, "");
 
-    const findBusinessId = (element) => {
-      const nodes = [];
-      let node = element;
-      for (let depth = 0; node && depth < 6; depth += 1, node = node.parentElement) nodes.push(node);
-      const seen = new WeakSet();
-      let found = null;
-      const walk = (value, depth) => {
-        if (found || depth > 8 || value == null || (typeof value !== "object" && typeof value !== "function")) return;
-        if (seen.has(value)) return;
-        seen.add(value);
-        for (const key of Object.keys(value)) {
-          let child;
-          try { child = value[key]; } catch { continue; }
-          if (/^(?:businessId|placeId)$/i.test(key) && /^\d{5,}$/.test(String(child || ""))) {
-            found = String(child);
-            return;
-          }
-          if (child && (typeof child === "object" || typeof child === "function")) walk(child, depth + 1);
-          if (found) return;
-        }
-      };
-      for (const item of nodes) {
-        for (const key of Object.keys(item).filter((key) => key.startsWith("__react"))) {
-          walk(item[key], 0);
-          if (found) return found;
-        }
-      }
-      return null;
-    };
-
     let best = null;
     for (const anchor of Array.from(document.querySelectorAll("a[role='button'],a[href]"))) {
       const title = (anchor.innerText || anchor.textContent || "").replace(/\s+/g, " ").trim();
@@ -231,9 +201,52 @@ async function findBestResult(frame, row) {
       if (!best || score > best.score) best = { anchor, score, text: text.slice(0, 500) };
     }
 
-    if (!best || best.score < 60) return { score: best?.score || 0, text: best?.text || "", placeId: null };
-    return { score: best.score, text: best.text, placeId: findBusinessId(best.anchor) };
+    document.querySelectorAll("[data-mapforyou-best]").forEach((element) => element.removeAttribute("data-mapforyou-best"));
+    if (!best || best.score < 60) return { score: best?.score || 0, text: best?.text || "", marked: false };
+    best.anchor.setAttribute("data-mapforyou-best", "true");
+    return { score: best.score, text: best.text, marked: true };
   }, { full, short, hints, phone });
+}
+
+async function reactBusinessId(frame) {
+  return frame.evaluate(() => {
+    const anchor = document.querySelector("[data-mapforyou-best='true']");
+    if (!anchor) return null;
+
+    const findings = [];
+    const seen = new WeakSet();
+    const walk = (value, path, depth) => {
+      if (depth > 8 || findings.length > 400 || value == null) return;
+      if (typeof value !== "object" && typeof value !== "function") return;
+      if (seen.has(value)) return;
+      seen.add(value);
+      for (const key of Object.keys(value)) {
+        let child;
+        try { child = value[key]; } catch { continue; }
+        const childPath = `${path}.${key}`;
+        if (/^(?:businessId|placeId)$/i.test(key) && /^\d{5,}$/.test(String(child || ""))) {
+          findings.push({ path: childPath, value: String(child) });
+        } else if (key === "id" && /(?:\.data|directionData|snsShareInfo)/i.test(path) && /^\d{5,}$/.test(String(child || ""))) {
+          findings.push({ path: childPath, value: String(child) });
+        }
+        if (child && (typeof child === "object" || typeof child === "function")) walk(child, childPath, depth + 1);
+      }
+    };
+
+    const nodes = [];
+    let node = anchor;
+    for (let depth = 0; node && depth < 6; depth += 1, node = node.parentElement) nodes.push(node);
+    for (const [index, item] of nodes.entries()) {
+      for (const key of Object.keys(item).filter((name) => name.startsWith("__react"))) {
+        walk(item[key], `node${index}.${key}`, 0);
+      }
+    }
+
+    const preferred = findings.find((item) => /businessId/i.test(item.path))
+      || findings.find((item) => /placeId/i.test(item.path))
+      || findings[0];
+    return preferred?.value || null;
+  });
 }
 
 async function resolvePlaceId(page, row) {
@@ -245,7 +258,8 @@ async function resolvePlaceId(page, row) {
   const frame = await waitSearchFrame(page);
   if (!frame) return { placeId: null, searchUrl: url, score: 0, text: "검색 결과를 불러오지 못함" };
   const result = await findBestResult(frame, row);
-  return { placeId: result.placeId, searchUrl: url, score: result.score, text: result.text };
+  const placeId = result.marked ? await reactBusinessId(frame) : null;
+  return { placeId, searchUrl: url, score: result.score, text: result.text };
 }
 
 async function waitDetailFrame(page, placeId, timeoutMs = 9_000) {
