@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import RestaurantMedia from "@/components/RestaurantMedia";
 import type { DiscoveryRestaurant } from "@/lib/discovery";
 import {
@@ -22,12 +22,19 @@ export default function RestaurantCover({
 }) {
   const category = broadCategory(store);
   const [failed, setFailed] = useState(false);
+  const stackRef = useRef<HTMLDivElement>(null);
   const hasImage = Boolean(store.imageUrl) && !failed;
   const isTourApiImage = store.imageSource.startsWith("tourapi_");
   const isEditableTourApiImage = store.imageSource.includes("type1");
   const preserveOriginal = isTourApiImage && !isEditableTourApiImage;
 
   useEffect(() => setFailed(false), [store.imageUrl]);
+
+  useEffect(() => {
+    if (compact) return;
+    const scroller = stackRef.current?.closest(".restaurant-detail-scroll");
+    if (scroller instanceof HTMLElement) scroller.scrollTo({ top: 0, behavior: "auto" });
+  }, [store.id, compact]);
 
   const cover = (
     <div
@@ -88,7 +95,7 @@ export default function RestaurantCover({
   if (compact) return cover;
 
   return (
-    <div className="restaurant-cover-stack">
+    <div className="restaurant-cover-stack" ref={stackRef}>
       {cover}
       <RestaurantMedia store={store} language={language} />
     </div>
