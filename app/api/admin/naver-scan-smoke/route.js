@@ -8,7 +8,7 @@ export async function GET(request) {
   const internalRequest = new Request(new URL("/api/public-data/naver-place-scan", request.url), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ region: "seongsu", limit: 1, retry: false }),
+    body: JSON.stringify({ region: "seongsu", limit: 1, sourceId: "309214" }),
   });
   return runNaverPlaceScan(internalRequest);
 }
