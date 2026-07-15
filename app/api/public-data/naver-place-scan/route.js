@@ -167,7 +167,7 @@ async function waitSearchFrame(page, timeoutMs = 8_000) {
   return null;
 }
 
-async function markBestResult(frame, row) {
+async function findBestResult(frame, row) {
   const full = compact(cleanName(row.name));
   const short = shortName(row.name);
   const hints = addressHints(row.road_address || row.address || "");
@@ -178,6 +178,36 @@ async function markBestResult(frame, row) {
       .toLocaleLowerCase("ko-KR")
       .replace(/&amp;/gi, "&")
       .replace(/[^0-9a-z가-힣]/g, "");
+
+    const findBusinessId = (element) => {
+      const nodes = [];
+      let node = element;
+      for (let depth = 0; node && depth < 6; depth += 1, node = node.parentElement) nodes.push(node);
+      const seen = new WeakSet();
+      let found = null;
+      const walk = (value, depth) => {
+        if (found || depth > 8 || value == null || (typeof value !== "object" && typeof value !== "function")) return;
+        if (seen.has(value)) return;
+        seen.add(value);
+        for (const key of Object.keys(value)) {
+          let child;
+          try { child = value[key]; } catch { continue; }
+          if (/^(?:businessId|placeId)$/i.test(key) && /^\d{5,}$/.test(String(child || ""))) {
+            found = String(child);
+            return;
+          }
+          if (child && (typeof child === "object" || typeof child === "function")) walk(child, depth + 1);
+          if (found) return;
+        }
+      };
+      for (const item of nodes) {
+        for (const key of Object.keys(item).filter((key) => key.startsWith("__react"))) {
+          walk(item[key], 0);
+          if (found) return found;
+        }
+      }
+      return null;
+    };
 
     let best = null;
     for (const anchor of Array.from(document.querySelectorAll("a[role='button'],a[href]"))) {
@@ -201,45 +231,21 @@ async function markBestResult(frame, row) {
       if (!best || score > best.score) best = { anchor, score, text: text.slice(0, 500) };
     }
 
-    document.querySelectorAll("[data-mapforyou-match]").forEach((element) => element.removeAttribute("data-mapforyou-match"));
-    if (!best || best.score < 60) return { marked: false, score: best?.score || 0, text: best?.text || "" };
-    best.anchor.setAttribute("data-mapforyou-match", "true");
-    return { marked: true, score: best.score, text: best.text };
+    if (!best || best.score < 60) return { score: best?.score || 0, text: best?.text || "", placeId: null };
+    return { score: best.score, text: best.text, placeId: findBusinessId(best.anchor) };
   }, { full, short, hints, phone });
 }
 
 async function resolvePlaceId(page, row) {
   const url = searchUrl(row);
   await page.goto(url, { waitUntil: "domcontentloaded", timeout: NAV_TIMEOUT_MS });
-  await delay(1_200);
+  await delay(1_300);
   if (await blocked(page)) throw new NaverBlockedError();
 
   const frame = await waitSearchFrame(page);
   if (!frame) return { placeId: null, searchUrl: url, score: 0, text: "검색 결과를 불러오지 못함" };
-  const marked = await markBestResult(frame, row);
-  if (!marked.marked) return { placeId: null, searchUrl: url, score: marked.score, text: marked.text };
-  const element = await frame.$("[data-mapforyou-match='true']");
-  if (!element) return { placeId: null, searchUrl: url, score: marked.score, text: marked.text };
-
-  const markerPromise = page.waitForResponse(
-    (response) => /\/p\/api\/place\/(?:marker|type)\/\d{5,}/i.test(response.url()),
-    { timeout: 12_000 },
-  ).catch(() => null);
-  await element.click();
-  const markerResponse = await markerPromise;
-  let placeId = extractPlaceId(markerResponse?.url() || "");
-
-  if (!placeId) {
-    const deadline = Date.now() + 5_000;
-    while (Date.now() < deadline && !placeId) {
-      for (const candidate of [page.url(), ...page.frames().map((item) => item.url())]) {
-        placeId ||= extractPlaceId(candidate);
-      }
-      if (!placeId) await delay(250);
-    }
-  }
-
-  return { placeId, searchUrl: url, score: marked.score, text: marked.text };
+  const result = await findBestResult(frame, row);
+  return { placeId: result.placeId, searchUrl: url, score: result.score, text: result.text };
 }
 
 async function waitDetailFrame(page, placeId, timeoutMs = 9_000) {
