@@ -253,25 +253,42 @@ async function waitForPlaceId(page, timeoutMs = 9_000) {
   return null;
 }
 
-async function waitForDetailFrames(page, placeId, timeoutMs = 8_000) {
+async function waitForReadyDetailFrames(page, placeId, timeoutMs = 9_000) {
   const deadline = Date.now() + timeoutMs;
+  let latestFrames = [];
+
   while (Date.now() < deadline) {
-    const frames = page.frames().filter((frame) => {
+    latestFrames = page.frames().filter((frame) => {
       const url = frame.url();
       return url.includes(`/${placeId}/`) || url.includes(`/place/${placeId}`);
     });
-    if (frames.length) return frames;
+
+    for (const frame of latestFrames) {
+      try {
+        const ready = await frame.evaluate(() => {
+          const text = (document.body?.innerText || "").replace(/\s+/g, " ").trim();
+          const externalLink = document.querySelector(
+            "a[href*='instagram.com'], a[href*='facebook.com'], a[target='_blank'][href^='http']",
+          );
+          return Boolean(externalLink) || (text.length > 250 && /주소|전화번호|홈페이지|영업시간/.test(text));
+        });
+        if (ready) return latestFrames;
+      } catch {
+        // Retry while detail frame is rendering.
+      }
+    }
+
     await delay(250);
   }
-  return [];
+
+  return latestFrames;
 }
 
 async function collectDetailLinks(page, placeId, placeUrl) {
-  let frames = await waitForDetailFrames(page, placeId);
+  let frames = await waitForReadyDetailFrames(page, placeId);
   if (!frames.length) {
     await page.goto(placeUrl, { waitUntil: "domcontentloaded", timeout: NAVIGATION_TIMEOUT_MS });
-    await delay(1_500);
-    frames = await waitForDetailFrames(page, placeId);
+    frames = await waitForReadyDetailFrames(page, placeId);
   }
 
   const links = [];
@@ -280,14 +297,14 @@ async function collectDetailLinks(page, placeId, placeUrl) {
     try {
       const frameLinks = await frame.evaluate(() =>
         Array.from(document.querySelectorAll("a[href]"))
-          .slice(0, 1200)
+          .slice(0, 1500)
           .map((anchor) => ({
             href: anchor.href,
             text: (anchor.innerText || anchor.textContent || "").replace(/\s+/g, " ").trim().slice(0, 200),
           })),
       );
       links.push(...frameLinks);
-      htmlChunks.push((await frame.content()).slice(0, 800_000));
+      htmlChunks.push((await frame.content()).slice(0, 900_000));
     } catch {
       // Ignore detached frames.
     }
@@ -340,7 +357,7 @@ async function websiteInstagram(website) {
 async function inspectStore(page, row) {
   const searchUrl = naverSearchUrl(row);
   await page.goto(searchUrl, { waitUntil: "domcontentloaded", timeout: NAVIGATION_TIMEOUT_MS });
-  await delay(1_500);
+  await delay(1_300);
   if (await pageBlocked(page)) throw new NaverBlockedError();
 
   const clicked = await clickBestSearchResult(page, row);
