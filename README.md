@@ -44,3 +44,5 @@ SUPABASE_SERVICE_ROLE_KEY=...
 npm install
 npm run dev
 ```
+
+<!-- redeploy-trigger: 2026-07-16T02:55:11+09:00 -->
