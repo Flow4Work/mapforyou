@@ -52,6 +52,15 @@ create table if not exists public.public_data_restaurants (
   license_type text,
   introduction text,
   image_url text,
+  instagram_url text,
+  instagram_username text,
+  instagram_status text not null default 'unchecked'
+    check (instagram_status in ('unchecked', 'candidate', 'verified', 'not_found', 'rejected')),
+  instagram_source text,
+  instagram_confidence integer,
+  instagram_candidates jsonb not null default '[]'::jsonb,
+  instagram_search_query text,
+  instagram_checked_at timestamptz,
   region_key text,
   search_keyword text,
   publish_status text not null default 'draft' check (publish_status in ('draft', 'published', 'needs_recheck')),
@@ -96,6 +105,8 @@ create table if not exists public.app_settings (
 
 create index if not exists public_data_restaurants_region_idx on public.public_data_restaurants(region_key);
 create index if not exists public_data_restaurants_publish_idx on public.public_data_restaurants(publish_status);
+create index if not exists public_data_restaurants_instagram_queue_idx
+  on public.public_data_restaurants(region_key, instagram_status, instagram_checked_at);
 create index if not exists public_data_menus_restaurant_idx on public.public_data_menus(restaurant_id);
 create index if not exists public_data_runs_started_idx on public.public_data_collection_runs(started_at desc);
 
