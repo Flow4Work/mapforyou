@@ -89,6 +89,10 @@ function elapsedLabel(seconds: number) {
   return `${Math.floor(seconds / 60)}분 ${seconds % 60}초`;
 }
 
+function completedCount(status: StatusResponse) {
+  return Math.max(0, Number(status.total || 0) - Number(status.unchecked || 0));
+}
+
 export default function NaverPlaceInstagramFinderV3() {
   const [region, setRegion] = useState("all");
   const [status, setStatus] = useState<StatusResponse>({});
@@ -103,6 +107,8 @@ export default function NaverPlaceInstagramFinderV3() {
   const [phase, setPhase] = useState("");
   const stopRequestedRef = useRef(false);
   const startedAtRef = useRef(0);
+  const totalCompleted = completedCount(status);
+  const totalCount = Number(status.total || 0);
 
   useEffect(() => {
     void loadStatus(region, true);
@@ -269,6 +275,7 @@ export default function NaverPlaceInstagramFinderV3() {
       <section style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 12, marginBottom: 18 }}>
         {[
           ["전체", status.total ?? 0],
+          ["처리 완료", totalCompleted],
           ["미확인", status.unchecked ?? 0],
           ["장소 확인 필요", status.candidate ?? 0],
           ["인스타 확정", status.verified ?? 0],
@@ -289,6 +296,20 @@ export default function NaverPlaceInstagramFinderV3() {
           </div>
           <p>2곳씩 나누어 최대 10곳</p>
         </div>
+
+        <div className="completion-summary" aria-live="polite">
+          <div>
+            <span>누적 처리 완료</span>
+            <strong>{totalCompleted.toLocaleString("ko-KR")}<small> / {totalCount.toLocaleString("ko-KR")}</small></strong>
+            <em>인스타 발견 여부와 관계없이 확인을 마친 가게</em>
+          </div>
+          <div>
+            <span>이번 실행 완료</span>
+            <strong>{progress}<small> / {TARGET_BATCH_SIZE}</small></strong>
+            <em>2곳이 저장될 때마다 바로 증가</em>
+          </div>
+        </div>
+
         <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
           <select
             value={region}
@@ -317,7 +338,7 @@ export default function NaverPlaceInstagramFinderV3() {
               <span>{elapsedLabel(elapsedSeconds)} 경과</span>
             </div>
             <div className="progress-track"><span style={{ width: `${Math.max(4, progress * 10)}%` }} /></div>
-            <small>현재 2곳의 응답이 끝나면 숫자와 최근 결과가 자동 갱신됩니다.</small>
+            <small>현재 2곳의 응답이 끝나면 완료 건수와 최근 결과가 자동 갱신됩니다.</small>
           </div>
         )}
 
@@ -400,6 +421,12 @@ export default function NaverPlaceInstagramFinderV3() {
       </section>
 
       <style jsx>{`
+        .completion-summary { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-bottom: 14px; }
+        .completion-summary > div { padding: 16px; border: 1px solid var(--line); border-radius: 14px; background: #fbfcf8; }
+        .completion-summary span { display: block; color: var(--muted); font-size: 11px; font-weight: 800; }
+        .completion-summary strong { display: block; margin-top: 6px; font-size: 30px; letter-spacing: -.04em; }
+        .completion-summary strong small { color: var(--muted); font-size: 15px; font-weight: 700; }
+        .completion-summary em { display: block; margin-top: 4px; color: var(--muted); font-size: 11px; font-style: normal; }
         .progress-box { margin-top: 14px; padding: 15px; border-radius: 14px; background: #eef5df; }
         .progress-row { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; }
         .progress-row span, .progress-box small { color: var(--muted); }
@@ -408,7 +435,7 @@ export default function NaverPlaceInstagramFinderV3() {
         .result-grid { display: grid; grid-template-columns: minmax(180px, .8fr) minmax(260px, 1.2fr); gap: 18px; }
         .manual-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 9px; margin-top: 14px; }
         @media (max-width: 760px) {
-          .result-grid, .manual-grid { grid-template-columns: 1fr; }
+          .completion-summary, .result-grid, .manual-grid { grid-template-columns: 1fr; }
           .progress-row { align-items: flex-start; flex-direction: column; gap: 4px; }
         }
       `}</style>
