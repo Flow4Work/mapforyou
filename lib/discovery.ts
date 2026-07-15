@@ -131,6 +131,7 @@ export async function loadDiscoveryRestaurants(limit = 500): Promise<DiscoveryRe
     .from("public_data_restaurants")
     .select(RESTAURANT_COLUMNS)
     .in("region_key", ACTIVE_REGIONS)
+    .eq("publish_status", "published")
     .order("updated_at", { ascending: false })
     .limit(limit);
 
@@ -170,6 +171,7 @@ export async function loadDiscoveryRestaurant(id: string): Promise<DiscoveryRest
     .select(RESTAURANT_COLUMNS)
     .eq("source_id", id)
     .in("region_key", ACTIVE_REGIONS)
+    .eq("publish_status", "published")
     .maybeSingle();
 
   if (restaurantError) throw new Error(`식당 조회 실패: ${restaurantError.message}`);
