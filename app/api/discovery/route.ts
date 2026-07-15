@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { loadDiscoveryRestaurantPage } from "@/lib/discovery";
 
+export const runtime = "nodejs";
 export const revalidate = 300;
 
 function integerParam(value: string | null, fallback: number) {
