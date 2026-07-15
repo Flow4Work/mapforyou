@@ -33,9 +33,12 @@ export type DiscoveryRestaurant = {
   regionKey: string;
   searchKeyword: string;
   imageUrl: string;
+  imageGalleryUrls: string[];
   imageSource: string;
   imageAttribution: string;
   imageSourceUrl: string;
+  instagramUrl: string;
+  instagramUsername: string;
   updatedAt: string;
   menus: DiscoveryMenu[];
 };
@@ -60,9 +63,12 @@ type RestaurantRow = {
   region_key: string | null;
   search_keyword: string | null;
   image_url: string | null;
+  image_gallery_urls: string[] | null;
   image_source: string | null;
   image_attribution: string | null;
   image_source_url: string | null;
+  instagram_url: string | null;
+  instagram_username: string | null;
   updated_at: string;
 };
 
@@ -76,14 +82,22 @@ type MenuRow = {
   is_specialty: boolean | null;
 };
 
-const RESTAURANT_COLUMNS = "source_id,name,name_en,name_ja,road_address,road_address_en,road_address_ja,address,latitude,longitude,phone,category,license_type,introduction,introduction_en,introduction_ja,region_key,search_keyword,image_url,image_source,image_attribution,image_source_url,updated_at";
+const RESTAURANT_COLUMNS = "source_id,name,name_en,name_ja,road_address,road_address_en,road_address_ja,address,latitude,longitude,phone,category,license_type,introduction,introduction_en,introduction_ja,region_key,search_keyword,image_url,image_gallery_urls,image_source,image_attribution,image_source_url,instagram_url,instagram_username,updated_at";
 
 function optionalNumber(value: number | string | null) {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : null;
 }
 
+function normalizedGallery(primary: string, gallery: string[] | null) {
+  const values = [primary, ...(gallery ?? [])]
+    .map((value) => String(value || "").trim())
+    .filter((value) => /^https?:\/\//i.test(value));
+  return [...new Set(values)];
+}
+
 function mapRestaurant(row: RestaurantRow, menus: DiscoveryMenu[]): DiscoveryRestaurant {
+  const imageUrl = row.image_url ?? "";
   return {
     id: String(row.source_id),
     name: row.name,
@@ -103,10 +117,13 @@ function mapRestaurant(row: RestaurantRow, menus: DiscoveryMenu[]): DiscoveryRes
     introductionJa: row.introduction_ja ?? "",
     regionKey: row.region_key ?? "",
     searchKeyword: row.search_keyword ?? "",
-    imageUrl: row.image_url ?? "",
+    imageUrl,
+    imageGalleryUrls: normalizedGallery(imageUrl, row.image_gallery_urls),
     imageSource: row.image_source ?? "",
     imageAttribution: row.image_attribution ?? "",
     imageSourceUrl: row.image_source_url ?? "",
+    instagramUrl: row.instagram_url ?? "",
+    instagramUsername: row.instagram_username ?? "",
     updatedAt: row.updated_at,
     menus,
   };
