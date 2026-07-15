@@ -2,7 +2,9 @@ import "server-only";
 
 import { getSupabaseServerClient } from "@/lib/supabase";
 
-const ACTIVE_REGIONS = ["seongsu", "hongdae"];
+const ACTIVE_REGIONS = ["seongsu", "hongdae"] as const;
+const DEFAULT_PER_REGION = 20;
+const MAX_PER_REGION = 50;
 
 export type DiscoveryMenu = {
   id: string;
@@ -43,9 +45,14 @@ export type DiscoveryRestaurant = {
   menus: DiscoveryMenu[];
 };
 
+export type DiscoveryRestaurantPage = {
+  stores: DiscoveryRestaurant[];
+  nextOffset: number | null;
+};
+
 type RestaurantRow = {
   source_id: string;
-  name: string;
+  name: string | null;
   name_en: string | null;
   name_ja: string | null;
   road_address: string | null;
@@ -83,6 +90,7 @@ type MenuRow = {
 };
 
 const RESTAURANT_COLUMNS = "source_id,name,name_en,name_ja,road_address,road_address_en,road_address_ja,address,latitude,longitude,phone,category,license_type,introduction,introduction_en,introduction_ja,region_key,search_keyword,image_url,image_gallery_urls,image_source,image_attribution,image_source_url,instagram_url,instagram_username,updated_at";
+const MENU_COLUMNS = "menu_id,restaurant_id,name_ko,name_en,name_ja,price,is_specialty,sort_order";
 
 function optionalNumber(value: number | string | null) {
   const parsed = Number(value);
@@ -96,11 +104,21 @@ function normalizedGallery(primary: string, gallery: string[] | null) {
   return [...new Set(values)];
 }
 
+function hasUsableText(...values: Array<string | null | undefined>) {
+  return values.some((value) => Boolean(value?.trim()));
+}
+
+function hasUsableCoreData(row: RestaurantRow) {
+  const hasName = hasUsableText(row.name, row.name_en, row.name_ja);
+  const hasIntroduction = hasUsableText(row.introduction, row.introduction_en, row.introduction_ja);
+  return hasName && hasIntroduction;
+}
+
 function mapRestaurant(row: RestaurantRow, menus: DiscoveryMenu[]): DiscoveryRestaurant {
   const imageUrl = row.image_url ?? "";
   return {
     id: String(row.source_id),
-    name: row.name,
+    name: row.name ?? "",
     nameEn: row.name_en ?? "",
     nameJa: row.name_ja ?? "",
     roadAddress: row.road_address ?? "",
@@ -140,42 +158,98 @@ function mapMenu(row: MenuRow): DiscoveryMenu {
   };
 }
 
-export async function loadDiscoveryRestaurants(limit = 1000): Promise<DiscoveryRestaurant[]> {
+async function loadMenusByRestaurant(ids: string[]) {
+  const menusByRestaurant = new Map<string, DiscoveryMenu[]>();
+  if (!ids.length) return menusByRestaurant;
+
   const supabase = getSupabaseServerClient();
-  if (!supabase) return [];
-
-  const { data: restaurantData, error: restaurantError } = await supabase
-    .from("public_data_restaurants")
-    .select(RESTAURANT_COLUMNS)
-    .in("region_key", ACTIVE_REGIONS)
-    .order("updated_at", { ascending: false })
-    .limit(limit);
-
-  if (restaurantError) throw new Error(`공개 식당 조회 실패: ${restaurantError.message}`);
-
-  const restaurants = (restaurantData ?? []) as unknown as RestaurantRow[];
-  const ids = restaurants.map((row) => String(row.source_id));
-  if (!ids.length) return [];
+  if (!supabase) return menusByRestaurant;
 
   const { data: menuData, error: menuError } = await supabase
     .from("public_data_menus")
-    .select("menu_id,restaurant_id,name_ko,name_en,name_ja,price,is_specialty,sort_order")
+    .select(MENU_COLUMNS)
     .in("restaurant_id", ids)
     .order("sort_order", { ascending: true });
 
   if (menuError) throw new Error(`공개 메뉴 조회 실패: ${menuError.message}`);
 
-  const menusByRestaurant = new Map<string, DiscoveryMenu[]>();
   for (const row of (menuData ?? []) as MenuRow[]) {
-    const id = String(row.restaurant_id);
-    const current = menusByRestaurant.get(id) ?? [];
+    const restaurantId = String(row.restaurant_id);
+    const current = menusByRestaurant.get(restaurantId) ?? [];
     current.push(mapMenu(row));
-    menusByRestaurant.set(id, current);
+    menusByRestaurant.set(restaurantId, current);
   }
 
+  return menusByRestaurant;
+}
+
+function attachMenus(restaurants: RestaurantRow[], menusByRestaurant: Map<string, DiscoveryMenu[]>) {
   return restaurants
     .map((row) => mapRestaurant(row, menusByRestaurant.get(String(row.source_id)) ?? []))
     .filter((restaurant) => restaurant.menus.length > 0);
+}
+
+export async function loadDiscoveryRestaurantPage({
+  offset = 0,
+  perRegion = DEFAULT_PER_REGION,
+}: {
+  offset?: number;
+  perRegion?: number;
+} = {}): Promise<DiscoveryRestaurantPage> {
+  const supabase = getSupabaseServerClient();
+  if (!supabase) return { stores: [], nextOffset: null };
+
+  const safeOffset = Math.max(0, Math.floor(offset));
+  const safePerRegion = Math.min(MAX_PER_REGION, Math.max(1, Math.floor(perRegion)));
+
+  const regionPages = await Promise.all(ACTIVE_REGIONS.map(async (regionKey) => {
+    const { data, error } = await supabase
+      .from("public_data_restaurants")
+      .select(RESTAURANT_COLUMNS)
+      .eq("region_key", regionKey)
+      .order("updated_at", { ascending: false })
+      .range(safeOffset, safeOffset + safePerRegion);
+
+    if (error) throw new Error(`공개 식당 조회 실패 (${regionKey}): ${error.message}`);
+
+    const rows = (data ?? []) as unknown as RestaurantRow[];
+    return {
+      rows: rows.slice(0, safePerRegion),
+      hasMore: rows.length > safePerRegion,
+    };
+  }));
+
+  const restaurants = regionPages
+    .flatMap((page) => page.rows)
+    .filter(hasUsableCoreData)
+    .sort((a, b) => Date.parse(b.updated_at) - Date.parse(a.updated_at));
+
+  const ids = restaurants.map((row) => String(row.source_id));
+  const menusByRestaurant = await loadMenusByRestaurant(ids);
+  const stores = attachMenus(restaurants, menusByRestaurant);
+  const nextOffset = regionPages.some((page) => page.hasMore) ? safeOffset + safePerRegion : null;
+
+  return { stores, nextOffset };
+}
+
+export async function loadDiscoveryRestaurants(limit = 1000): Promise<DiscoveryRestaurant[]> {
+  const supabase = getSupabaseServerClient();
+  if (!supabase) return [];
+
+  const safeLimit = Math.min(1000, Math.max(1, Math.floor(limit)));
+  const { data: restaurantData, error: restaurantError } = await supabase
+    .from("public_data_restaurants")
+    .select(RESTAURANT_COLUMNS)
+    .in("region_key", [...ACTIVE_REGIONS])
+    .order("updated_at", { ascending: false })
+    .limit(safeLimit);
+
+  if (restaurantError) throw new Error(`공개 식당 조회 실패: ${restaurantError.message}`);
+
+  const restaurants = ((restaurantData ?? []) as unknown as RestaurantRow[]).filter(hasUsableCoreData);
+  const ids = restaurants.map((row) => String(row.source_id));
+  const menusByRestaurant = await loadMenusByRestaurant(ids);
+  return attachMenus(restaurants, menusByRestaurant);
 }
 
 export async function loadDiscoveryRestaurant(id: string): Promise<DiscoveryRestaurant | null> {
@@ -186,15 +260,18 @@ export async function loadDiscoveryRestaurant(id: string): Promise<DiscoveryRest
     .from("public_data_restaurants")
     .select(RESTAURANT_COLUMNS)
     .eq("source_id", id)
-    .in("region_key", ACTIVE_REGIONS)
+    .in("region_key", [...ACTIVE_REGIONS])
     .maybeSingle();
 
   if (restaurantError) throw new Error(`식당 조회 실패: ${restaurantError.message}`);
   if (!restaurantData) return null;
 
+  const restaurantRow = restaurantData as unknown as RestaurantRow;
+  if (!hasUsableCoreData(restaurantRow)) return null;
+
   const { data: menuData, error: menuError } = await supabase
     .from("public_data_menus")
-    .select("menu_id,restaurant_id,name_ko,name_en,name_ja,price,is_specialty,sort_order")
+    .select(MENU_COLUMNS)
     .eq("restaurant_id", id)
     .order("sort_order", { ascending: true });
 
@@ -202,5 +279,5 @@ export async function loadDiscoveryRestaurant(id: string): Promise<DiscoveryRest
 
   const menus = ((menuData ?? []) as MenuRow[]).map(mapMenu);
   if (!menus.length) return null;
-  return mapRestaurant(restaurantData as unknown as RestaurantRow, menus);
+  return mapRestaurant(restaurantRow, menus);
 }
