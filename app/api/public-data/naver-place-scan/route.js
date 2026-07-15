@@ -91,6 +91,7 @@ function extractPlaceId(value) {
     // Keep original text.
   }
   const patterns = [
+    /\/api\/place\/(?:marker|type)\/(\d{5,})/i,
     /\/place\/(\d{5,})(?:[/?#]|$)/i,
     /\/entry\/place\/(\d{5,})/i,
     /pcmap\.place\.naver\.com\/(?:restaurant|cafe|place|hospital|hairshop|nailshop|accommodation)\/(\d{5,})/i,
@@ -232,13 +233,25 @@ async function markBestResult(frame, row) {
 
 async function clickBestSearchResult(page, row) {
   const frame = await waitForSearchFrame(page);
-  if (!frame) return { clicked: false, score: 0, text: "검색 결과 iframe을 불러오지 못함" };
+  if (!frame) return { clicked: false, score: 0, text: "검색 결과 iframe을 불러오지 못함", placeId: null };
   const marked = await markBestResult(frame, row);
-  if (!marked.marked) return { clicked: false, score: marked.score, text: marked.text };
+  if (!marked.marked) return { clicked: false, score: marked.score, text: marked.text, placeId: null };
   const element = await frame.$("[data-mapforyou-match='true']");
-  if (!element) return { clicked: false, score: marked.score, text: marked.text };
+  if (!element) return { clicked: false, score: marked.score, text: marked.text, placeId: null };
+
+  const markerResponse = page.waitForResponse(
+    (response) => /\/p\/api\/place\/(?:marker|type)\/\d{5,}/i.test(response.url()),
+    { timeout: 12_000 },
+  ).catch(() => null);
+
   await element.click();
-  return { clicked: true, score: marked.score, text: marked.text };
+  const response = await markerResponse;
+  return {
+    clicked: true,
+    score: marked.score,
+    text: marked.text,
+    placeId: extractPlaceId(response?.url() || ""),
+  };
 }
 
 async function waitForPlaceId(page, timeoutMs = 9_000) {
@@ -369,7 +382,7 @@ async function inspectStore(page, row) {
     };
   }
 
-  const placeId = await waitForPlaceId(page);
+  const placeId = clicked.placeId || await waitForPlaceId(page, 5_000);
   if (!placeId) {
     return {
       placeId: null, placeUrl: null, searchUrl, officialWebsite: null, instagramUrl: null,
