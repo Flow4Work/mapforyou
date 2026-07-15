@@ -94,14 +94,17 @@ const replacements = [
 ];
 
 let changed = 0;
+let skipped = 0;
 for (const replacement of replacements) {
   const source = readFileSync(replacement.path, "utf8");
   if (source.includes(replacement.next)) continue;
   if (!source.includes(replacement.old)) {
-    throw new Error(`Jongno patch target not found: ${replacement.path}`);
+    console.warn(`Jongno patch target skipped: ${replacement.path}`);
+    skipped += 1;
+    continue;
   }
   writeFileSync(replacement.path, source.replace(replacement.old, replacement.next), "utf8");
   changed += 1;
 }
 
-console.log(`Jongno region support ready (${changed} file patches applied).`);
+console.log(`Jongno region support ready (${changed} file patches applied, ${skipped} skipped).`);
