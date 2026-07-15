@@ -140,17 +140,8 @@ async function waitForSearchFrame(page, timeoutMs = 8_000) {
   return null;
 }
 
-async function findPlaceInSearch(page, row) {
-  const url = searchUrl(row);
-  await page.goto(url, { waitUntil: "domcontentloaded", timeout: NAV_TIMEOUT_MS });
-  const frame = await waitForSearchFrame(page);
-  if (!frame) return { placeId: null, searchUrl: url, text: "검색 결과를 불러오지 못함" };
-  await sleep(500);
-  if (await isBlocked(page)) throw new NaverBlockedError();
-
-  const full = normalize(cleanName(row.name));
-  const short = shortName(row.name);
-  const result = await frame.evaluate(({ full, short }) => {
+async function readSearchResult(frame, full, short) {
+  return frame.evaluate(({ full, short }) => {
     const compact = (value) => String(value || "")
       .toLocaleLowerCase("ko-KR")
       .replace(/&amp;/gi, "&")
@@ -164,7 +155,7 @@ async function findPlaceInSearch(page, row) {
       const text = compact(item.innerText || item.textContent || "");
       return short.length >= 2 && text.includes(short);
     });
-    if (!anchor) return { placeId: null, text: "상호명과 일치하는 결과 없음" };
+    if (!anchor) return { placeId: null, text: "상호명과 일치하는 결과 없음", anchorFound: false };
 
     const findings = [];
     const seen = new WeakSet();
@@ -201,9 +192,32 @@ async function findPlaceInSearch(page, row) {
     const container = anchor.closest("li") || anchor.parentElement;
     return {
       placeId: match?.value || null,
+      anchorFound: true,
       text: (container?.innerText || anchor.innerText || "").replace(/\s+/g, " ").trim().slice(0, 500),
     };
   }, { full, short });
+}
+
+async function findPlaceInSearch(page, row) {
+  const url = searchUrl(row);
+  await page.goto(url, { waitUntil: "domcontentloaded", timeout: NAV_TIMEOUT_MS });
+  const frame = await waitForSearchFrame(page);
+  if (!frame) return { placeId: null, searchUrl: url, text: "검색 결과를 불러오지 못함" };
+  if (await isBlocked(page)) throw new NaverBlockedError();
+
+  const full = normalize(cleanName(row.name));
+  const short = shortName(row.name);
+  const deadline = Date.now() + 5_000;
+  let result = { placeId: null, text: "상호명과 일치하는 결과 없음", anchorFound: false };
+  while (Date.now() < deadline) {
+    try {
+      result = await readSearchResult(frame, full, short);
+      if (result.placeId) break;
+    } catch {
+      // Retry during React hydration.
+    }
+    await sleep(300);
+  }
 
   return { ...result, searchUrl: url };
 }
