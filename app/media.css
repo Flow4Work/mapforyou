@@ -1,0 +1,177 @@
+.restaurant-cover-stack {
+  display: grid;
+  min-width: 0;
+  gap: 10px;
+}
+
+.restaurant-media {
+  display: grid;
+  gap: 10px;
+}
+
+.restaurant-detail-panel .restaurant-media {
+  margin: 0 12px 12px;
+}
+
+.instagram-embed-shell {
+  overflow: hidden;
+  border: 1px solid #eadfd8;
+  border-radius: 17px;
+  background: white;
+}
+
+.instagram-embed-shell iframe {
+  display: block;
+  width: 100%;
+  min-height: 520px;
+  border: 0;
+  background: white;
+}
+
+.instagram-embed-shell > a {
+  display: flex;
+  justify-content: center;
+  padding: 11px;
+  border-top: 1px solid #eadfd8;
+  color: #9f2d55;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.instagram-profile-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 15px;
+  border: 1px solid #eadfd8;
+  border-radius: 16px;
+  color: #4c272f;
+  background: linear-gradient(135deg, #fff 0%, #fff7f2 52%, #f8edf4 100%);
+  box-shadow: 0 9px 24px rgba(89, 42, 52, .06);
+}
+
+.instagram-profile-icon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 13px;
+  color: white;
+  background: linear-gradient(145deg, #f9a13b, #e44167 52%, #7b3fc6);
+  font-size: 25px;
+  font-weight: 900;
+}
+
+.instagram-profile-card > span:nth-child(2) {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.instagram-profile-card small {
+  color: #a06d75;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+
+.instagram-profile-card strong {
+  overflow: hidden;
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.instagram-profile-card em {
+  color: #806b6f;
+  font-size: 9px;
+  font-style: normal;
+  line-height: 1.4;
+}
+
+.instagram-profile-card b {
+  color: #b14d66;
+  font-size: 18px;
+}
+
+.restaurant-gallery-block {
+  padding: 14px;
+  border: 1px solid #eadfd8;
+  border-radius: 17px;
+  background: white;
+}
+
+.restaurant-gallery-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.restaurant-gallery-heading span {
+  color: #a45239;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.restaurant-gallery-heading strong {
+  display: grid;
+  place-items: center;
+  min-width: 25px;
+  height: 25px;
+  border-radius: 999px;
+  color: #8f3b28;
+  background: #fff0e6;
+  font-size: 10px;
+}
+
+.restaurant-gallery {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.restaurant-gallery.single {
+  grid-template-columns: 1fr;
+}
+
+.restaurant-gallery img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: 11px;
+  object-fit: cover;
+  background: #f1eee7;
+}
+
+.detail-hero-grid > .restaurant-cover-stack .restaurant-cover {
+  min-height: 460px;
+}
+
+@media (max-width: 900px) {
+  .detail-hero-grid > .restaurant-cover-stack .restaurant-cover {
+    min-height: 360px;
+  }
+
+  .instagram-embed-shell iframe {
+    min-height: 460px;
+  }
+}
+
+@media (max-width: 560px) {
+  .detail-hero-grid > .restaurant-cover-stack .restaurant-cover {
+    min-height: 330px;
+  }
+
+  .instagram-embed-shell iframe {
+    min-height: 420px;
+  }
+
+  .restaurant-gallery {
+    grid-template-columns: 1fr;
+  }
+}
