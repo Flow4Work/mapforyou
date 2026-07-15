@@ -11,14 +11,13 @@ const REGIONS = ["seongsu", "hongdae"];
 const MAX_BATCH_SIZE = 10;
 const DEADLINE_MS = 52_000;
 const NAV_TIMEOUT_MS = 13_000;
-const BLOCK_PATTERN = /자동입력|비정상적인 접근|접근이 제한|서비스 이용이 제한|요청이 차단/i;
-const DETAIL_FRAME_PATTERN = /pcmap\.place\.naver\.com\/(?:restaurant|cafe|place|hospital|hairshop|nailshop|accommodation)\/(\d{5,})\//i;
-
-const RESERVED_INSTAGRAM_PATHS = new Set([
+const DETAIL_FRAME_RE = /pcmap\.place\.naver\.com\/(?:restaurant|cafe|place|hospital|hairshop|nailshop|accommodation)\/(\d{5,})\//i;
+const BLOCK_RE = /자동입력|비정상적인 접근|접근이 제한|서비스 이용이 제한|요청이 차단/i;
+const RESERVED_INSTAGRAM = new Set([
   "about", "accounts", "challenge", "developer", "direct", "directory", "emails", "explore",
   "legal", "p", "press", "privacy", "reel", "reels", "stories", "terms", "tv", "web",
 ]);
-const EXCLUDED_WEBSITE_HOSTS = [
+const NON_WEBSITE_HOSTS = [
   "naver.com", "naver.me", "instagram.com", "facebook.com", "youtube.com", "youtu.be",
   "twitter.com", "x.com", "blog.naver.com", "booking.naver.com", "smartplace.naver.com",
 ];
@@ -30,7 +29,7 @@ class NaverBlockedError extends Error {
   }
 }
 
-const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 function sameOrigin(request) {
   const origin = request.headers.get("origin");
@@ -42,7 +41,7 @@ function sameOrigin(request) {
   }
 }
 
-function compact(value) {
+function normalize(value) {
   return String(value || "")
     .toLocaleLowerCase("ko-KR")
     .replace(/&amp;/gi, "&")
@@ -54,17 +53,7 @@ function cleanName(value) {
 }
 
 function shortName(value) {
-  return compact(cleanName(value).replace(/(?:성수점|홍대점|연남점|서울숲점|본점|직영점|지점)$/g, ""));
-}
-
-function addressHints(value) {
-  const parts = String(value || "").split(/\s+/).map(compact).filter((part) => part.length >= 2);
-  const preferred = parts.filter((part) => /(?:구|동|가)$/.test(part) || /(?:로|길)\d*/.test(part));
-  return [...new Set([...preferred, ...parts.slice(-4)])].slice(0, 7);
-}
-
-function targetRegions(region) {
-  return REGIONS.includes(region) ? [region] : [...REGIONS];
+  return normalize(cleanName(value).replace(/(?:성수점|홍대점|연남점|서울숲점|본점|직영점|지점)$/g, ""));
 }
 
 function searchUrl(row) {
@@ -72,25 +61,8 @@ function searchUrl(row) {
   return `https://map.naver.com/p/search/${encodeURIComponent(query)}`;
 }
 
-function extractPlaceId(value) {
-  let decoded = String(value || "");
-  try {
-    decoded = decodeURIComponent(decoded);
-  } catch {
-    // Keep original value.
-  }
-  const patterns = [
-    /\/api\/place\/(?:marker|type)\/(\d{5,})/i,
-    /\/place\/(\d{5,})(?:[/?#]|$)/i,
-    /\/entry\/place\/(\d{5,})/i,
-    DETAIL_FRAME_PATTERN,
-    /[?&](?:placeId|id)=(\d{5,})/i,
-  ];
-  for (const pattern of patterns) {
-    const match = decoded.match(pattern);
-    if (match?.[1]) return match[1];
-  }
-  return null;
+function regionList(region) {
+  return REGIONS.includes(region) ? [region] : [...REGIONS];
 }
 
 function instagramProfile(value) {
@@ -101,15 +73,15 @@ function instagramProfile(value) {
     const host = url.hostname.toLowerCase().replace(/^(www\.|m\.)/, "");
     if (host !== "instagram.com") return null;
     const username = decodeURIComponent(url.pathname.split("/").filter(Boolean)[0] || "").toLowerCase();
-    if (!username || RESERVED_INSTAGRAM_PATHS.has(username) || !/^[a-z0-9._]{1,30}$/.test(username)) return null;
+    if (!username || RESERVED_INSTAGRAM.has(username) || !/^[a-z0-9._]{1,30}$/.test(username)) return null;
     return { username, url: `https://www.instagram.com/${username}/` };
   } catch {
     return null;
   }
 }
 
-function externalUrl(rawValue, baseUrl) {
-  const raw = String(rawValue || "").trim().replace(/&amp;/gi, "&");
+function unwrapUrl(value, baseUrl) {
+  const raw = String(value || "").trim().replace(/&amp;/gi, "&");
   if (!raw || /^(javascript:|mailto:|tel:|data:)/i.test(raw)) return null;
   try {
     let url = new URL(raw, baseUrl);
@@ -129,21 +101,21 @@ function externalUrl(rawValue, baseUrl) {
   }
 }
 
-function publicWebsite(value) {
+function isWebsite(value) {
   try {
     const host = new URL(value).hostname.toLowerCase().replace(/^www\./, "");
     if (!host || host === "localhost" || /^\d+\.\d+\.\d+\.\d+$/.test(host)) return false;
-    return !EXCLUDED_WEBSITE_HOSTS.some((excluded) => host === excluded || host.endsWith(`.${excluded}`));
+    return !NON_WEBSITE_HOSTS.some((excluded) => host === excluded || host.endsWith(`.${excluded}`));
   } catch {
     return false;
   }
 }
 
-async function blocked(page) {
+async function isBlocked(page) {
   for (const frame of page.frames()) {
     try {
       const text = await frame.evaluate(() => (document.body?.innerText || "").slice(0, 15_000));
-      if (BLOCK_PATTERN.test(text)) return true;
+      if (BLOCK_RE.test(text)) return true;
     } catch {
       // Ignore detached frames.
     }
@@ -151,67 +123,48 @@ async function blocked(page) {
   return false;
 }
 
-async function waitSearchFrame(page, timeoutMs = 8_000) {
+async function waitForSearchFrame(page, timeoutMs = 8_000) {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
     const frame = page.frames().find((item) => item.url().includes("pcmap.place.naver.com/place/list"));
     if (frame) {
       try {
-        if ((await frame.evaluate(() => document.body?.innerText || "")).trim()) return frame;
+        const text = await frame.evaluate(() => document.body?.innerText || "");
+        if (text.trim()) return frame;
       } catch {
         // Retry while rendering.
       }
     }
-    await delay(250);
+    await sleep(200);
   }
   return null;
 }
 
-async function findBestResult(frame, row) {
-  const full = compact(cleanName(row.name));
-  const short = shortName(row.name);
-  const hints = addressHints(row.road_address || row.address || "");
-  const phone = String(row.phone || "").replace(/\D/g, "");
+async function findPlaceInSearch(page, row) {
+  const url = searchUrl(row);
+  await page.goto(url, { waitUntil: "domcontentloaded", timeout: NAV_TIMEOUT_MS });
+  const frame = await waitForSearchFrame(page);
+  if (!frame) return { placeId: null, searchUrl: url, text: "검색 결과를 불러오지 못함" };
+  await sleep(500);
+  if (await isBlocked(page)) throw new NaverBlockedError();
 
-  return frame.evaluate(({ full, short, hints, phone }) => {
-    const normalize = (value) => String(value || "")
+  const full = normalize(cleanName(row.name));
+  const short = shortName(row.name);
+  const result = await frame.evaluate(({ full, short }) => {
+    const compact = (value) => String(value || "")
       .toLocaleLowerCase("ko-KR")
       .replace(/&amp;/gi, "&")
       .replace(/[^0-9a-z가-힣]/g, "");
 
-    let best = null;
-    for (const anchor of Array.from(document.querySelectorAll("a[role='button'],a[href]"))) {
-      const title = (anchor.innerText || anchor.textContent || "").replace(/\s+/g, " ").trim();
-      if (!title || title.length > 160) continue;
-      const container = anchor.closest("li") || anchor.parentElement;
-      const text = (container?.innerText || title).replace(/\s+/g, " ").trim();
-      const titleBlob = normalize(title);
-      const textBlob = normalize(text);
-      let score = 0;
-
-      if (full.length >= 2 && titleBlob.includes(full)) score += 110;
-      else if (full.length >= 2 && textBlob.includes(full)) score += 90;
-      else if (short.length >= 2 && titleBlob.includes(short)) score += 60;
-      else if (short.length >= 2 && textBlob.includes(short)) score += 50;
-      else continue;
-
-      score += Math.min(30, hints.filter((hint) => textBlob.includes(hint)).length * 10);
-      if (phone.length >= 8 && textBlob.includes(phone)) score += 20;
-      if (/출발|도착|상세주소/.test(text)) score += 5;
-      if (!best || score > best.score) best = { anchor, score, text: text.slice(0, 500) };
-    }
-
-    document.querySelectorAll("[data-mapforyou-best]").forEach((element) => element.removeAttribute("data-mapforyou-best"));
-    if (!best || best.score < 60) return { score: best?.score || 0, text: best?.text || "", marked: false };
-    best.anchor.setAttribute("data-mapforyou-best", "true");
-    return { score: best.score, text: best.text, marked: true };
-  }, { full, short, hints, phone });
-}
-
-async function reactBusinessId(frame) {
-  return frame.evaluate(() => {
-    const anchor = document.querySelector("[data-mapforyou-best='true']");
-    if (!anchor) return null;
+    const anchors = Array.from(document.querySelectorAll("a"));
+    const anchor = anchors.find((item) => {
+      const text = compact(item.innerText || item.textContent || "");
+      return full.length >= 2 && text.includes(full);
+    }) || anchors.find((item) => {
+      const text = compact(item.innerText || item.textContent || "");
+      return short.length >= 2 && text.includes(short);
+    });
+    if (!anchor) return { placeId: null, text: "상호명과 일치하는 결과 없음" };
 
     const findings = [];
     const seen = new WeakSet();
@@ -242,33 +195,23 @@ async function reactBusinessId(frame) {
       }
     }
 
-    const preferred = findings.find((item) => /businessId/i.test(item.path))
+    const match = findings.find((item) => /businessId/i.test(item.path))
       || findings.find((item) => /placeId/i.test(item.path))
       || findings[0];
-    return preferred?.value || null;
-  });
+    const container = anchor.closest("li") || anchor.parentElement;
+    return {
+      placeId: match?.value || null,
+      text: (container?.innerText || anchor.innerText || "").replace(/\s+/g, " ").trim().slice(0, 500),
+    };
+  }, { full, short });
+
+  return { ...result, searchUrl: url };
 }
 
-async function resolvePlaceId(page, row) {
-  const url = searchUrl(row);
-  await page.goto(url, { waitUntil: "domcontentloaded", timeout: NAV_TIMEOUT_MS });
-  await delay(2_000);
-  if (await blocked(page)) throw new NaverBlockedError();
-
-  const frame = await waitSearchFrame(page);
-  if (!frame) return { placeId: null, searchUrl: url, score: 0, text: "검색 결과를 불러오지 못함" };
-  const result = await findBestResult(frame, row);
-  const placeId = result.marked ? await reactBusinessId(frame) : null;
-  return { placeId, searchUrl: url, score: result.score, text: result.text };
-}
-
-async function waitDetailFrame(page, placeId, timeoutMs = 9_000) {
+async function waitForDetailFrame(page, placeId, timeoutMs = 10_000) {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
-    const frame = page.frames().find((item) => {
-      const match = item.url().match(DETAIL_FRAME_PATTERN);
-      return match?.[1] === placeId;
-    });
+    const frame = page.frames().find((item) => item.url().match(DETAIL_FRAME_RE)?.[1] === placeId);
     if (frame) {
       try {
         const ready = await frame.evaluate(() => {
@@ -276,24 +219,24 @@ async function waitDetailFrame(page, placeId, timeoutMs = 9_000) {
           return text.length > 250 && /주소|전화번호|영업시간|홈페이지/.test(text);
         });
         if (ready) {
-          await delay(1_500);
+          await sleep(1_500);
           return frame;
         }
       } catch {
         // Retry while rendering.
       }
     }
-    await delay(250);
+    await sleep(200);
   }
   return null;
 }
 
-async function readPlaceLinks(page, placeId) {
+async function readPlace(page, placeId) {
   const placeUrl = `https://map.naver.com/p/entry/place/${placeId}`;
   await page.goto(placeUrl, { waitUntil: "domcontentloaded", timeout: NAV_TIMEOUT_MS });
-  const frame = await waitDetailFrame(page, placeId);
+  const frame = await waitForDetailFrame(page, placeId);
   if (!frame) return { placeUrl, instagram: null, website: null };
-  if (await blocked(page)) throw new NaverBlockedError();
+  if (await isBlocked(page)) throw new NaverBlockedError();
 
   const { links, html } = await frame.evaluate(() => ({
     links: Array.from(document.querySelectorAll("a[href]"))
@@ -307,23 +250,22 @@ async function readPlaceLinks(page, placeId) {
 
   let instagram = null;
   const websites = [];
-  for (const link of links) {
-    const external = externalUrl(link.href, placeUrl);
+  for (const item of links) {
+    const external = unwrapUrl(item.href, placeUrl);
     if (!external) continue;
     instagram ||= instagramProfile(external);
-    if (publicWebsite(external)) websites.push({ url: external, priority: /홈페이지|website|공식/i.test(link.text) ? 1 : 0 });
+    if (isWebsite(external)) websites.push({ url: external, priority: /홈페이지|website|공식/i.test(item.text) ? 1 : 0 });
   }
-
-  const decodedHtml = html.replace(/\\u002F/gi, "/").replace(/\\\//g, "/");
-  for (const match of decodedHtml.match(/https?:\/\/(?:www\.)?instagram\.com\/[a-z0-9._]+/gi) || []) {
+  const decoded = html.replace(/\\u002F/gi, "/").replace(/\\\//g, "/");
+  for (const match of decoded.match(/https?:\/\/(?:www\.)?instagram\.com\/[a-z0-9._]+/gi) || []) {
     instagram ||= instagramProfile(match);
   }
   websites.sort((a, b) => b.priority - a.priority);
   return { placeUrl, instagram, website: websites[0]?.url || null };
 }
 
-async function websiteInstagram(website) {
-  if (!publicWebsite(website)) return null;
+async function findInstagramOnWebsite(website) {
+  if (!isWebsite(website)) return null;
   try {
     const response = await fetch(website, {
       redirect: "follow",
@@ -347,57 +289,57 @@ async function websiteInstagram(website) {
 }
 
 async function inspectStore(page, row) {
-  const resolved = await resolvePlaceId(page, row);
-  if (!resolved.placeId) {
+  const search = await findPlaceInSearch(page, row);
+  if (!search.placeId) {
     return {
       placeId: null,
       placeUrl: null,
-      searchUrl: resolved.searchUrl,
+      searchUrl: search.searchUrl,
       website: null,
       instagram: null,
       source: "none",
-      confidence: Math.min(resolved.score, 70),
-      reasons: [resolved.text || "상호명과 주소가 맞는 네이버 장소를 확인하지 못함"],
+      confidence: 60,
+      reasons: [search.text || "네이버 장소를 확인하지 못함"],
     };
   }
 
-  const detail = await readPlaceLinks(page, resolved.placeId);
+  const detail = await readPlace(page, search.placeId);
   if (detail.instagram) {
     return {
-      placeId: resolved.placeId,
+      placeId: search.placeId,
       placeUrl: detail.placeUrl,
-      searchUrl: resolved.searchUrl,
+      searchUrl: search.searchUrl,
       website: detail.website,
       instagram: detail.instagram,
       source: "naver_place",
       confidence: 100,
-      reasons: ["네이버 장소 상세에 등록된 인스타그램 링크", resolved.text],
+      reasons: ["네이버 장소 상세에 등록된 인스타그램 링크", search.text],
     };
   }
 
-  const websiteProfile = detail.website ? await websiteInstagram(detail.website) : null;
-  if (websiteProfile) {
+  const websiteInstagram = detail.website ? await findInstagramOnWebsite(detail.website) : null;
+  if (websiteInstagram) {
     return {
-      placeId: resolved.placeId,
+      placeId: search.placeId,
       placeUrl: detail.placeUrl,
-      searchUrl: resolved.searchUrl,
+      searchUrl: search.searchUrl,
       website: detail.website,
-      instagram: websiteProfile,
+      instagram: websiteInstagram,
       source: "official_website",
       confidence: 95,
-      reasons: ["네이버 장소의 공식 홈페이지에서 인스타그램 링크 확인", resolved.text],
+      reasons: ["공식 홈페이지에서 인스타그램 링크 확인", search.text],
     };
   }
 
   return {
-    placeId: resolved.placeId,
+    placeId: search.placeId,
     placeUrl: detail.placeUrl,
-    searchUrl: resolved.searchUrl,
+    searchUrl: search.searchUrl,
     website: detail.website,
     instagram: null,
     source: "none",
     confidence: 85,
-    reasons: [detail.website ? "공식 홈페이지는 확인했지만 인스타그램 링크 없음" : "장소는 확인했지만 외부 링크 없음", resolved.text],
+    reasons: [detail.website ? "공식 홈페이지는 확인했지만 인스타그램 링크 없음" : "장소는 확인했지만 외부 링크 없음", search.text],
   };
 }
 
@@ -436,15 +378,13 @@ export async function POST(request) {
     let query = supabase
       .from("public_data_restaurants")
       .select("source_id,name,road_address,address,latitude,longitude,phone,category,region_key")
-      .in("region_key", targetRegions(region));
-    if (body.sourceId) {
-      query = query.eq("source_id", String(body.sourceId)).limit(1);
-    } else {
-      query = query
-        .in("instagram_status", statuses)
-        .order(body.retry ? "instagram_checked_at" : "created_at", { ascending: true, nullsFirst: true })
-        .limit(limit);
-    }
+      .in("region_key", regionList(region));
+    if (body.sourceId) query = query.eq("source_id", String(body.sourceId)).limit(1);
+    else query = query
+      .in("instagram_status", statuses)
+      .order(body.retry ? "instagram_checked_at" : "created_at", { ascending: true, nullsFirst: true })
+      .limit(limit);
+
     const { data, error } = await query;
     if (error) throw error;
     const stores = data || [];
@@ -525,7 +465,7 @@ export async function POST(request) {
         processed += 1;
         if (result.placeId) placeResolved += 1;
         if (hasInstagram) found += 1;
-        await delay(500);
+        await sleep(400);
       }
     } finally {
       if (page) await page.close().catch(() => undefined);
