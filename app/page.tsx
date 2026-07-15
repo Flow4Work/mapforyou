@@ -1,4 +1,5 @@
 import AnalyticsTracker from "@/components/AnalyticsTracker";
+import DetailPanelScrollReset from "@/components/DetailPanelScrollReset";
 import DiscoveryApp from "@/components/DiscoveryApp";
 import { loadDiscoveryRestaurants } from "@/lib/discovery";
 
@@ -9,6 +10,7 @@ export default async function HomePage() {
   return (
     <>
       <AnalyticsTracker />
+      <DetailPanelScrollReset />
       <DiscoveryApp initialStores={stores} />
     </>
   );
