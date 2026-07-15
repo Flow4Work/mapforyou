@@ -11,7 +11,7 @@
     "lint": "tsc --noEmit"
   },
   "dependencies": {
-    "@sparticuz/chromium": "149.0.0",
+    "@sparticuz/chromium-min": "149.0.0",
     "@supabase/supabase-js": "2.57.4",
     "leaflet": "^1.9.4",
     "next": "16.2.10",
