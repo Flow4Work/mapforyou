@@ -6,7 +6,7 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     "/api/public-data/instagram": ["./node_modules/@sparticuz/chromium/bin/**"],
     "/api/public-data/naver-place-scan": ["./node_modules/@sparticuz/chromium/bin/**"],
-    "/api/admin/naver-browser-test": ["./node_modules/@sparticuz/chromium/bin/**"],
+    "/api/admin/naver-scan-smoke": ["./node_modules/@sparticuz/chromium/bin/**"],
   },
 };
 
