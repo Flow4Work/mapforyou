@@ -26,8 +26,8 @@ const replacements = [
   },
   {
     path: "lib/discovery.ts",
-    old: `const ACTIVE_REGIONS = ["seongsu", "hongdae"];`,
-    next: `const ACTIVE_REGIONS = ["seongsu", "hongdae", "geondae", "jongno"];`,
+    old: `const ACTIVE_REGIONS = ["seongsu", "hongdae"] as const;`,
+    next: `const ACTIVE_REGIONS = ["seongsu", "hongdae", "geondae", "jongno"] as const;`,
   },
   {
     path: "app/api/public-data/images/route.ts",
@@ -41,8 +41,8 @@ const replacements = [
   },
   {
     path: "app/api/tourapi/images/route.ts",
-    old: `.replace(/\\b(성수|홍대|서울|왕십리|마포|성동)\\s*(점|본점|지점)?\\b/g, " ")`,
-    next: `.replace(/\\b(성수|홍대|서울|왕십리|마포|성동|자양|건대|광진|종로|인사동|익선동|삼청동|안국)\\s*(점|본점|지점)?\\b/g, " ")`,
+    old: `.replace(/\b(성수|홍대|서울|왕십리|마포|성동)\s*(점|본점|지점)?\b/g, " ")`,
+    next: `.replace(/\b(성수|홍대|서울|왕십리|마포|성동|자양|건대|광진|종로|인사동|익선동|삼청동|안국)\s*(점|본점|지점)?\b/g, " ")`,
   },
   {
     path: "app/api/tourapi/images/route.ts",
