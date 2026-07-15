@@ -7,17 +7,17 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
-const ACTIVE_REGIONS = ["seongsu", "hongdae"];
+const REGIONS = ["seongsu", "hongdae"];
 const MAX_BATCH_SIZE = 10;
-const REQUEST_DEADLINE_MS = 52_000;
-const NAVIGATION_TIMEOUT_MS = 13_000;
+const DEADLINE_MS = 52_000;
+const NAV_TIMEOUT_MS = 13_000;
 const BLOCK_PATTERN = /자동입력|비정상적인 접근|접근이 제한|서비스 이용이 제한|요청이 차단/i;
+const DETAIL_FRAME_PATTERN = /pcmap\.place\.naver\.com\/(?:restaurant|cafe|place|hospital|hairshop|nailshop|accommodation)\/(\d{5,})\//i;
 
 const RESERVED_INSTAGRAM_PATHS = new Set([
   "about", "accounts", "challenge", "developer", "direct", "directory", "emails", "explore",
   "legal", "p", "press", "privacy", "reel", "reels", "stories", "terms", "tv", "web",
 ]);
-
 const EXCLUDED_WEBSITE_HOSTS = [
   "naver.com", "naver.me", "instagram.com", "facebook.com", "youtube.com", "youtu.be",
   "twitter.com", "x.com", "blog.naver.com", "booking.naver.com", "smartplace.naver.com",
@@ -30,7 +30,9 @@ class NaverBlockedError extends Error {
   }
 }
 
-function isSameOrigin(request) {
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+function sameOrigin(request) {
   const origin = request.headers.get("origin");
   if (!origin) return true;
   try {
@@ -40,10 +42,6 @@ function isSameOrigin(request) {
   }
 }
 
-function delay(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
 function compact(value) {
   return String(value || "")
     .toLocaleLowerCase("ko-KR")
@@ -51,35 +49,26 @@ function compact(value) {
     .replace(/[^0-9a-z가-힣]/g, "");
 }
 
-function cleanSearchName(value) {
-  return String(value || "")
-    .replace(/[()[\]{}]/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
+function cleanName(value) {
+  return String(value || "").replace(/[()[\]{}]/g, " ").replace(/\s+/g, " ").trim();
 }
 
-function baseName(value) {
-  return compact(
-    cleanSearchName(value)
-      .replace(/(?:성수점|홍대점|연남점|서울숲점|본점|직영점|지점)$/g, ""),
-  );
+function shortName(value) {
+  return compact(cleanName(value).replace(/(?:성수점|홍대점|연남점|서울숲점|본점|직영점|지점)$/g, ""));
 }
 
 function addressHints(value) {
-  const parts = String(value || "")
-    .split(/\s+/)
-    .map(compact)
-    .filter((part) => part.length >= 2);
+  const parts = String(value || "").split(/\s+/).map(compact).filter((part) => part.length >= 2);
   const preferred = parts.filter((part) => /(?:구|동|가)$/.test(part) || /(?:로|길)\d*/.test(part));
   return [...new Set([...preferred, ...parts.slice(-4)])].slice(0, 7);
 }
 
-function selectedRegions(region) {
-  return ACTIVE_REGIONS.includes(region) ? [region] : [...ACTIVE_REGIONS];
+function targetRegions(region) {
+  return REGIONS.includes(region) ? [region] : [...REGIONS];
 }
 
-function naverSearchUrl(row) {
-  const query = `${cleanSearchName(row.name)} ${row.road_address || row.address || ""}`.trim();
+function searchUrl(row) {
+  const query = `${cleanName(row.name)} ${row.road_address || row.address || ""}`.trim();
   return `https://map.naver.com/p/search/${encodeURIComponent(query)}`;
 }
 
@@ -88,13 +77,13 @@ function extractPlaceId(value) {
   try {
     decoded = decodeURIComponent(decoded);
   } catch {
-    // Keep original text.
+    // Keep original value.
   }
   const patterns = [
     /\/api\/place\/(?:marker|type)\/(\d{5,})/i,
     /\/place\/(\d{5,})(?:[/?#]|$)/i,
     /\/entry\/place\/(\d{5,})/i,
-    /pcmap\.place\.naver\.com\/(?:restaurant|cafe|place|hospital|hairshop|nailshop|accommodation)\/(\d{5,})/i,
+    DETAIL_FRAME_PATTERN,
     /[?&](?:placeId|id)=(\d{5,})/i,
   ];
   for (const pattern of patterns) {
@@ -104,12 +93,11 @@ function extractPlaceId(value) {
   return null;
 }
 
-function normalizeInstagramProfile(value) {
+function instagramProfile(value) {
   const raw = String(value || "").trim().replace(/&amp;/gi, "&");
   if (!raw) return null;
-  const withProtocol = /^https?:\/\//i.test(raw) ? raw : `https://${raw.replace(/^\/+/, "")}`;
   try {
-    const url = new URL(withProtocol);
+    const url = new URL(/^https?:\/\//i.test(raw) ? raw : `https://${raw.replace(/^\/+/, "")}`);
     const host = url.hostname.toLowerCase().replace(/^(www\.|m\.)/, "");
     if (host !== "instagram.com") return null;
     const username = decodeURIComponent(url.pathname.split("/").filter(Boolean)[0] || "").toLowerCase();
@@ -120,7 +108,7 @@ function normalizeInstagramProfile(value) {
   }
 }
 
-function unwrapExternalUrl(rawValue, baseUrl) {
+function externalUrl(rawValue, baseUrl) {
   const raw = String(rawValue || "").trim().replace(/&amp;/gi, "&");
   if (!raw || /^(javascript:|mailto:|tel:|data:)/i.test(raw)) return null;
   try {
@@ -141,10 +129,9 @@ function unwrapExternalUrl(rawValue, baseUrl) {
   }
 }
 
-function isPublicWebsite(value) {
+function publicWebsite(value) {
   try {
-    const url = new URL(value);
-    const host = url.hostname.toLowerCase().replace(/^www\./, "");
+    const host = new URL(value).hostname.toLowerCase().replace(/^www\./, "");
     if (!host || host === "localhost" || /^\d+\.\d+\.\d+\.\d+$/.test(host)) return false;
     return !EXCLUDED_WEBSITE_HOSTS.some((excluded) => host === excluded || host.endsWith(`.${excluded}`));
   } catch {
@@ -152,7 +139,7 @@ function isPublicWebsite(value) {
   }
 }
 
-async function pageBlocked(page) {
+async function blocked(page) {
   for (const frame of page.frames()) {
     try {
       const text = await frame.evaluate(() => (document.body?.innerText || "").slice(0, 15_000));
@@ -164,7 +151,7 @@ async function pageBlocked(page) {
   return false;
 }
 
-async function waitForSearchFrame(page, timeoutMs = 8_000) {
+async function waitSearchFrame(page, timeoutMs = 8_000) {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
     const frame = page.frames().find((item) => item.url().includes("pcmap.place.naver.com/place/list"));
@@ -172,7 +159,7 @@ async function waitForSearchFrame(page, timeoutMs = 8_000) {
       try {
         if ((await frame.evaluate(() => document.body?.innerText || "")).trim()) return frame;
       } catch {
-        // Retry while loading.
+        // Retry while rendering.
       }
     }
     await delay(250);
@@ -181,169 +168,142 @@ async function waitForSearchFrame(page, timeoutMs = 8_000) {
 }
 
 async function markBestResult(frame, row) {
-  const fullName = compact(cleanSearchName(row.name));
-  const shortName = baseName(row.name);
+  const full = compact(cleanName(row.name));
+  const short = shortName(row.name);
   const hints = addressHints(row.road_address || row.address || "");
   const phone = String(row.phone || "").replace(/\D/g, "");
 
-  return frame.evaluate(({ fullName, shortName, hints, phone }) => {
+  return frame.evaluate(({ full, short, hints, phone }) => {
     const normalize = (value) => String(value || "")
       .toLocaleLowerCase("ko-KR")
       .replace(/&amp;/gi, "&")
       .replace(/[^0-9a-z가-힣]/g, "");
 
-    let bestAnchor = null;
-    let bestScore = 0;
-    let bestText = "";
-
-    for (const anchor of Array.from(document.querySelectorAll("a[role='button'], a[href]"))) {
+    let best = null;
+    for (const anchor of Array.from(document.querySelectorAll("a[role='button'],a[href]"))) {
       const title = (anchor.innerText || anchor.textContent || "").replace(/\s+/g, " ").trim();
       if (!title || title.length > 160) continue;
       const container = anchor.closest("li") || anchor.parentElement;
-      const containerText = (container?.innerText || title).replace(/\s+/g, " ").trim();
+      const text = (container?.innerText || title).replace(/\s+/g, " ").trim();
       const titleBlob = normalize(title);
-      const containerBlob = normalize(containerText);
+      const textBlob = normalize(text);
       let score = 0;
 
-      if (fullName.length >= 2 && titleBlob.includes(fullName)) score += 110;
-      else if (fullName.length >= 2 && containerBlob.includes(fullName)) score += 90;
-      else if (shortName.length >= 2 && titleBlob.includes(shortName)) score += 60;
-      else if (shortName.length >= 2 && containerBlob.includes(shortName)) score += 50;
+      if (full.length >= 2 && titleBlob.includes(full)) score += 110;
+      else if (full.length >= 2 && textBlob.includes(full)) score += 90;
+      else if (short.length >= 2 && titleBlob.includes(short)) score += 60;
+      else if (short.length >= 2 && textBlob.includes(short)) score += 50;
       else continue;
 
-      score += Math.min(30, hints.filter((hint) => containerBlob.includes(hint)).length * 10);
-      if (phone.length >= 8 && containerBlob.includes(phone)) score += 20;
-      if (/출발|도착|상세주소/.test(containerText)) score += 5;
-
-      if (score > bestScore) {
-        bestAnchor = anchor;
-        bestScore = score;
-        bestText = containerText.slice(0, 500);
-      }
+      score += Math.min(30, hints.filter((hint) => textBlob.includes(hint)).length * 10);
+      if (phone.length >= 8 && textBlob.includes(phone)) score += 20;
+      if (/출발|도착|상세주소/.test(text)) score += 5;
+      if (!best || score > best.score) best = { anchor, score, text: text.slice(0, 500) };
     }
 
-    document.querySelectorAll("[data-mapforyou-match]").forEach((element) => {
-      element.removeAttribute("data-mapforyou-match");
-    });
-    if (!bestAnchor || bestScore < 60) return { marked: false, score: bestScore, text: bestText };
-    bestAnchor.setAttribute("data-mapforyou-match", "true");
-    return { marked: true, score: bestScore, text: bestText };
-  }, { fullName, shortName, hints, phone });
+    document.querySelectorAll("[data-mapforyou-match]").forEach((element) => element.removeAttribute("data-mapforyou-match"));
+    if (!best || best.score < 60) return { marked: false, score: best?.score || 0, text: best?.text || "" };
+    best.anchor.setAttribute("data-mapforyou-match", "true");
+    return { marked: true, score: best.score, text: best.text };
+  }, { full, short, hints, phone });
 }
 
-async function clickBestSearchResult(page, row) {
-  const frame = await waitForSearchFrame(page);
-  if (!frame) return { clicked: false, score: 0, text: "검색 결과 iframe을 불러오지 못함", placeId: null };
-  const marked = await markBestResult(frame, row);
-  if (!marked.marked) return { clicked: false, score: marked.score, text: marked.text, placeId: null };
-  const element = await frame.$("[data-mapforyou-match='true']");
-  if (!element) return { clicked: false, score: marked.score, text: marked.text, placeId: null };
+async function resolvePlaceId(page, row) {
+  const url = searchUrl(row);
+  await page.goto(url, { waitUntil: "domcontentloaded", timeout: NAV_TIMEOUT_MS });
+  await delay(1_200);
+  if (await blocked(page)) throw new NaverBlockedError();
 
-  const markerResponse = page.waitForResponse(
+  const frame = await waitSearchFrame(page);
+  if (!frame) return { placeId: null, searchUrl: url, score: 0, text: "검색 결과를 불러오지 못함" };
+  const marked = await markBestResult(frame, row);
+  if (!marked.marked) return { placeId: null, searchUrl: url, score: marked.score, text: marked.text };
+  const element = await frame.$("[data-mapforyou-match='true']");
+  if (!element) return { placeId: null, searchUrl: url, score: marked.score, text: marked.text };
+
+  const markerPromise = page.waitForResponse(
     (response) => /\/p\/api\/place\/(?:marker|type)\/\d{5,}/i.test(response.url()),
     { timeout: 12_000 },
   ).catch(() => null);
-
   await element.click();
-  const response = await markerResponse;
-  return {
-    clicked: true,
-    score: marked.score,
-    text: marked.text,
-    placeId: extractPlaceId(response?.url() || ""),
-  };
+  const markerResponse = await markerPromise;
+  let placeId = extractPlaceId(markerResponse?.url() || "");
+
+  if (!placeId) {
+    const deadline = Date.now() + 5_000;
+    while (Date.now() < deadline && !placeId) {
+      for (const candidate of [page.url(), ...page.frames().map((item) => item.url())]) {
+        placeId ||= extractPlaceId(candidate);
+      }
+      if (!placeId) await delay(250);
+    }
+  }
+
+  return { placeId, searchUrl: url, score: marked.score, text: marked.text };
 }
 
-async function waitForPlaceId(page, timeoutMs = 9_000) {
+async function waitDetailFrame(page, placeId, timeoutMs = 9_000) {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
-    for (const value of [page.url(), ...page.frames().map((frame) => frame.url())]) {
-      const placeId = extractPlaceId(value);
-      if (placeId) return placeId;
+    const frame = page.frames().find((item) => {
+      const match = item.url().match(DETAIL_FRAME_PATTERN);
+      return match?.[1] === placeId;
+    });
+    if (frame) {
+      try {
+        const ready = await frame.evaluate(() => {
+          const text = (document.body?.innerText || "").replace(/\s+/g, " ").trim();
+          return text.length > 250 && /주소|전화번호|영업시간|홈페이지/.test(text);
+        });
+        if (ready) {
+          await delay(1_500);
+          return frame;
+        }
+      } catch {
+        // Retry while rendering.
+      }
     }
     await delay(250);
   }
   return null;
 }
 
-async function waitForReadyDetailFrames(page, placeId, timeoutMs = 9_000) {
-  const deadline = Date.now() + timeoutMs;
-  let latestFrames = [];
+async function readPlaceLinks(page, placeId) {
+  const placeUrl = `https://map.naver.com/p/entry/place/${placeId}`;
+  await page.goto(placeUrl, { waitUntil: "domcontentloaded", timeout: NAV_TIMEOUT_MS });
+  const frame = await waitDetailFrame(page, placeId);
+  if (!frame) return { placeUrl, instagram: null, website: null };
+  if (await blocked(page)) throw new NaverBlockedError();
 
-  while (Date.now() < deadline) {
-    latestFrames = page.frames().filter((frame) => {
-      const url = frame.url();
-      return url.includes(`/${placeId}/`) || url.includes(`/place/${placeId}`);
-    });
+  const { links, html } = await frame.evaluate(() => ({
+    links: Array.from(document.querySelectorAll("a[href]"))
+      .slice(0, 1500)
+      .map((anchor) => ({
+        href: anchor.href,
+        text: (anchor.innerText || anchor.textContent || "").replace(/\s+/g, " ").trim().slice(0, 200),
+      })),
+    html: document.documentElement.outerHTML.slice(0, 1_200_000),
+  }));
 
-    for (const frame of latestFrames) {
-      try {
-        const ready = await frame.evaluate(() => {
-          const text = (document.body?.innerText || "").replace(/\s+/g, " ").trim();
-          const externalLink = document.querySelector(
-            "a[href*='instagram.com'], a[href*='facebook.com'], a[target='_blank'][href^='http']",
-          );
-          return Boolean(externalLink) || (text.length > 250 && /주소|전화번호|홈페이지|영업시간/.test(text));
-        });
-        if (ready) return latestFrames;
-      } catch {
-        // Retry while detail frame is rendering.
-      }
-    }
-
-    await delay(250);
-  }
-
-  return latestFrames;
-}
-
-async function collectDetailLinks(page, placeId, placeUrl) {
-  let frames = await waitForReadyDetailFrames(page, placeId);
-  if (!frames.length) {
-    await page.goto(placeUrl, { waitUntil: "domcontentloaded", timeout: NAVIGATION_TIMEOUT_MS });
-    frames = await waitForReadyDetailFrames(page, placeId);
-  }
-
-  const links = [];
-  const htmlChunks = [];
-  for (const frame of frames.length ? frames : page.frames()) {
-    try {
-      const frameLinks = await frame.evaluate(() =>
-        Array.from(document.querySelectorAll("a[href]"))
-          .slice(0, 1500)
-          .map((anchor) => ({
-            href: anchor.href,
-            text: (anchor.innerText || anchor.textContent || "").replace(/\s+/g, " ").trim().slice(0, 200),
-          })),
-      );
-      links.push(...frameLinks);
-      htmlChunks.push((await frame.content()).slice(0, 900_000));
-    } catch {
-      // Ignore detached frames.
-    }
-  }
-
-  const decodedHtml = htmlChunks.join("\n").replace(/\\u002F/gi, "/").replace(/\\\//g, "/");
-  const instagramMatches = decodedHtml.match(/https?:\/\/(?:www\.)?instagram\.com\/[a-z0-9._]+/gi) || [];
-
-  let directProfile = null;
-  const websiteCandidates = [];
-  for (const item of links) {
-    const external = unwrapExternalUrl(item.href, placeUrl);
+  let instagram = null;
+  const websites = [];
+  for (const link of links) {
+    const external = externalUrl(link.href, placeUrl);
     if (!external) continue;
-    directProfile ||= normalizeInstagramProfile(external);
-    if (isPublicWebsite(external)) {
-      websiteCandidates.push({ url: external, priority: /홈페이지|website|공식/i.test(item.text) ? 1 : 0 });
-    }
+    instagram ||= instagramProfile(external);
+    if (publicWebsite(external)) websites.push({ url: external, priority: /홈페이지|website|공식/i.test(link.text) ? 1 : 0 });
   }
-  for (const match of instagramMatches) directProfile ||= normalizeInstagramProfile(match);
 
-  websiteCandidates.sort((a, b) => b.priority - a.priority);
-  return { directProfile, officialWebsite: websiteCandidates[0]?.url || null };
+  const decodedHtml = html.replace(/\\u002F/gi, "/").replace(/\\\//g, "/");
+  for (const match of decodedHtml.match(/https?:\/\/(?:www\.)?instagram\.com\/[a-z0-9._]+/gi) || []) {
+    instagram ||= instagramProfile(match);
+  }
+  websites.sort((a, b) => b.priority - a.priority);
+  return { placeUrl, instagram, website: websites[0]?.url || null };
 }
 
 async function websiteInstagram(website) {
-  if (!isPublicWebsite(website)) return null;
+  if (!publicWebsite(website)) return null;
   try {
     const response = await fetch(website, {
       redirect: "follow",
@@ -356,9 +316,8 @@ async function websiteInstagram(website) {
     });
     if (!response.ok || !String(response.headers.get("content-type") || "").includes("text/html")) return null;
     const html = (await response.text()).slice(0, 1_200_000).replace(/\\u002F/gi, "/").replace(/\\\//g, "/");
-    const matches = html.match(/https?:\/\/(?:www\.)?instagram\.com\/[a-z0-9._]+/gi) || [];
-    for (const match of matches) {
-      const profile = normalizeInstagramProfile(match);
+    for (const match of html.match(/https?:\/\/(?:www\.)?instagram\.com\/[a-z0-9._]+/gi) || []) {
+      const profile = instagramProfile(match);
       if (profile) return profile;
     }
   } catch {
@@ -368,57 +327,57 @@ async function websiteInstagram(website) {
 }
 
 async function inspectStore(page, row) {
-  const searchUrl = naverSearchUrl(row);
-  await page.goto(searchUrl, { waitUntil: "domcontentloaded", timeout: NAVIGATION_TIMEOUT_MS });
-  await delay(1_300);
-  if (await pageBlocked(page)) throw new NaverBlockedError();
-
-  const clicked = await clickBestSearchResult(page, row);
-  if (!clicked.clicked) {
+  const resolved = await resolvePlaceId(page, row);
+  if (!resolved.placeId) {
     return {
-      placeId: null, placeUrl: null, searchUrl, officialWebsite: null, instagramUrl: null,
-      instagramUsername: null, discoverySource: "none", confidence: Math.min(clicked.score, 50),
-      reasons: [clicked.text || "상호명과 주소가 맞는 네이버 장소를 선택하지 못함"],
+      placeId: null,
+      placeUrl: null,
+      searchUrl: resolved.searchUrl,
+      website: null,
+      instagram: null,
+      source: "none",
+      confidence: Math.min(resolved.score, 70),
+      reasons: [resolved.text || "상호명과 주소가 맞는 네이버 장소를 확인하지 못함"],
     };
   }
 
-  const placeId = clicked.placeId || await waitForPlaceId(page, 5_000);
-  if (!placeId) {
+  const detail = await readPlaceLinks(page, resolved.placeId);
+  if (detail.instagram) {
     return {
-      placeId: null, placeUrl: null, searchUrl, officialWebsite: null, instagramUrl: null,
-      instagramUsername: null, discoverySource: "none", confidence: Math.min(clicked.score, 70),
-      reasons: ["검색 결과는 선택했지만 네이버 장소 ID를 확인하지 못함", clicked.text],
+      placeId: resolved.placeId,
+      placeUrl: detail.placeUrl,
+      searchUrl: resolved.searchUrl,
+      website: detail.website,
+      instagram: detail.instagram,
+      source: "naver_place",
+      confidence: 100,
+      reasons: ["네이버 장소 상세에 등록된 인스타그램 링크", resolved.text],
     };
   }
 
-  const placeUrl = `https://map.naver.com/p/entry/place/${placeId}`;
-  if (await pageBlocked(page)) throw new NaverBlockedError();
-  const { directProfile, officialWebsite } = await collectDetailLinks(page, placeId, placeUrl);
-
-  if (directProfile) {
-    return {
-      placeId, placeUrl, searchUrl, officialWebsite, instagramUrl: directProfile.url,
-      instagramUsername: directProfile.username, discoverySource: "naver_place", confidence: 100,
-      reasons: ["네이버 장소 상세에 등록된 인스타그램 링크", clicked.text],
-    };
-  }
-
-  const websiteProfile = officialWebsite ? await websiteInstagram(officialWebsite) : null;
+  const websiteProfile = detail.website ? await websiteInstagram(detail.website) : null;
   if (websiteProfile) {
     return {
-      placeId, placeUrl, searchUrl, officialWebsite, instagramUrl: websiteProfile.url,
-      instagramUsername: websiteProfile.username, discoverySource: "official_website", confidence: 95,
-      reasons: ["네이버 장소의 공식 홈페이지에서 인스타그램 링크 확인", clicked.text],
+      placeId: resolved.placeId,
+      placeUrl: detail.placeUrl,
+      searchUrl: resolved.searchUrl,
+      website: detail.website,
+      instagram: websiteProfile,
+      source: "official_website",
+      confidence: 95,
+      reasons: ["네이버 장소의 공식 홈페이지에서 인스타그램 링크 확인", resolved.text],
     };
   }
 
   return {
-    placeId, placeUrl, searchUrl, officialWebsite, instagramUrl: null, instagramUsername: null,
-    discoverySource: "none", confidence: 85,
-    reasons: [
-      officialWebsite ? "장소와 공식 홈페이지는 확인했지만 인스타그램 링크 없음" : "장소는 확인했지만 외부 링크 없음",
-      clicked.text,
-    ],
+    placeId: resolved.placeId,
+    placeUrl: detail.placeUrl,
+    searchUrl: resolved.searchUrl,
+    website: detail.website,
+    instagram: null,
+    source: "none",
+    confidence: 85,
+    reasons: [detail.website ? "공식 홈페이지는 확인했지만 인스타그램 링크 없음" : "장소는 확인했지만 외부 링크 없음", resolved.text],
   };
 }
 
@@ -434,7 +393,7 @@ async function launchBrowser() {
 
 async function preparePage(browser) {
   const page = await browser.newPage();
-  page.setDefaultNavigationTimeout(NAVIGATION_TIMEOUT_MS);
+  page.setDefaultNavigationTimeout(NAV_TIMEOUT_MS);
   page.setDefaultTimeout(9_000);
   await page.setUserAgent(
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36",
@@ -449,26 +408,30 @@ async function preparePage(browser) {
 }
 
 export async function POST(request) {
-  if (!isSameOrigin(request)) return NextResponse.json({ error: "허용되지 않은 요청입니다." }, { status: 403 });
-
+  if (!sameOrigin(request)) return NextResponse.json({ error: "허용되지 않은 요청입니다." }, { status: 403 });
   const supabase = getSupabaseServerClient();
   if (!supabase) return NextResponse.json({ error: "Supabase 연결 없음" }, { status: 503 });
 
   try {
     const body = await request.json();
-    const region = ACTIVE_REGIONS.includes(body.region) ? body.region : "all";
+    const region = REGIONS.includes(body.region) ? body.region : "all";
     const limit = Math.min(Math.max(Number(body.limit) || MAX_BATCH_SIZE, 1), MAX_BATCH_SIZE);
-    const targetStatuses = body.retry ? ["not_found", "candidate"] : ["unchecked"];
+    const statuses = body.retry ? ["not_found", "candidate"] : ["unchecked"];
 
-    const { data, error } = await supabase
+    let query = supabase
       .from("public_data_restaurants")
       .select("source_id,name,road_address,address,latitude,longitude,phone,category,region_key")
-      .in("region_key", selectedRegions(region))
-      .in("instagram_status", targetStatuses)
-      .order(body.retry ? "instagram_checked_at" : "created_at", { ascending: true, nullsFirst: true })
-      .limit(limit);
+      .in("region_key", targetRegions(region));
+    if (body.sourceId) {
+      query = query.eq("source_id", String(body.sourceId)).limit(1);
+    } else {
+      query = query
+        .in("instagram_status", statuses)
+        .order(body.retry ? "instagram_checked_at" : "created_at", { ascending: true, nullsFirst: true })
+        .limit(limit);
+    }
+    const { data, error } = await query;
     if (error) throw error;
-
     const stores = data || [];
     if (!stores.length) return NextResponse.json({ processed: 0, message: "확인할 가게가 없습니다." });
 
@@ -483,10 +446,8 @@ export async function POST(request) {
     try {
       browser = await launchBrowser();
       page = await preparePage(browser);
-
       for (const store of stores) {
-        if (Date.now() - startedAt > REQUEST_DEADLINE_MS) break;
-
+        if (Date.now() - startedAt > DEADLINE_MS) break;
         let result;
         try {
           result = await inspectStore(page, store);
@@ -496,28 +457,32 @@ export async function POST(request) {
             break;
           }
           result = {
-            placeId: null, placeUrl: null, searchUrl: naverSearchUrl(store), officialWebsite: null,
-            instagramUrl: null, instagramUsername: null, discoverySource: "none", confidence: 0,
+            placeId: null,
+            placeUrl: null,
+            searchUrl: searchUrl(store),
+            website: null,
+            instagram: null,
+            source: "none",
+            confidence: 0,
             reasons: [scanError instanceof Error ? scanError.message : "네이버 장소 확인 실패"],
           };
         }
 
         const now = new Date().toISOString();
-        const hasInstagram = Boolean(result.instagramUrl && result.instagramUsername);
+        const hasInstagram = Boolean(result.instagram?.url && result.instagram?.username);
         const status = hasInstagram ? "verified" : result.placeId ? "not_found" : "candidate";
         const source = hasInstagram
-          ? result.discoverySource === "official_website" ? "naver_official_website" : "naver_place_direct"
+          ? result.source === "official_website" ? "naver_official_website" : "naver_place_direct"
           : result.placeId ? "naver_place_no_instagram" : "naver_place_unmatched";
-
         const candidate = {
           provider: "naver_place",
           placeId: result.placeId,
           placeUrl: result.placeUrl,
           searchUrl: result.searchUrl,
-          officialWebsite: result.officialWebsite,
-          instagramUrl: result.instagramUrl,
-          instagramUsername: result.instagramUsername,
-          discoverySource: result.discoverySource,
+          officialWebsite: result.website,
+          instagramUrl: result.instagram?.url || null,
+          instagramUsername: result.instagram?.username || null,
+          discoverySource: result.source,
           confidence: result.confidence,
           reasons: result.reasons,
         };
@@ -525,8 +490,8 @@ export async function POST(request) {
         const { error: updateError } = await supabase
           .from("public_data_restaurants")
           .update({
-            instagram_url: hasInstagram ? result.instagramUrl : null,
-            instagram_username: hasInstagram ? result.instagramUsername : null,
+            instagram_url: result.instagram?.url || null,
+            instagram_username: result.instagram?.username || null,
             instagram_status: status,
             instagram_source: source,
             instagram_confidence: result.confidence,
@@ -535,7 +500,7 @@ export async function POST(request) {
             instagram_checked_at: now,
             naver_place_id: result.placeId,
             naver_place_url: result.placeUrl,
-            official_website_url: result.officialWebsite,
+            official_website_url: result.website,
             naver_place_checked_at: now,
             updated_at: now,
           })
@@ -545,7 +510,7 @@ export async function POST(request) {
         processed += 1;
         if (result.placeId) placeResolved += 1;
         if (hasInstagram) found += 1;
-        await delay(650);
+        await delay(500);
       }
     } finally {
       if (page) await page.close().catch(() => undefined);
