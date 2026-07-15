@@ -1,3 +1,4 @@
+import NaverContinuousRunner from "@/components/NaverContinuousRunner";
 import NaverPlaceInstagramFinderV3 from "@/components/NaverPlaceInstagramFinderV3";
 import PublicDataTabs from "@/components/PublicDataTabs";
 
@@ -7,6 +8,7 @@ export default function PublicDataInstagramPage() {
   return (
     <>
       <PublicDataTabs active="instagram" />
+      <NaverContinuousRunner />
       <NaverPlaceInstagramFinderV3 />
     </>
   );
