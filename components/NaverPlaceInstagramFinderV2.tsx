@@ -55,6 +55,9 @@ const REGIONS = [
   { value: "hongdae", label: "홍대" },
 ];
 
+const TARGET_BATCH_SIZE = 10;
+const SERVER_CHUNK_SIZE = 2;
+
 function regionLabel(value: string) {
   if (value === "seongsu") return "성수";
   if (value === "hongdae") return "홍대";
@@ -114,20 +117,51 @@ export default function NaverPlaceInstagramFinderV2() {
   async function scan(retry = false) {
     setRunning(true);
     setStopped(false);
-    setMessage(retry ? "없음·실패 가게를 다시 확인 중입니다." : "네이버 장소 10곳을 순차 확인 중입니다.");
+
+    let processed = 0;
+    let placeResolved = 0;
+    let found = 0;
+    let wasStopped = false;
+
     try {
-      const response = await fetch("/api/public-data/naver-place-scan", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ region, limit: 10, retry }),
-      });
-      const data = (await response.json()) as ScanResponse;
-      if (!response.ok) throw new Error(data.error || "네이버 장소 확인 실패");
-      setStopped(Boolean(data.stopped));
-      setMessage(data.message || "네이버 장소 확인을 완료했습니다.");
+      while (processed < TARGET_BATCH_SIZE) {
+        const remaining = TARGET_BATCH_SIZE - processed;
+        const chunkSize = Math.min(SERVER_CHUNK_SIZE, remaining);
+        setMessage(
+          retry
+            ? `없음·실패 가게를 다시 확인 중입니다. ${processed}/${TARGET_BATCH_SIZE}`
+            : `네이버 장소를 자동 확인 중입니다. ${processed}/${TARGET_BATCH_SIZE}`,
+        );
+
+        const response = await fetch("/api/public-data/naver-place-scan", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ region, limit: chunkSize, retry }),
+        });
+        const data = (await response.json()) as ScanResponse;
+        if (!response.ok) throw new Error(data.error || "네이버 장소 확인 실패");
+
+        const chunkProcessed = Number(data.processed || 0);
+        processed += chunkProcessed;
+        placeResolved += Number(data.placeResolved || 0);
+        found += Number(data.found || 0);
+        wasStopped = Boolean(data.stopped);
+
+        if (wasStopped || chunkProcessed === 0) break;
+      }
+
+      setStopped(wasStopped);
+      setMessage(
+        wasStopped
+          ? `${processed}곳 처리 후 네이버 접근 제한이 감지돼 즉시 중단했습니다.`
+          : `${processed}곳 중 네이버 장소 ${placeResolved}곳을 확인했고 인스타그램 ${found}곳을 자동 저장했습니다.`,
+      );
       await loadStatus(region);
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "네이버 장소 확인 실패");
+      setMessage(
+        `${processed}곳까지 저장했습니다. ${error instanceof Error ? error.message : "네이버 장소 확인 실패"}`,
+      );
+      await loadStatus(region);
     } finally {
       setRunning(false);
     }
@@ -185,13 +219,13 @@ export default function NaverPlaceInstagramFinderV2() {
         <div className="section-heading" style={{ marginBottom: 12 }}>
           <div>
             <span>NO API KEY</span>
-            <h2>별도 API 없이 저속 시험</h2>
+            <h2>별도 API 없이 저속 확인</h2>
           </div>
-          <strong>10곳씩 순차 처리</strong>
+          <strong>한 번 클릭해 최대 10곳</strong>
         </div>
         <div className="notice" style={{ marginTop: 0 }}>
-          로그인·캡차 우회·프록시는 사용하지 않습니다. 접근 제한 문구가 나타나면 즉시 중단하고, 처리하지 못한
-          가게는 그대로 남깁니다.
+          서버 제한을 피하기 위해 2곳씩 나누어 최대 5회 자동 실행합니다. 로그인·캡차 우회·프록시는 사용하지 않으며,
+          접근 제한 문구가 나타나면 즉시 중단합니다.
         </div>
       </section>
 
@@ -225,7 +259,7 @@ export default function NaverPlaceInstagramFinderV2() {
             <span>LOW-SPEED BATCH</span>
             <h2>네이버 장소 자동 확인</h2>
           </div>
-          <p>한 브라우저에서 순차 실행</p>
+          <p>2곳씩 나누어 최대 10곳</p>
         </div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
           <select
@@ -241,7 +275,11 @@ export default function NaverPlaceInstagramFinderV2() {
           <button className="primary-button" disabled={running || !status.unchecked} onClick={() => void scan(false)}>
             {running ? "네이버 장소 확인 중…" : "다음 10곳 자동 확인"}
           </button>
-          <button className="ghost-button" disabled={running || !status.notFound} onClick={() => void scan(true)}>
+          <button
+            className="ghost-button"
+            disabled={running || !(status.notFound || status.candidate)}
+            onClick={() => void scan(true)}
+          >
             없음·실패 10곳 재확인
           </button>
         </div>
@@ -341,7 +379,7 @@ export default function NaverPlaceInstagramFinderV2() {
         ) : (
           <div className="empty-state">
             <strong>아직 처리한 가게가 없습니다.</strong>
-            <span>성수 또는 홍대를 선택하고 10곳 시험을 실행해주세요.</span>
+            <span>성수 또는 홍대를 선택하고 10곳 확인을 실행해주세요.</span>
           </div>
         )}
       </section>
