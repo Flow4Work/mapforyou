@@ -1,0 +1,15 @@
+.restaurant-detail-panel .detail-overview-card,
+.detail-main-column > .detail-section-heading:first-child {
+  display: none !important;
+}
+
+.restaurant-detail-scroll {
+  overflow-anchor: none;
+  scroll-behavior: auto;
+}
+
+.restaurant-detail-scroll > .restaurant-cover-stack,
+.detail-hero-grid > .restaurant-cover-stack {
+  position: relative;
+  z-index: 1;
+}
