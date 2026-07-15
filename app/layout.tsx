@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import "./discovery.css";
 import "./discovery-map.css";
+import "./media.css";
 
 export const metadata: Metadata = {
   title: "MapForYou | Translated Seoul Menus",
