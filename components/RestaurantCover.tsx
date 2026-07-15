@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import RestaurantMedia from "@/components/RestaurantMedia";
 import type { DiscoveryRestaurant } from "@/lib/discovery";
 import {
   broadCategory,
@@ -28,7 +29,7 @@ export default function RestaurantCover({
 
   useEffect(() => setFailed(false), [store.imageUrl]);
 
-  return (
+  const cover = (
     <div
       className={`restaurant-cover cover-${category} ${compact ? "restaurant-cover-compact" : ""}`}
       style={{ position: "relative", overflow: "hidden", background: preserveOriginal ? "#f1eee7" : undefined }}
@@ -81,6 +82,15 @@ export default function RestaurantCover({
           </small>
         )}
       </div>
+    </div>
+  );
+
+  if (compact) return cover;
+
+  return (
+    <div className="restaurant-cover-stack">
+      {cover}
+      <RestaurantMedia store={store} language={language} />
     </div>
   );
 }
