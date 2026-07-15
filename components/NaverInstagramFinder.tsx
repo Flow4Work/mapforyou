@@ -3,12 +3,18 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 
 type Candidate = {
-  url: string;
-  username: string;
-  title: string;
-  description: string;
+  provider: "foursquare";
+  fsqId: string;
+  placeName: string;
+  address: string;
+  distance: number | null;
   score: number;
-  query: string;
+  reasons: string[];
+  instagramUrl: string | null;
+  instagramUsername: string | null;
+  website: string | null;
+  phone: string | null;
+  verifiedPlace: boolean;
 };
 
 type InstagramRow = {
@@ -36,7 +42,9 @@ type StatusResponse = {
   rejected?: number;
   rows?: InstagramRow[];
   processed?: number;
+  matched?: number;
   found?: number;
+  autoVerified?: number;
   message?: string;
   error?: string;
 };
@@ -60,10 +68,10 @@ function regionLabel(regionKey: string) {
   return regionKey || "지역 미확인";
 }
 
-function statusLabel(status: string) {
-  if (status === "verified") return "확정";
-  if (status === "candidate") return "후보 발견";
-  if (status === "not_found") return "결과 없음";
+function statusLabel(status: string, source: string | null) {
+  if (status === "verified") return source === "foursquare_auto" ? "자동 확정" : "확정";
+  if (status === "candidate") return "검토 필요";
+  if (status === "not_found") return source === "foursquare_no_instagram" ? "인스타 없음" : "매칭 실패";
   if (status === "rejected") return "후보 제외";
   return "미확인";
 }
@@ -75,12 +83,16 @@ function statusClass(status: string) {
   return "";
 }
 
-export default function NaverInstagramFinder() {
+function distanceLabel(distance: number | null) {
+  if (distance === null) return "거리 정보 없음";
+  return `${Math.round(distance).toLocaleString("ko-KR")}m`;
+}
+
+export default function FoursquareInstagramFinder() {
   const [region, setRegion] = useState("all");
   const [status, setStatus] = useState<StatusResponse>({});
   const [credentialStatus, setCredentialStatus] = useState<CredentialStatus>({});
-  const [clientId, setClientId] = useState("");
-  const [clientSecret, setClientSecret] = useState("");
+  const [apiKey, setApiKey] = useState("");
   const [manualDrafts, setManualDrafts] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [running, setRunning] = useState(false);
@@ -110,7 +122,7 @@ export default function NaverInstagramFinder() {
 
   async function loadCredentialStatus() {
     try {
-      const response = await fetch("/api/naver/search-credentials", { cache: "no-store" });
+      const response = await fetch("/api/foursquare/credentials", { cache: "no-store" });
       const data = (await response.json()) as CredentialStatus;
       setCredentialStatus(data);
     } catch {
@@ -120,28 +132,25 @@ export default function NaverInstagramFinder() {
 
   async function saveCredentials(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!clientId.trim() || !clientSecret.trim()) {
-      setMessage("Client ID와 Client Secret을 모두 입력해주세요.");
+    if (!apiKey.trim()) {
+      setMessage("Foursquare Places API Key를 입력해주세요.");
       return;
     }
-
     setSavingCredentials(true);
     setMessage("");
     try {
-      const response = await fetch("/api/naver/search-credentials", {
+      const response = await fetch("/api/foursquare/credentials", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ clientId: clientId.trim(), clientSecret: clientSecret.trim() }),
+        body: JSON.stringify({ apiKey: apiKey.trim() }),
       });
       const data = (await response.json()) as CredentialStatus & { saved?: boolean };
-      if (!response.ok) throw new Error(data.error || "네이버 검색 키 저장 실패");
-
-      setClientId("");
-      setClientSecret("");
+      if (!response.ok) throw new Error(data.error || "Foursquare API Key 저장 실패");
+      setApiKey("");
       setCredentialStatus({ configured: true, source: "admin", updatedAt: data.updatedAt ?? null });
-      setMessage("네이버 검색 API 연결을 확인하고 저장했습니다.");
+      setMessage("Foursquare Places API 연결을 확인하고 저장했습니다.");
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "네이버 검색 키 저장 실패");
+      setMessage(error instanceof Error ? error.message : "Foursquare API Key 저장 실패");
     } finally {
       setSavingCredentials(false);
     }
@@ -149,20 +158,19 @@ export default function NaverInstagramFinder() {
 
   async function scanBatch(retry = false) {
     setRunning(true);
-    setMessage(retry ? "결과가 없었던 가게 10곳을 다시 찾는 중입니다." : "다음 가게 10곳을 찾는 중입니다.");
-
+    setMessage(retry ? "결과가 없었던 가게 20곳을 다시 확인 중입니다." : "다음 가게 20곳을 자동 매칭 중입니다.");
     try {
       const response = await fetch("/api/public-data/instagram", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "scan", region, limit: 10, retry }),
+        body: JSON.stringify({ action: "scan", region, limit: 20, retry }),
       });
       const data = (await response.json()) as StatusResponse;
-      if (!response.ok) throw new Error(data.error || "인스타그램 검색 실패");
+      if (!response.ok) throw new Error(data.error || "Foursquare 인스타그램 검색 실패");
       setStatus(data);
-      setMessage(data.message || "10곳 검색을 완료했습니다.");
+      setMessage(data.message || "20곳 검색을 완료했습니다.");
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "인스타그램 검색 실패");
+      setMessage(error instanceof Error ? error.message : "Foursquare 인스타그램 검색 실패");
     } finally {
       setRunning(false);
     }
@@ -184,7 +192,9 @@ export default function NaverInstagramFinder() {
       const data = (await response.json()) as StatusResponse;
       if (!response.ok) throw new Error(data.error || "저장 실패");
       setStatus(data);
-      setMessage(`${row.name}: ${action === "verify" || action === "manual" ? "공식 계정으로 확정했습니다." : "후보 상태를 변경했습니다."}`);
+      setMessage(
+        `${row.name}: ${action === "verify" || action === "manual" ? "공식 계정으로 확정했습니다." : "상태를 변경했습니다."}`,
+      );
       if (action === "manual") {
         setManualDrafts((current) => {
           const next = { ...current };
@@ -217,12 +227,13 @@ export default function NaverInstagramFinder() {
         }}
       >
         <div>
-          <p className="eyebrow">NAVER WEB SEARCH</p>
+          <p className="eyebrow">FOURSQUARE PLACES</p>
           <h1 style={{ margin: 0, fontSize: "clamp(32px, 5vw, 48px)", letterSpacing: "-.05em" }}>
-            가게 인스타그램 찾기
+            가게 인스타그램 자동 수집
           </h1>
-          <p style={{ maxWidth: 760, margin: "12px 0 0", color: "var(--muted)", lineHeight: 1.65 }}>
-            저장된 성수·홍대 가게를 10곳씩 검색합니다. 후보는 자동 확정하지 않으며, 직접 확인한 계정만 공식 URL로 저장됩니다.
+          <p style={{ maxWidth: 780, margin: "12px 0 0", color: "var(--muted)", lineHeight: 1.65 }}>
+            상호명과 실제 좌표를 함께 비교해 20곳씩 매칭합니다. 일치도가 높은 장소의 인스타그램은 자동 확정하고,
+            애매한 결과만 검토 목록에 남깁니다.
           </p>
         </div>
         <button className="ghost-button" disabled={loading || running} onClick={() => void loadStatus()}>
@@ -233,45 +244,26 @@ export default function NaverInstagramFinder() {
       <section className="card">
         <div className="section-heading" style={{ marginBottom: 16 }}>
           <div>
-            <span>SEARCH API KEY</span>
-            <h2>네이버 검색 API 연결</h2>
+            <span>PLACES API KEY</span>
+            <h2>Foursquare 연결</h2>
           </div>
           <strong>{credentialStatus.configured ? "연결됨" : "키 필요"}</strong>
         </div>
-
         <div className="notice" style={{ marginTop: 0, marginBottom: 14 }}>
-          현재 지도에 쓰는 NAVER Cloud Maps 키와는 별개입니다. 네이버 개발자센터 애플리케이션에서 ‘검색’ API를 추가한 뒤 Client ID와 Client Secret을 넣어야 합니다.
+          네이버 웹검색은 사용하지 않습니다. Foursquare Developer Console에서 Places API Key 하나만 발급해 넣으면 됩니다.
         </div>
-
-        <form
-          onSubmit={saveCredentials}
-          style={{ display: "grid", gridTemplateColumns: "minmax(180px, .8fr) minmax(240px, 1.2fr) auto", gap: 10 }}
-        >
+        <form onSubmit={saveCredentials} style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) auto", gap: 10 }}>
           <input
             type="password"
-            value={clientId}
-            onChange={(event) => setClientId(event.target.value)}
-            placeholder="X-Naver-Client-Id"
+            value={apiKey}
+            onChange={(event) => setApiKey(event.target.value)}
+            placeholder="Foursquare Places API Key"
             autoComplete="off"
             spellCheck={false}
             disabled={savingCredentials}
             style={{ minWidth: 0, padding: "12px 13px", border: "1px solid #dde0d8", borderRadius: 11 }}
           />
-          <input
-            type="password"
-            value={clientSecret}
-            onChange={(event) => setClientSecret(event.target.value)}
-            placeholder="X-Naver-Client-Secret"
-            autoComplete="off"
-            spellCheck={false}
-            disabled={savingCredentials}
-            style={{ minWidth: 0, padding: "12px 13px", border: "1px solid #dde0d8", borderRadius: 11 }}
-          />
-          <button
-            className="secondary-button"
-            type="submit"
-            disabled={savingCredentials || !clientId.trim() || !clientSecret.trim()}
-          >
+          <button className="secondary-button" type="submit" disabled={savingCredentials || !apiKey.trim()}>
             {savingCredentials ? "연결 확인 중…" : "확인 후 저장"}
           </button>
         </form>
@@ -280,7 +272,7 @@ export default function NaverInstagramFinder() {
             ? credentialStatus.source === "environment"
               ? "Vercel 환경변수에 저장된 키를 사용 중입니다."
               : `관리자에서 저장한 키 사용 중${credentialStatus.updatedAt ? ` · ${new Date(credentialStatus.updatedAt).toLocaleString("ko-KR")}` : ""}`
-            : "네이버 검색 키가 아직 없습니다."}
+            : "Foursquare Places API Key가 아직 없습니다."}
         </div>
       </section>
 
@@ -296,9 +288,9 @@ export default function NaverInstagramFinder() {
         {[
           ["전체 가게", status.total ?? 0],
           ["미확인", status.unchecked ?? 0],
-          ["후보 발견", status.candidate ?? 0],
+          ["검토 필요", status.candidate ?? 0],
           ["확정", status.verified ?? 0],
-          ["결과 없음", status.notFound ?? 0],
+          ["없음·매칭 실패", status.notFound ?? 0],
         ].map(([label, value]) => (
           <article key={String(label)} className="card" style={{ marginBottom: 0, padding: 18 }}>
             <span style={{ color: "var(--muted)", fontSize: 11, fontWeight: 800 }}>{label}</span>
@@ -310,12 +302,11 @@ export default function NaverInstagramFinder() {
       <section className="card">
         <div className="section-heading" style={{ marginBottom: 14 }}>
           <div>
-            <span>BATCH SEARCH</span>
-            <h2>10곳씩 후보 찾기</h2>
+            <span>AUTO MATCH</span>
+            <h2>20곳씩 시험 수집</h2>
           </div>
-          <p>가게당 웹문서 결과 최대 10개 확인</p>
+          <p>상호명 + 좌표 + 주소 + 전화번호 일치도 계산</p>
         </div>
-
         <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 10 }}>
           <select
             value={region}
@@ -332,19 +323,18 @@ export default function NaverInstagramFinder() {
             disabled={running || !credentialStatus.configured || !status.unchecked}
             onClick={() => void scanBatch(false)}
           >
-            {running ? "네이버에서 찾는 중…" : "다음 10곳 찾기"}
+            {running ? "Foursquare에서 매칭 중…" : "다음 20곳 자동 수집"}
           </button>
           <button
             className="ghost-button"
             disabled={running || !credentialStatus.configured || !status.notFound}
             onClick={() => void scanBatch(true)}
           >
-            결과 없음 10곳 다시 찾기
+            결과 없음 20곳 재확인
           </button>
         </div>
-
         <p className="fine-print" style={{ fontSize: 12 }}>
-          지역검색 API로 10곳을 가져오는 기능이 아닙니다. DB에 이미 저장된 가게 10곳을 골라 웹문서 검색 API로 각각 공식 인스타 후보를 찾습니다.
+          검색 결과를 단순히 상호명으로 고르지 않습니다. 저장된 좌표와 거리까지 계산하며, 88점 이상인 장소만 자동 확정합니다.
         </p>
         {message && <div className="notice">{message}</div>}
       </section>
@@ -352,38 +342,30 @@ export default function NaverInstagramFinder() {
       <section className="card">
         <div className="section-heading">
           <div>
-            <span>REVIEW QUEUE</span>
-            <h2>최근 검색 결과</h2>
+            <span>RESULTS</span>
+            <h2>최근 처리 결과</h2>
           </div>
-          <p>후보 링크를 열어 실제 가게 계정인지 확인</p>
+          <p>자동 확정 결과와 애매한 후보만 확인</p>
         </div>
-
         {loading ? (
-          <div className="empty-state compact">검색 현황을 불러오는 중입니다.</div>
+          <div className="empty-state compact">수집 현황을 불러오는 중입니다.</div>
         ) : recentRows.length ? (
           <div style={{ display: "grid", gap: 12 }}>
             {recentRows.map((row) => {
               const best = row.candidates[0] ?? null;
               const manualValue = manualDrafts[row.sourceId] ?? "";
               const saving = savingId === row.sourceId;
-
               return (
                 <article
                   key={row.sourceId}
                   style={{ padding: 18, border: "1px solid var(--line)", borderRadius: 16, background: "#fbfcf8" }}
                 >
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "minmax(180px, .8fr) minmax(240px, 1.2fr)",
-                      gap: 18,
-                    }}
-                  >
+                  <div className="result-grid">
                     <div>
                       <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8 }}>
                         <strong style={{ fontSize: 16 }}>{row.name}</strong>
                         <span className={`status-pill ${statusClass(row.instagramStatus)}`}>
-                          {statusLabel(row.instagramStatus)}
+                          {statusLabel(row.instagramStatus, row.instagramSource)}
                         </span>
                         <span className="status-pill">{regionLabel(row.regionKey)}</span>
                       </div>
@@ -392,105 +374,106 @@ export default function NaverInstagramFinder() {
                       </p>
                       {row.checkedAt && (
                         <small style={{ display: "block", marginTop: 7, color: "var(--muted)" }}>
-                          검색: {new Date(row.checkedAt).toLocaleString("ko-KR")}
+                          처리: {new Date(row.checkedAt).toLocaleString("ko-KR")}
                         </small>
                       )}
                     </div>
-
                     <div>
                       {row.instagramStatus === "verified" && row.instagramUrl ? (
-                        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 9 }}>
-                          <a className="text-link" href={row.instagramUrl} target="_blank" rel="noreferrer">
-                            @{row.instagramUsername || row.instagramUrl} ↗
-                          </a>
-                          <span className="status-pill status-found">공식 URL 저장됨</span>
+                        <div style={{ display: "grid", gap: 8 }}>
+                          <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 9 }}>
+                            <a className="text-link" href={row.instagramUrl} target="_blank" rel="noreferrer">
+                              @{row.instagramUsername || row.instagramUrl} ↗
+                            </a>
+                            <span className="status-pill status-found">
+                              {row.instagramSource === "foursquare_auto" ? "높은 일치도로 자동 저장" : "공식 URL 저장됨"}
+                            </span>
+                          </div>
+                          {best && (
+                            <small style={{ color: "var(--muted)" }}>
+                              Foursquare: {best.placeName} · {distanceLabel(best.distance)} · 일치도 {best.score}
+                            </small>
+                          )}
                         </div>
                       ) : best ? (
                         <>
                           <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 9 }}>
-                            <a className="text-link" href={best.url} target="_blank" rel="noreferrer">
-                              @{best.username} ↗
-                            </a>
-                            <span className={`status-pill ${best.score >= 75 ? "status-found" : "status-partial"}`}>
-                              신뢰도 {best.score}
+                            <strong>{best.placeName || "Foursquare 장소명 없음"}</strong>
+                            <span className={`status-pill ${best.score >= 88 ? "status-found" : "status-partial"}`}>
+                              일치도 {best.score}
                             </span>
+                            <span className="status-pill">{distanceLabel(best.distance)}</span>
                           </div>
-                          <p style={{ margin: "7px 0 0", fontSize: 12, lineHeight: 1.55 }}>
-                            {best.title || "제목 없음"}
+                          <p style={{ margin: "7px 0 0", color: "var(--muted)", fontSize: 11, lineHeight: 1.5 }}>
+                            {best.address || "Foursquare 주소 없음"}
                           </p>
-                          {best.description && (
-                            <p style={{ margin: "5px 0 0", color: "var(--muted)", fontSize: 11, lineHeight: 1.5 }}>
-                              {best.description.slice(0, 180)}
+                          {best.reasons.length > 0 && (
+                            <p style={{ margin: "6px 0 0", color: "var(--muted)", fontSize: 11 }}>
+                              {best.reasons.join(" · ")}
                             </p>
                           )}
-                          {row.candidates.length > 1 && (
-                            <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 9 }}>
-                              {row.candidates.slice(1, 5).map((candidate) => (
-                                <a
-                                  key={candidate.username}
-                                  className="status-pill"
-                                  href={candidate.url}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                >
-                                  @{candidate.username} · {candidate.score}
-                                </a>
-                              ))}
-                            </div>
+                          {best.instagramUrl ? (
+                            <a
+                              className="text-link"
+                              href={best.instagramUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              style={{ display: "inline-block", marginTop: 9 }}
+                            >
+                              @{best.instagramUsername} ↗
+                            </a>
+                          ) : (
+                            <p style={{ margin: "9px 0 0", color: "var(--muted)", fontSize: 12 }}>
+                              장소는 매칭됐지만 Foursquare에 인스타그램 정보가 없습니다.
+                            </p>
+                          )}
+                          {best.website && (
+                            <a
+                              className="status-pill"
+                              href={best.website}
+                              target="_blank"
+                              rel="noreferrer"
+                              style={{ display: "inline-flex", marginTop: 9 }}
+                            >
+                              공식 웹사이트 ↗
+                            </a>
                           )}
                         </>
                       ) : (
                         <p style={{ margin: 0, color: "var(--muted)", fontSize: 12 }}>
-                          네이버 웹문서 검색에서 인스타그램 프로필 후보를 찾지 못했습니다.
+                          800m 안에서 신뢰할 수 있는 Foursquare 장소를 찾지 못했습니다.
                         </p>
                       )}
                     </div>
                   </div>
-
                   {row.instagramStatus !== "verified" && (
                     <>
                       <div className="action-row" style={{ marginTop: 14 }}>
-                        {best && (
+                        {best?.instagramUrl && (
                           <button
                             className="secondary-button"
                             disabled={saving}
-                            onClick={() => void saveStoreAction(row, "verify", best.url)}
+                            onClick={() => void saveStoreAction(row, "verify", best.instagramUrl!)}
                           >
                             이 계정 확정
                           </button>
                         )}
-                        {best && (
-                          <button
-                            className="ghost-button"
-                            disabled={saving}
-                            onClick={() => void saveStoreAction(row, "reject")}
-                          >
+                        {best?.instagramUrl && (
+                          <button className="ghost-button" disabled={saving} onClick={() => void saveStoreAction(row, "reject")}>
                             후보 아님
                           </button>
                         )}
-                        <button
-                          className="text-button"
-                          disabled={saving}
-                          onClick={() => void saveStoreAction(row, "not_found")}
-                        >
+                        <button className="text-button" disabled={saving} onClick={() => void saveStoreAction(row, "not_found")}>
                           계정 없음 처리
                         </button>
                       </div>
-
-                      <div
-                        style={{
-                          display: "grid",
-                          gridTemplateColumns: "minmax(0, 1fr) auto",
-                          gap: 9,
-                          marginTop: 13,
-                        }}
-                      >
+                      <div className="manual-grid">
                         <input
                           value={manualValue}
                           onChange={(event) =>
                             setManualDrafts((current) => ({ ...current, [row.sourceId]: event.target.value }))
                           }
-                          placeholder="직접 확인한 https://www.instagram.com/사용자명/"
+                          placeholder="추가로 확인한 https://www.instagram.com/사용자명/"
                           disabled={saving}
                           style={{ minWidth: 0, padding: "11px 12px", border: "1px solid #dde0d8", borderRadius: 11 }}
                         />
@@ -510,17 +493,28 @@ export default function NaverInstagramFinder() {
           </div>
         ) : (
           <div className="empty-state">
-            <strong>아직 검색한 가게가 없습니다.</strong>
-            <span>네이버 검색 키를 연결하고 ‘다음 10곳 찾기’를 실행해주세요.</span>
+            <strong>아직 처리한 가게가 없습니다.</strong>
+            <span>Foursquare 키를 연결하고 ‘다음 20곳 자동 수집’을 실행해주세요.</span>
           </div>
         )}
       </section>
 
       <style jsx>{`
+        .result-grid {
+          display: grid;
+          grid-template-columns: minmax(180px, .8fr) minmax(260px, 1.2fr);
+          gap: 18px;
+        }
+        .manual-grid {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) auto;
+          gap: 9px;
+          margin-top: 13px;
+        }
         @media (max-width: 760px) {
           form,
-          article > div,
-          article > div + div {
+          .result-grid,
+          .manual-grid {
             grid-template-columns: 1fr !important;
           }
         }
