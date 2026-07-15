@@ -1,10 +1,11 @@
 import Link from "next/link";
 
-type AdminTab = "collect" | "images" | "analytics";
+type AdminTab = "collect" | "images" | "instagram" | "analytics";
 
 const tabs: Array<{ key: AdminTab; href: string; label: string }> = [
   { key: "collect", href: "/admin/public-data", label: "가게·메뉴 수집" },
   { key: "images", href: "/admin/public-data/images", label: "사진 보강·직접 확인" },
+  { key: "instagram", href: "/admin/public-data/instagram", label: "인스타그램 찾기" },
   { key: "analytics", href: "/admin/public-data/analytics", label: "이용 현황" },
 ];
 
