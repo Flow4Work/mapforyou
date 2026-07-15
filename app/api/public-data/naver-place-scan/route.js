@@ -239,7 +239,7 @@ async function findBestResult(frame, row) {
 async function resolvePlaceId(page, row) {
   const url = searchUrl(row);
   await page.goto(url, { waitUntil: "domcontentloaded", timeout: NAV_TIMEOUT_MS });
-  await delay(1_300);
+  await delay(2_000);
   if (await blocked(page)) throw new NaverBlockedError();
 
   const frame = await waitSearchFrame(page);
@@ -405,11 +405,6 @@ async function preparePage(browser) {
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36",
   );
   await page.setExtraHTTPHeaders({ "accept-language": "ko-KR,ko;q=0.9,en;q=0.7" });
-  await page.setRequestInterception(true);
-  page.on("request", (request) => {
-    if (["image", "media", "font"].includes(request.resourceType())) request.abort();
-    else request.continue();
-  });
   return page;
 }
 
