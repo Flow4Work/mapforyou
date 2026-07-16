@@ -30,7 +30,7 @@ export default function RestaurantMedia({
   const instagramUrl = String(store.instagramUrl || "").trim();
   const additionalImages = (store.imageGalleryUrls || [])
     .filter((url) => url && url !== store.imageUrl)
-    .slice(0, compact ? 3 : 5);
+    .slice(0, compact ? 3 : 4);
   const hasInstagramPost = instagramContentUrl(instagramUrl);
   const hasInstagramProfile = Boolean(instagramUrl) && !hasInstagramPost;
 
@@ -39,19 +39,31 @@ export default function RestaurantMedia({
   const copy = language === "ja"
     ? {
         social: "公式Instagram",
-        socialBody: "最新の写真や営業情報はInstagramで確認できます。",
-        open: "Instagramを開く",
+        open: "Instagram",
         gallery: "写真",
       }
     : {
         social: "Official Instagram",
-        socialBody: "See recent photos and updates on Instagram.",
-        open: "Open Instagram",
-        gallery: "More photos",
+        open: "Instagram",
+        gallery: "Photos",
       };
 
   return (
     <section className={`restaurant-media ${compact ? "restaurant-media-compact" : ""}`}>
+      {additionalImages.length > 0 && (
+        <div className="restaurant-gallery-block">
+          <div className="restaurant-gallery-heading">
+            <span>{copy.gallery}</span>
+            <strong>{additionalImages.length + (store.imageUrl ? 1 : 0)}</strong>
+          </div>
+          <div className={`restaurant-gallery ${additionalImages.length === 1 ? "single" : ""}`}>
+            {additionalImages.map((url, index) => (
+              <img key={`${url}-${index}`} src={url} alt={`${store.name} ${copy.gallery} ${index + 2}`} loading="lazy" />
+            ))}
+          </div>
+        </div>
+      )}
+
       {hasInstagramPost && (
         <div className="instagram-embed-shell">
           <iframe
@@ -67,29 +79,11 @@ export default function RestaurantMedia({
       )}
 
       {hasInstagramProfile && (
-        <a className="instagram-profile-card" href={instagramUrl} target="_blank" rel="noreferrer">
-          <span className="instagram-profile-icon">◎</span>
-          <span>
-            <small>{copy.social}</small>
-            <strong>@{instagramHandle(store)}</strong>
-            <em>{copy.socialBody}</em>
-          </span>
+        <a className="instagram-profile-link" href={instagramUrl} target="_blank" rel="noreferrer">
+          <span className="instagram-profile-link-icon">◎</span>
+          <span><small>{copy.social}</small><strong>@{instagramHandle(store)}</strong></span>
           <b>↗</b>
         </a>
-      )}
-
-      {!instagramUrl && additionalImages.length > 0 && (
-        <div className="restaurant-gallery-block">
-          <div className="restaurant-gallery-heading">
-            <span>{copy.gallery}</span>
-            <strong>{additionalImages.length + 1}</strong>
-          </div>
-          <div className={`restaurant-gallery ${additionalImages.length === 1 ? "single" : ""}`}>
-            {additionalImages.map((url, index) => (
-              <img key={`${url}-${index}`} src={url} alt={`${store.name} ${copy.gallery} ${index + 2}`} loading="lazy" />
-            ))}
-          </div>
-        </div>
       )}
     </section>
   );
