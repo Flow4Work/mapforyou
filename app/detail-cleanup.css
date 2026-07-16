@@ -13,3 +13,84 @@
   position: relative;
   z-index: 1;
 }
+
+.instagram-profile-card {
+  display: none !important;
+}
+
+.instagram-profile-link {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+  min-height: 42px;
+  padding: 7px 10px;
+  border: 1px solid #eadfd8;
+  border-radius: 11px;
+  color: #59333b;
+  background: #fff;
+}
+
+.instagram-profile-link-icon {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 9px;
+  color: #fff;
+  background: linear-gradient(145deg, #f9a13b, #e44167 52%, #7b3fc6);
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.instagram-profile-link > span:nth-child(2) {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.instagram-profile-link small {
+  color: #9e6e76;
+  font-size: 7px;
+  font-weight: 900;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+
+.instagram-profile-link strong {
+  overflow: hidden;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.instagram-profile-link b {
+  color: #b14d66;
+  font-size: 13px;
+}
+
+.restaurant-detail-panel .restaurant-gallery-block {
+  padding: 9px;
+  border-radius: 12px;
+}
+
+.restaurant-detail-panel .restaurant-gallery-heading {
+  margin-bottom: 7px;
+}
+
+.restaurant-detail-panel .restaurant-gallery {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.restaurant-detail-panel .restaurant-gallery img {
+  aspect-ratio: 1 / 1;
+  border-radius: 8px;
+}
+
+@media (max-width: 560px) {
+  .restaurant-detail-panel .restaurant-gallery {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
