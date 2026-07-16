@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import PublicQualityGuard from "@/components/PublicQualityGuard";
 import "./globals.css";
 import "./booking.css";
 import "./discovery.css";
@@ -12,5 +13,5 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="ja"><body>{children}</body></html>;
+  return <html lang="ja"><body><PublicQualityGuard />{children}</body></html>;
 }
