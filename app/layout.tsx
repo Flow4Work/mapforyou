@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import PublicQualityGuard from "@/components/PublicQualityGuard";
 import "./globals.css";
 import "./discovery.css";
 import "./discovery-map.css";
@@ -11,5 +12,5 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="en"><body>{children}</body></html>;
+  return <html lang="en"><body><PublicQualityGuard />{children}</body></html>;
 }
