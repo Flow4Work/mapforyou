@@ -16,12 +16,18 @@ export async function GET(request: Request) {
     const offset = integerParam(url.searchParams.get("offset"), 0);
     const perRegion = integerParam(url.searchParams.get("perRegion"), 20);
     const page = await loadDiscoveryRestaurantPage({ offset, perRegion });
+    const stores = page.stores.filter(
+      (store) => store.regionKey === "seongsu",
+    );
 
-    return NextResponse.json(page, {
-      headers: {
-        "Cache-Control": "no-store, max-age=0",
+    return NextResponse.json(
+      { stores, nextOffset: null },
+      {
+        headers: {
+          "Cache-Control": "no-store, max-age=0",
+        },
       },
-    });
+    );
   } catch (error) {
     console.error("discovery pagination failed", error);
     return NextResponse.json({ error: "Discovery data unavailable" }, { status: 500 });
