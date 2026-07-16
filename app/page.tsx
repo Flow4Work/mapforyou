@@ -3,7 +3,8 @@ import DetailPanelScrollReset from "@/components/DetailPanelScrollReset";
 import DiscoveryApp from "@/components/DiscoveryApp";
 import { loadDiscoveryRestaurants } from "@/lib/discovery";
 
-export const revalidate = 300;
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export default async function HomePage() {
   const stores = await loadDiscoveryRestaurants(1000);
