@@ -78,7 +78,10 @@ export default function CuratedPlaceBuilder() {
   const hasPlace = Boolean(draft?.name.trim() && (draft?.roadAddress.trim() || draft?.address.trim()));
   const hasInstagram = Boolean(draft?.instagramUrl.trim());
   const hasMenus = parsedMenus.length > 0;
-  const hasCoordinates = Number.isFinite(Number(draft?.latitude)) && Number.isFinite(Number(draft?.longitude));
+  const hasCoordinates = draft?.latitude != null
+    && draft?.longitude != null
+    && Number.isFinite(Number(draft.latitude))
+    && Number.isFinite(Number(draft.longitude));
   const ready = hasPlace && hasInstagram && hasMenus && hasCoordinates;
 
   function update<K extends keyof PlaceDraft>(key: K, value: PlaceDraft[K]) {
@@ -91,10 +94,10 @@ export default function CuratedPlaceBuilder() {
     setMessage("네이버 장소 1곳을 확인하고 있습니다.");
     setTest(null);
     try {
-      const response = await fetch("/api/public-data/curated-place", {
+      const response = await fetch("/api/public-data/curated-place/preview", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "preview", url }),
+        body: JSON.stringify({ url }),
       });
       const data = (await response.json()) as { preview?: PlaceDraft; error?: string };
       if (!response.ok || !data.preview) throw new Error(data.error || "가게 정보를 불러오지 못했습니다.");
