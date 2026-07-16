@@ -6,7 +6,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
-const BATCH_SIZE = 3;
+const BATCH_SIZE = 1;
 const NAVIGATION_TIMEOUT_MS = 12_000;
 
 const TARGETS = [
