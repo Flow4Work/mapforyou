@@ -1,18 +1,10 @@
-import AnalyticsTracker from "@/components/AnalyticsTracker";
-import DetailPanelScrollReset from "@/components/DetailPanelScrollReset";
-import DiscoveryApp from "@/components/DiscoveryApp";
-import { loadDiscoveryRestaurants } from "@/lib/discovery";
+import BookingConciergeHome from "@/components/BookingConciergeHome";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const metadata = {
+  title: "韓国の予約代行 | MapForYou",
+  description: "韓国のレストランや美容室へ日本語で予約を依頼できます。空席確認後にPayPalまたはカードで支払います。",
+};
 
-export default async function HomePage() {
-  const stores = await loadDiscoveryRestaurants(1000);
-  return (
-    <>
-      <AnalyticsTracker />
-      <DetailPanelScrollReset />
-      <DiscoveryApp initialStores={stores} />
-    </>
-  );
+export default function HomePage() {
+  return <BookingConciergeHome />;
 }
