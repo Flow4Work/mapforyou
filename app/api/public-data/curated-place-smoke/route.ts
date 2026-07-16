@@ -6,42 +6,45 @@ export const maxDuration = 30;
 
 const PLACE_ID = "31316692";
 
-function snippets(html: string, pattern: RegExp, radius = 180, limit = 8) {
-  const values: string[] = [];
-  for (const match of html.matchAll(pattern)) {
-    const index = match.index ?? 0;
-    values.push(html.slice(Math.max(0, index - radius), Math.min(html.length, index + match[0].length + radius)));
-    if (values.length >= limit) break;
-  }
-  return values;
-}
-
-export async function GET() {
-  const url = `https://pcmap.place.naver.com/place/${PLACE_ID}/home`;
-  const response = await fetch(url, {
+export async function GET(request: Request) {
+  const origin = new URL(request.url).origin;
+  const response = await fetch(`${origin}/api/public-data/curated-place/preview`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ url: PLACE_ID }),
     cache: "no-store",
-    redirect: "follow",
-    signal: AbortSignal.timeout(12_000),
-    headers: {
-      "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/150.0.0.0 Safari/537.36",
-      "accept-language": "ko-KR,ko;q=0.9,en;q=0.7",
-      accept: "text/html,application/xhtml+xml",
-    },
   });
-  const html = (await response.text()).slice(0, 1_500_000).replace(/\\u002F/gi, "/").replace(/\\\//g, "/");
+  const data = await response.json().catch(() => null) as {
+    preview?: {
+      naverPlaceId?: string;
+      name?: string;
+      roadAddress?: string;
+      phone?: string;
+      latitude?: number | null;
+      longitude?: number | null;
+      instagramUrl?: string;
+      officialWebsiteUrl?: string;
+      menus?: Array<{ nameKo?: string; price?: number }>;
+      warnings?: string[];
+    };
+    error?: string;
+  } | null;
 
   return NextResponse.json({
+    ok: response.ok,
     status: response.status,
-    finalUrl: response.url,
-    length: html.length,
-    keys: {
-      placeName: snippets(html, /(?:placeName|businessName|name)[\\\"']?\s*[:=]/gi),
-      roadAddress: snippets(html, /roadAddress|도로명/gi),
-      phone: snippets(html, /telephone|phone|전화/gi),
-      instagram: snippets(html, /instagram\.com/gi),
-      menu: snippets(html, /menuName|menu_name|메뉴/gi),
-      price: snippets(html, /(?:price|가격)[\\\"']?\s*[:=]/gi),
-      placeId: snippets(html, new RegExp(PLACE_ID, "g"), 120, 4),
-    },
-  });
+    result: data?.preview ? {
+      naverPlaceId: data.preview.naverPlaceId,
+      name: data.preview.name,
+      roadAddress: data.preview.roadAddress,
+      phone: data.preview.phone,
+      coordinates: [data.preview.latitude, data.preview.longitude],
+      instagramUrl: data.preview.instagramUrl,
+      officialWebsiteFound: Boolean(data.preview.officialWebsiteUrl),
+      menuCount: data.preview.menus?.length ?? 0,
+      menuSample: data.preview.menus?.slice(0, 5) ?? [],
+      warnings: data.preview.warnings ?? [],
+    } : null,
+    error: data?.error ?? null,
+  }, { status: response.ok ? 200 : response.status });
 }
