@@ -104,7 +104,11 @@ export default function CuratedPlaceBuilder() {
         const coordinateResponse = await fetch("/api/public-data/curated-place/coordinates", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name: nextDraft.name, address: nextDraft.roadAddress || nextDraft.address }),
+          body: JSON.stringify({
+            name: nextDraft.name,
+            address: nextDraft.roadAddress || nextDraft.address,
+            placeId: nextDraft.naverPlaceId,
+          }),
         });
         const coordinateData = (await coordinateResponse.json()) as { place?: Partial<PlaceDraft> };
         if (coordinateResponse.ok && coordinateData.place) nextDraft = { ...nextDraft, ...coordinateData.place };
@@ -186,7 +190,7 @@ export default function CuratedPlaceBuilder() {
             {statusBox("가게·주소", hasPlace, hasPlace ? "기준 장소가 정해졌습니다." : "가게명과 주소를 확인해주세요.")}
             {statusBox("인스타그램", hasInstagram, hasInstagram ? draft.instagramUrl : "공식 계정을 직접 입력해주세요.")}
             {statusBox("메뉴", hasMenus, hasMenus ? `${parsedMenus.length}개 메뉴가 저장됩니다.` : "메뉴명 | 가격 형식으로 입력해주세요.")}
-            {statusBox("지도 좌표", hasCoordinates, hasCoordinates ? `${draft.latitude}, ${draft.longitude}` : "네이버 검색 API 키 또는 주소를 확인해주세요.")}
+            {statusBox("지도 좌표", hasCoordinates, hasCoordinates ? `${draft.latitude}, ${draft.longitude}` : "주소 또는 네이버 장소 정보를 확인해주세요.")}
           </section>
 
           <section className="card" style={{ padding: 24 }}>
