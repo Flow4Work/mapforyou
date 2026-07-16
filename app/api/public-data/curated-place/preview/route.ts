@@ -26,7 +26,7 @@ function isSameOrigin(request: Request) {
 }
 
 function normalizeSpace(value: string) {
-  return value.replace(/\\n|\\r|\\t/g, " ").replace(/\\"/g, '"').replace(/\s+/g, " ").trim();
+  return value.replace(/\n|\r|\t/g, " ").replace(/\\"/g, '"').replace(/\s+/g, " ").trim();
 }
 
 function extractPlaceId(value: string) {
@@ -47,6 +47,36 @@ function extractPlaceId(value: string) {
     if (match?.[1]) return match[1];
   }
   return null;
+}
+
+async function resolvePlaceId(value: string) {
+  const direct = extractPlaceId(value);
+  if (direct) return direct;
+
+  let inputUrl: URL;
+  try {
+    inputUrl = new URL(value.trim());
+  } catch {
+    return null;
+  }
+  const host = inputUrl.hostname.toLowerCase().replace(/^www\./, "");
+  if (host !== "naver.me") return null;
+
+  const response = await fetch(inputUrl.toString(), {
+    cache: "no-store",
+    redirect: "follow",
+    signal: AbortSignal.timeout(10_000),
+    headers: {
+      "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/150.0.0.0 Safari/537.36",
+      "accept-language": "ko-KR,ko;q=0.9,en;q=0.7",
+      accept: "text/html,application/xhtml+xml",
+    },
+  });
+  const redirected = extractPlaceId(response.url);
+  if (redirected) return redirected;
+
+  const html = (await response.text()).slice(0, 300_000);
+  return extractPlaceId(html);
 }
 
 function decodeHtmlState(html: string) {
@@ -142,8 +172,8 @@ export async function POST(request: Request) {
   if (!isSameOrigin(request)) return NextResponse.json({ error: "허용되지 않은 요청입니다." }, { status: 403 });
   try {
     const body = (await request.json()) as { url?: string };
-    const placeId = extractPlaceId(body.url ?? "");
-    if (!placeId) return NextResponse.json({ error: "네이버 장소 상세 URL 또는 장소 ID를 입력해주세요." }, { status: 400 });
+    const placeId = await resolvePlaceId(body.url ?? "");
+    if (!placeId) return NextResponse.json({ error: "네이버 장소 상세 URL, naver.me 공유 링크 또는 장소 ID를 입력해주세요." }, { status: 400 });
 
     const detailUrl = `https://pcmap.place.naver.com/place/${placeId}/home`;
     const response = await fetch(detailUrl, {
