@@ -207,6 +207,7 @@ export async function loadDiscoveryRestaurantPage({
       .from("public_data_restaurants")
       .select(RESTAURANT_COLUMNS)
       .eq("region_key", regionKey)
+      .eq("publish_status", "published")
       .order("updated_at", { ascending: false })
       .range(safeOffset, safeOffset + safePerRegion);
 
@@ -241,6 +242,7 @@ export async function loadDiscoveryRestaurants(limit = 1000): Promise<DiscoveryR
     .from("public_data_restaurants")
     .select(RESTAURANT_COLUMNS)
     .in("region_key", [...ACTIVE_REGIONS])
+    .eq("publish_status", "published")
     .order("updated_at", { ascending: false })
     .limit(safeLimit);
 
@@ -260,6 +262,7 @@ export async function loadDiscoveryRestaurant(id: string): Promise<DiscoveryRest
     .from("public_data_restaurants")
     .select(RESTAURANT_COLUMNS)
     .eq("source_id", id)
+    .eq("publish_status", "published")
     .in("region_key", [...ACTIVE_REGIONS])
     .maybeSingle();
 
