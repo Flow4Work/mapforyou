@@ -21,6 +21,8 @@ type PlaceDraft = {
   instagramUrl: string;
   instagramUsername: string;
   officialWebsiteUrl: string;
+  latitude: number | null;
+  longitude: number | null;
   menus: MenuDraft[];
   warnings: string[];
 };
@@ -67,7 +69,6 @@ export default function CuratedPlaceBuilder() {
   const [regionKey, setRegionKey] = useState("seongsu");
   const [draft, setDraft] = useState<PlaceDraft | null>(null);
   const [menuText, setMenuText] = useState("");
-  const [publish, setPublish] = useState(false);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
@@ -77,7 +78,8 @@ export default function CuratedPlaceBuilder() {
   const hasPlace = Boolean(draft?.name.trim() && (draft?.roadAddress.trim() || draft?.address.trim()));
   const hasInstagram = Boolean(draft?.instagramUrl.trim());
   const hasMenus = parsedMenus.length > 0;
-  const ready = hasPlace && hasInstagram && hasMenus;
+  const hasCoordinates = Number.isFinite(Number(draft?.latitude)) && Number.isFinite(Number(draft?.longitude));
+  const ready = hasPlace && hasInstagram && hasMenus && hasCoordinates;
 
   function update<K extends keyof PlaceDraft>(key: K, value: PlaceDraft[K]) {
     setDraft((current) => current ? { ...current, [key]: value } : current);
@@ -96,11 +98,22 @@ export default function CuratedPlaceBuilder() {
       });
       const data = (await response.json()) as { preview?: PlaceDraft; error?: string };
       if (!response.ok || !data.preview) throw new Error(data.error || "가게 정보를 불러오지 못했습니다.");
-      setDraft(data.preview);
-      setMenuText(menusToText(data.preview.menus));
-      setPublish(false);
+
+      let nextDraft = data.preview;
+      if ((!Number.isFinite(Number(nextDraft.latitude)) || !Number.isFinite(Number(nextDraft.longitude))) && nextDraft.name) {
+        const coordinateResponse = await fetch("/api/public-data/curated-place/coordinates", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: nextDraft.name, address: nextDraft.roadAddress || nextDraft.address }),
+        });
+        const coordinateData = (await coordinateResponse.json()) as { place?: Partial<PlaceDraft> };
+        if (coordinateResponse.ok && coordinateData.place) nextDraft = { ...nextDraft, ...coordinateData.place };
+      }
+
+      setDraft(nextDraft);
+      setMenuText(menusToText(nextDraft.menus));
       setMessage(
-        `가게·주소 ${data.preview.name && data.preview.roadAddress ? "확인" : "수정 필요"} · 인스타 ${data.preview.instagramUrl ? "확인" : "직접 입력 필요"} · 메뉴 ${data.preview.menus.length}개 후보`,
+        `가게·주소 ${nextDraft.name && nextDraft.roadAddress ? "확인" : "수정 필요"} · 인스타 ${nextDraft.instagramUrl ? "확인" : "직접 입력 필요"} · 메뉴 ${nextDraft.menus.length}개 후보`,
       );
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "가게 확인에 실패했습니다.");
@@ -123,13 +136,13 @@ export default function CuratedPlaceBuilder() {
           action: "save",
           regionKey,
           menus: parsedMenus,
-          publish: publish && ready,
+          publish: true,
         }),
       });
       const data = (await response.json()) as { test?: SaveTest; error?: string };
       if (!response.ok || !data.test) throw new Error(data.error || "저장 검증에 실패했습니다.");
       setTest(data.test);
-      setMessage(data.test.readyForPublic ? "저장과 재조회 검증이 완료됐습니다." : "초안으로 저장했습니다. 부족한 정보를 채운 뒤 공개하세요.");
+      setMessage(data.test.readyForPublic ? "저장·공개와 재조회 검증이 완료됐습니다." : "저장됐지만 공개 준비 검증에 실패했습니다.");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "저장에 실패했습니다.");
     } finally {
@@ -173,6 +186,7 @@ export default function CuratedPlaceBuilder() {
             {statusBox("가게·주소", hasPlace, hasPlace ? "기준 장소가 정해졌습니다." : "가게명과 주소를 확인해주세요.")}
             {statusBox("인스타그램", hasInstagram, hasInstagram ? draft.instagramUrl : "공식 계정을 직접 입력해주세요.")}
             {statusBox("메뉴", hasMenus, hasMenus ? `${parsedMenus.length}개 메뉴가 저장됩니다.` : "메뉴명 | 가격 형식으로 입력해주세요.")}
+            {statusBox("지도 좌표", hasCoordinates, hasCoordinates ? `${draft.latitude}, ${draft.longitude}` : "네이버 검색 API 키 또는 주소를 확인해주세요.")}
           </section>
 
           <section className="card" style={{ padding: 24 }}>
@@ -209,12 +223,11 @@ export default function CuratedPlaceBuilder() {
               <div><span>STEP 3</span><h2>저장·재조회 테스트</h2></div>
               <strong>{ready ? "3가지 조합 완료" : "정보 보완 필요"}</strong>
             </div>
-            <label style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 14 }}>
-              <input type="checkbox" checked={publish} disabled={!ready || saving} onChange={(event) => setPublish(event.target.checked)} />
-              세 가지가 모두 확인됐으므로 사용자 화면에 공개
-            </label>
+            <div className="notice" style={{ marginTop: 0 }}>
+              가게·주소·인스타그램·메뉴·지도 좌표가 모두 확인된 경우에만 저장과 공개가 가능합니다.
+            </div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
-              <button className="primary-button" disabled={saving || !hasPlace} onClick={() => void save()}>{saving ? "저장·검증 중…" : publish ? "저장하고 공개" : "초안 저장 후 테스트"}</button>
+              <button className="primary-button" disabled={saving || !ready} onClick={() => void save()}>{saving ? "저장·검증 중…" : "저장하고 공개"}</button>
             </div>
 
             {test && (
