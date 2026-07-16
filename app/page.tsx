@@ -7,7 +7,10 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export default async function HomePage() {
-  const stores = await loadDiscoveryRestaurants(1000);
+  const stores = (await loadDiscoveryRestaurants(1000)).filter(
+    (store) => store.regionKey === "seongsu",
+  );
+
   return (
     <>
       <AnalyticsTracker />
