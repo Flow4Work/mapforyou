@@ -19,7 +19,7 @@ export async function GET() {
     page = await browser.newPage();
     await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/150.0.0.0 Safari/537.36");
     await page.setExtraHTTPHeaders({ "accept-language": "ko-KR,ko;q=0.9,en;q=0.7" });
-    await page.goto(`https://map.naver.com/p/search/${encodeURIComponent("LOOOP 루프 성수점 베이커리 카페")}`, { waitUntil: "domcontentloaded", timeout: 15000 });
+    await page.goto(`https://map.naver.com/p/search/${encodeURIComponent("LOOOP 성수")}`, { waitUntil: "domcontentloaded", timeout: 15000 });
     await new Promise((resolve) => setTimeout(resolve, 4500));
     const frames = [] as Array<Record<string, unknown>>;
     for (const frame of page.frames()) {
