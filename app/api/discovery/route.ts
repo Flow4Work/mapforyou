@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { loadDiscoveryRestaurantPage } from "@/lib/discovery";
 
 export const runtime = "nodejs";
-export const revalidate = 300;
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 function integerParam(value: string | null, fallback: number) {
   const parsed = Number(value);
@@ -18,7 +19,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json(page, {
       headers: {
-        "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",
+        "Cache-Control": "no-store, max-age=0",
       },
     });
   } catch (error) {
