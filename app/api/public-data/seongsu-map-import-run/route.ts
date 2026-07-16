@@ -10,33 +10,33 @@ const BATCH_SIZE = 3;
 const NAVIGATION_TIMEOUT_MS = 12_000;
 
 const TARGETS = [
-  { name: "페로몬 성수", query: "페로몬 성수 카페" },
-  { name: "오우드", query: "오우드 성수 카페" },
-  { name: "그라스커피랩 성수점", query: "그라스커피랩 성수점" },
-  { name: "LOOOP 루프 성수점 베이커리 카페", query: "LOOOP 루프 성수점 베이커리 카페" },
-  { name: "에낭 성수점", query: "에낭 성수점 카페" },
-  { name: "entry55 라운지성수", query: "entry55 라운지성수" },
-  { name: "에어드랍 커피 성수", query: "에어드랍 커피 성수" },
-  { name: "맥파이앤타이거 성수티룸", query: "맥파이앤타이거 성수티룸" },
+  { name: "페로몬 성수", query: "페로몬 성수" },
+  { name: "오우드", query: "오우드 성수" },
+  { name: "그라스커피랩 성수점", query: "그라스커피랩 성수" },
+  { name: "LOOOP 루프 성수점 베이커리 카페", query: "LOOOP 성수" },
+  { name: "에낭 성수점", query: "에낭 성수" },
+  { name: "entry55 라운지성수", query: "entry55 성수" },
+  { name: "에어드랍 커피 성수", query: "에어드랍커피 성수" },
+  { name: "맥파이앤타이거 성수티룸", query: "맥파이앤타이거 성수" },
   { name: "성수르치아바타", query: "성수르치아바타" },
-  { name: "클래식 해례커피 성수본점", query: "클래식 해례커피 성수본점" },
+  { name: "클래식 해례커피 성수본점", query: "해례커피 성수" },
   { name: "파케파케 성수", query: "파케파케 성수" },
-  { name: "마망젤라또 성수점", query: "마망젤라또 성수점" },
-  { name: "첸첸 성수점", query: "첸첸 성수점 카페" },
-  { name: "프렌즈앤아트", query: "프렌즈앤아트 성수 카페" },
+  { name: "마망젤라또 성수점", query: "마망젤라또 성수" },
+  { name: "첸첸 성수점", query: "첸첸 성수" },
+  { name: "프렌즈앤아트", query: "프렌즈앤아트 성수" },
   { name: "카페씨떼 성수", query: "카페씨떼 성수" },
-  { name: "레이저요거트 성수점", query: "레이저요거트 성수점" },
-  { name: "ddd", query: "ddd 성수 카페" },
+  { name: "레이저요거트 성수점", query: "레이저요거트 성수" },
+  { name: "ddd", query: "ddd 성수" },
   { name: "스탠다드브레드 성수", query: "스탠다드브레드 성수" },
-  { name: "브릭샌드 성수 팩토리", query: "브릭샌드 성수 팩토리" },
-  { name: "유키모찌 성수점", query: "유키모찌 성수점" },
+  { name: "브릭샌드 성수 팩토리", query: "브릭샌드 성수팩토리" },
+  { name: "유키모찌 성수점", query: "유키모찌 성수" },
   { name: "ETF베이커리 성수", query: "ETF베이커리 성수" },
   { name: "이파리서재", query: "이파리서재 성수" },
-  { name: "브루크 성수", query: "브루크 성수 카페" },
-  { name: "하하하성수", query: "하하하성수 카페" },
-  { name: "사운드프로바이더 Cafe&Bar", query: "사운드프로바이더 Cafe&Bar 성수" },
+  { name: "브루크 성수", query: "브루크 성수" },
+  { name: "하하하성수", query: "하하하성수" },
+  { name: "사운드프로바이더 Cafe&Bar", query: "사운드프로바이더 성수" },
   { name: "헤리스플랏", query: "헤리스플랏 성수" },
-  { name: "밀스", query: "밀스 성수 베이커리" },
+  { name: "밀스", query: "밀스 성수" },
   { name: "피제리아앤 성수", query: "피제리아앤 성수" },
   { name: "코끼리베이글 성수", query: "코끼리베이글 성수" },
 ] as const;
@@ -68,7 +68,7 @@ function compact(value: string) {
   return value
     .toLocaleLowerCase("ko-KR")
     .replace(/&amp;/gi, "&")
-    .replace(/(?:성수점|성수본점|성수|본점|베이커리카페|카페앤바|cafe&bar)/gi, "")
+    .replace(/(?:성수점|성수본점|성수|본점|베이커리\s*카페|카페앤바|cafe&bar)/gi, "")
     .replace(/[^0-9a-z가-힣]/g, "");
 }
 
@@ -101,7 +101,7 @@ async function launchBrowser() {
 async function preparePage(browser: Browser) {
   const page = await browser.newPage();
   page.setDefaultNavigationTimeout(NAVIGATION_TIMEOUT_MS);
-  page.setDefaultTimeout(7_000);
+  page.setDefaultTimeout(8_000);
   await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/150.0.0.0 Safari/537.36");
   await page.setExtraHTTPHeaders({ "accept-language": "ko-KR,ko;q=0.9,en;q=0.7" });
   await page.setRequestInterception(true);
@@ -119,8 +119,8 @@ async function elements(page: Page) {
     const frame = frames[frameIndex];
     try {
       const items = await frame.evaluate(() =>
-        Array.from(document.querySelectorAll<HTMLElement>("a[href],button,[role='button'],[data-id],[data-place-id]"))
-          .slice(0, 1600)
+        Array.from(document.querySelectorAll<HTMLElement>("a[href],button,[role='button'],[role='link'],[data-id],[data-place-id]"))
+          .slice(0, 1800)
           .map((element, elementIndex) => ({
             elementIndex,
             text: (element.innerText || element.textContent || "").replace(/\s+/g, " ").trim().slice(0, 600),
@@ -140,7 +140,7 @@ async function elements(page: Page) {
 
 async function findPlaceId(page: Page, targetName: string, query: string) {
   await page.goto(`https://map.naver.com/p/search/${encodeURIComponent(query)}`, { waitUntil: "domcontentloaded", timeout: NAVIGATION_TIMEOUT_MS });
-  await delay(1_400);
+  await delay(4_200);
   const target = compact(targetName);
   const candidates = (await elements(page))
     .map((item) => {
@@ -165,14 +165,14 @@ async function findPlaceId(page: Page, targetName: string, query: string) {
   if (!frame) return null;
   try {
     await frame.evaluate((elementIndex) => {
-      const list = Array.from(document.querySelectorAll<HTMLElement>("a[href],button,[role='button'],[data-id],[data-place-id]"));
+      const list = Array.from(document.querySelectorAll<HTMLElement>("a[href],button,[role='button'],[role='link'],[data-id],[data-place-id]"));
       list[elementIndex]?.click();
     }, clickable.elementIndex);
   } catch {
     return null;
   }
 
-  const deadline = Date.now() + 6_000;
+  const deadline = Date.now() + 7_000;
   while (Date.now() < deadline) {
     for (const value of [page.url(), ...page.frames().map((item) => item.url())]) {
       const placeId = extractPlaceId(value);
@@ -180,7 +180,7 @@ async function findPlaceId(page: Page, targetName: string, query: string) {
     }
     const discovered = (await elements(page)).map((item) => item.placeId).find(Boolean);
     if (discovered) return { placeId: discovered, matchedText: clickable.text, score: clickable.score };
-    await delay(350);
+    await delay(400);
   }
   return null;
 }
