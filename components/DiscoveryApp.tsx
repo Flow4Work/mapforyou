@@ -175,19 +175,7 @@ export default function DiscoveryApp({
   useEffect(() => {
     void refreshStores();
 
-    const handleFocus = () => void refreshStores();
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible") void refreshStores();
-    };
-    const timer = window.setInterval(() => void refreshStores(), 60_000);
-
-    window.addEventListener("focus", handleFocus);
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-
     return () => {
-      window.clearInterval(timer);
-      window.removeEventListener("focus", handleFocus);
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
       refreshAbortRef.current?.abort();
     };
   }, [refreshStores]);
