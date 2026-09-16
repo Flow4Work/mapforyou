@@ -121,28 +121,47 @@ export default function RestaurantDetail({ store }: { store: DiscoveryRestaurant
           <div className="detail-menu-list">
             {menus.map((menu) => {
               const revealed = revealedMenuId === menu.id;
+              const localizedName = localizedMenuName(menu, language);
+              const description = language === "ja"
+                ? menu.descriptionJa || menu.descriptionKo
+                : menu.descriptionEn || menu.descriptionKo;
+              const hasVerifiedImage = menu.imageStatus === "verified" && /^https?:\/\//i.test(menu.imageUrl);
               return (
-                <article className="detail-menu-card" key={menu.id}>
-                  <div className="detail-menu-main">
-                    <div>
-                      {menu.isSpecialty && <span className="featured-chip">{language === "ja" ? "おすすめ" : "Featured"}</span>}
-                      <h3>{localizedMenuName(menu, language)}</h3>
-                    </div>
-                    <strong>{priceLabel(menu.price, language)}</strong>
-                  </div>
-                  <button
-                    className="show-staff-button"
-                    onClick={() => setRevealedMenuId(revealed ? "" : menu.id)}
-                  >
-                    {revealed ? copy.hide : copy.show}
-                  </button>
-                  {revealed && (
-                    <div className="staff-display-card">
-                      <small>{language === "ja" ? "スタッフにこの画面を見せてください" : "Show this screen to the staff"}</small>
-                      <strong>{menu.nameKo}</strong>
-                      <span>이 메뉴 하나 주세요.</span>
-                    </div>
+                <article className={`detail-menu-card${hasVerifiedImage ? " has-image" : ""}`} key={menu.id}>
+                  {hasVerifiedImage && (
+                    <a
+                      className="detail-menu-image-link"
+                      href={menu.imageSourceUrl || menu.imageUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      aria-label={`${localizedName} image source`}
+                    >
+                      <img className="detail-menu-image" src={menu.imageUrl} alt={localizedName} loading="lazy" />
+                    </a>
                   )}
+                  <div className="detail-menu-body">
+                    <div className="detail-menu-main">
+                      <div>
+                        {menu.isSpecialty && <span className="featured-chip">{language === "ja" ? "おすすめ" : "Featured"}</span>}
+                        <h3>{localizedName}</h3>
+                        {description && <p className="detail-menu-description">{description}</p>}
+                      </div>
+                      <strong>{priceLabel(menu.price, language)}</strong>
+                    </div>
+                    <button
+                      className="show-staff-button"
+                      onClick={() => setRevealedMenuId(revealed ? "" : menu.id)}
+                    >
+                      {revealed ? copy.hide : copy.show}
+                    </button>
+                    {revealed && (
+                      <div className="staff-display-card">
+                        <small>{language === "ja" ? "スタッフにこの画面を見せてください" : "Show this screen to the staff"}</small>
+                        <strong>{menu.nameKo}</strong>
+                        <span>이 메뉴 하나 주세요.</span>
+                      </div>
+                    )}
+                  </div>
                 </article>
               );
             })}

@@ -1,0 +1,1018 @@
+{
+  "restaurantId": "naver:1720159258",
+  "placeId": "1720159258",
+  "name": "스탠다드브레드 성수",
+  "menuCount": 54,
+  "verifiedImageCount": 53,
+  "notAvailableCount": 1,
+  "menus": [
+    {
+      "naverKey": "Menu:1720159258_0",
+      "naverMenuId": "1720159258_0",
+      "index": 0,
+      "nameKo": "무화과 프렌치 토스트",
+      "price": 16900,
+      "descriptionKo": "달콤한 무화과가 가득 들어가 가을 시즌 프렌치토스트",
+      "isSpecialty": false,
+      "images": [
+        "https://ldb-phinf.pstatic.net/20260912_284/17891938921105ahwn_JPEG/KakaoTalk_Photo_2026-09-12-15-14-20.jpg"
+      ],
+      "menuId": "naver:1720159258_0",
+      "imageUrl": "https://ldb-phinf.pstatic.net/20260912_284/17891938921105ahwn_JPEG/KakaoTalk_Photo_2026-09-12-15-14-20.jpg",
+      "imageStatus": "verified",
+      "imageSource": "naver_place_menu",
+      "imageSourceUrl": "https://map.naver.com/p/entry/place/1720159258?placePath=/menu",
+      "imageAttribution": "Naver Place · Standard Bread Seongsu"
+    },
+    {
+      "naverKey": "Menu:1720159258_1",
+      "naverMenuId": "1720159258_1",
+      "index": 1,
+      "nameKo": "🎃호박인절미 식빵",
+      "price": 8500,
+      "descriptionKo": "담백한 단호박 생식빵에 달달하고 쫀득한 호박 인절미가 가득 들어간 식빵",
+      "isSpecialty": true,
+      "images": [
+        "https://ldb-phinf.pstatic.net/20260619_290/1781851374383GixJi_JPEG/KakaoTalk_20260619_153847356.jpg",
+        "https://ldb-phinf.pstatic.net/20260619_299/1781851374531rzD6A_JPEG/KakaoTalk_20260619_153847356_01.jpg"
+      ],
+      "menuId": "naver:1720159258_1",
+      "imageUrl": "https://ldb-phinf.pstatic.net/20260619_290/1781851374383GixJi_JPEG/KakaoTalk_20260619_153847356.jpg",
+      "imageStatus": "verified",
+      "imageSource": "naver_place_menu",
+      "imageSourceUrl": "https://map.naver.com/p/entry/place/1720159258?placePath=/menu",
+      "imageAttribution": "Naver Place · Standard Bread Seongsu"
+    },
+    {
+      "naverKey": "Menu:1720159258_2",
+      "naverMenuId": "1720159258_2",
+      "index": 2,
+      "nameKo": "🍕피자 식빵",
+      "price": 9900,
+      "descriptionKo": "식빵 속 꽉 찬 햄,치즈와 토마토 소스의 중독적인 꿀조화!",
+      "isSpecialty": true,
+      "images": [
+        "https://ldb-phinf.pstatic.net/20260722_173/1784719214345wmg6H_JPEG/KakaoTalk_20260722_200845934.jpg"
+      ],
+      "menuId": "naver:1720159258_2",
+      "imageUrl": "https://ldb-phinf.pstatic.net/20260722_173/1784719214345wmg6H_JPEG/KakaoTalk_20260722_200845934.jpg",
+      "imageStatus": "verified",
+      "imageSource": "naver_place_menu",
+      "imageSourceUrl": "https://map.naver.com/p/entry/place/1720159258?placePath=/menu",
+      "imageAttribution": "Naver Place · Standard Bread Seongsu"
+    },
+    {
+      "naverKey": "Menu:1720159258_3",
+      "naverMenuId": "1720159258_3",
+      "index": 3,
+      "nameKo": "황치즈 프렌치 토스트",
+      "price": 15900,
+      "descriptionKo": "황치즈의 단짠 풍미와 육즙 터지는 킬바사의 환상적인 조화",
+      "isSpecialty": true,
+      "images": [
+        "https://ldb-phinf.pstatic.net/20260330_191/1774856460795lMaBM_JPEG/260326_SB%28%B4%A9%B3%A2%29_01.jpg"
+      ],
+      "menuId": "naver:1720159258_3",
+      "imageUrl": "https://ldb-phinf.pstatic.net/20260330_191/1774856460795lMaBM_JPEG/260326_SB%28%B4%A9%B3%A2%29_01.jpg",
+      "imageStatus": "verified",
+      "imageSource": "naver_place_menu",
+      "imageSourceUrl": "https://map.naver.com/p/entry/place/1720159258?placePath=/menu",
+      "imageAttribution": "Naver Place · Standard Bread Seongsu"
+    },
+    {
+      "naverKey": "Menu:1720159258_4",
+      "naverMenuId": "1720159258_4",
+      "index": 4,
+      "nameKo": "황치즈 퐁듀 식빵",
+      "price": 8800,
+      "descriptionKo": "폭포처럼 쏟아지는 꾸덕한 황치즈와 촉촉한 식빵의 완벽한 풍미",
+      "isSpecialty": true,
+      "images": [
+        "https://ldb-phinf.pstatic.net/20260330_11/1774857406190PnaMU_JPEG/260326_SB%28%B4%A9%B3%A2%29_03.jpg"
+      ],
+      "menuId": "naver:1720159258_4",
+      "imageUrl": "https://ldb-phinf.pstatic.net/20260330_11/1774857406190PnaMU_JPEG/260326_SB%28%B4%A9%B3%A2%29_03.jpg",
+      "imageStatus": "verified",
+      "imageSource": "naver_place_menu",
+      "imageSourceUrl": "https://map.naver.com/p/entry/place/1720159258?placePath=/menu",
+      "imageAttribution": "Naver Place · Standard Bread Seongsu"
+    },
+    {
+      "naverKey": "Menu:1720159258_5",
+      "naverMenuId": "1720159258_5",
+      "index": 5,
+      "nameKo": "메이플 베이컨 피스타치오 토스트",
+      "price": 16900,
+      "descriptionKo": "",
+      "isSpecialty": true,
+      "images": [
+        "https://ldb-phinf.pstatic.net/20260220_182/17715722880830oBDt_JPEG/%B8%DE%C0%CC%C7%C3%BA%A3%C0%CC%C4%C1%C7%C7%BD%BA%C5%B8%C4%A1%BF%C0.jpg"
+      ],
+      "menuId": "naver:1720159258_5",
+      "imageUrl": "https://ldb-phinf.pstatic.net/20260220_182/17715722880830oBDt_JPEG/%B8%DE%C0%CC%C7%C3%BA%A3%C0%CC%C4%C1%C7%C7%BD%BA%C5%B8%C4%A1%BF%C0.jpg",
+      "imageStatus": "verified",
+      "imageSource": "naver_place_menu",
+      "imageSourceUrl": "https://map.naver.com/p/entry/place/1720159258?placePath=/menu",
+      "imageAttribution": "Naver Place · Standard Bread Seongsu"
+    },
+    {
+      "naverKey": "Menu:1720159258_6",
+      "naverMenuId": "1720159258_6",
+      "index": 6,
+      "nameKo": "크림브륄레 프렌치 토스트",
+      "price": 14900,
+      "descriptionKo": "달궈진 무쇠팬에 서브되는 즉석 프렌치 토스트",
+      "isSpecialty": true,
+      "images": [
+        "https://ldb-phinf.pstatic.net/20240906_245/1725605597086AF5V6_JPEG/240621_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_62.jpg",
+        "https://ldb-phinf.pstatic.net/20240906_294/1725605592109KD6wW_JPEG/240621_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_63.jpg"
+      ],
+      "menuId": "naver:1720159258_6",
+      "imageUrl": "https://ldb-phinf.pstatic.net/20240906_245/1725605597086AF5V6_JPEG/240621_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_62.jpg",
+      "imageStatus": "verified",
+      "imageSource": "naver_place_menu",
+      "imageSourceUrl": "https://map.naver.com/p/entry/place/1720159258?placePath=/menu",
+      "imageAttribution": "Naver Place · Standard Bread Seongsu"
+    },
+    {
+      "naverKey": "Menu:1720159258_7",
+      "naverMenuId": "1720159258_7",
+      "index": 7,
+      "nameKo": "솔티드버터 생 식빵 (half)",
+      "price": 5800,
+      "descriptionKo": "촉촉하고 쫄깃한 생식빵에 짭짤한 버터를 넣은 식빵",
+      "isSpecialty": true,
+      "images": [
+        "https://ldb-phinf.pstatic.net/20240906_90/1725612156543YFb10_JPEG/240621_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_31.jpg",
+        "https://ldb-phinf.pstatic.net/20240906_159/1725612148825FGDjq_JPEG/240621_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_30.jpg"
+      ],
+      "menuId": "naver:1720159258_7",
+      "imageUrl": "https://ldb-phinf.pstatic.net/20240906_90/1725612156543YFb10_JPEG/240621_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_31.jpg",
+      "imageStatus": "verified",
+      "imageSource": "naver_place_menu",
+      "imageSourceUrl": "https://map.naver.com/p/entry/place/1720159258?placePath=/menu",
+      "imageAttribution": "Naver Place · Standard Bread Seongsu"
+    },
+    {
+      "naverKey": "Menu:1720159258_8",
+      "naverMenuId": "1720159258_8",
+      "index": 8,
+      "nameKo": "솔티드버터 생 식빵",
+      "price": 9500,
+      "descriptionKo": "촉촉하고 쫄깃한 생식빵에 짭짤한 버터를 넣은 식빵",
+      "isSpecialty": false,
+      "images": [
+        "https://ldb-phinf.pstatic.net/20240906_104/1725612219806WW8Y9_JPEG/240723_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_03.jpg",
+        "https://ldb-phinf.pstatic.net/20240906_82/1725612216786Bn9Wi_JPEG/240723_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_01.jpg"
+      ],
+      "menuId": "naver:1720159258_8",
+      "imageUrl": "https://ldb-phinf.pstatic.net/20240906_104/1725612219806WW8Y9_JPEG/240723_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_03.jpg",
+      "imageStatus": "verified",
+      "imageSource": "naver_place_menu",
+      "imageSourceUrl": "https://map.naver.com/p/entry/place/1720159258?placePath=/menu",
+      "imageAttribution": "Naver Place · Standard Bread Seongsu"
+    },
+    {
+      "naverKey": "Menu:1720159258_9",
+      "naverMenuId": "1720159258_9",
+      "index": 9,
+      "nameKo": "클래식 생 식빵 (half)",
+      "price": 4900,
+      "descriptionKo": "고수분율의 매우 촉촉하고 쫄깃한 식감의 정통 식빵",
+      "isSpecialty": false,
+      "images": [
+        "https://ldb-phinf.pstatic.net/20241108_248/1731058025737cghF6_JPEG/241105_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5%28%B4%A9%B3%A2%29_05.jpg",
+        "https://ldb-phinf.pstatic.net/20241108_180/1731058022752nBhH8_JPEG/241105_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5%28%B4%A9%B3%A2%29_06.jpg"
+      ],
+      "menuId": "naver:1720159258_9",
+      "imageUrl": "https://ldb-phinf.pstatic.net/20241108_248/1731058025737cghF6_JPEG/241105_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5%28%B4%A9%B3%A2%29_05.jpg",
+      "imageStatus": "verified",
+      "imageSource": "naver_place_menu",
+      "imageSourceUrl": "https://map.naver.com/p/entry/place/1720159258?placePath=/menu",
+      "imageAttribution": "Naver Place · Standard Bread Seongsu"
+    },
+    {
+      "naverKey": "Menu:1720159258_10",
+      "naverMenuId": "1720159258_10",
+      "index": 10,
+      "nameKo": "클래식 생 식빵",
+      "price": 8000,
+      "descriptionKo": "고수분율의 매우 촉촉하고 쫄깃한 식감의 정통 식빵",
+      "isSpecialty": false,
+      "images": [
+        "https://ldb-phinf.pstatic.net/20241108_212/1731058044709irKWG_JPEG/241105_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5%28%B4%A9%B3%A2%29_10.jpg",
+        "https://ldb-phinf.pstatic.net/20241108_202/1731058039423DbifO_JPEG/241105_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5%28%B4%A9%B3%A2%29_09.jpg"
+      ],
+      "menuId": "naver:1720159258_10",
+      "imageUrl": "https://ldb-phinf.pstatic.net/20241108_212/1731058044709irKWG_JPEG/241105_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5%28%B4%A9%B3%A2%29_10.jpg",
+      "imageStatus": "verified",
+      "imageSource": "naver_place_menu",
+      "imageSourceUrl": "https://map.naver.com/p/entry/place/1720159258?placePath=/menu",
+      "imageAttribution": "Naver Place · Standard Bread Seongsu"
+    },
+    {
+      "naverKey": "Menu:1720159258_11",
+      "naverMenuId": "1720159258_11",
+      "index": 11,
+      "nameKo": "브리오슈 식빵 (half)",
+      "price": 5500,
+      "descriptionKo": "버터와 계란이 듬뿍 들어가 고소한 맛이 일품인 식빵",
+      "isSpecialty": false,
+      "images": [
+        "https://ldb-phinf.pstatic.net/20241108_116/17310580590645CH6p_JPEG/241105_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5%28%B4%A9%B3%A2%29_08.jpg",
+        "https://ldb-phinf.pstatic.net/20241108_58/1731058053643SGOjq_JPEG/241105_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5%28%B4%A9%B3%A2%29_07.jpg"
+      ],
+      "menuId": "naver:1720159258_11",
+      "imageUrl": "https://ldb-phinf.pstatic.net/20241108_116/17310580590645CH6p_JPEG/241105_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5%28%B4%A9%B3%A2%29_08.jpg",
+      "imageStatus": "verified",
+      "imageSource": "naver_place_menu",
+      "imageSourceUrl": "https://map.naver.com/p/entry/place/1720159258?placePath=/menu",
+      "imageAttribution": "Naver Place · Standard Bread Seongsu"
+    },
+    {
+      "naverKey": "Menu:1720159258_12",
+      "naverMenuId": "1720159258_12",
+      "index": 12,
+      "nameKo": "브리오슈 식빵",
+      "price": 8800,
+      "descriptionKo": "버터와 계란이 듬뿍 들어가 고소한 맛이 일품인 식빵",
+      "isSpecialty": false,
+      "images": [
+        "https://ldb-phinf.pstatic.net/20241108_216/1731058071062cjr5S_JPEG/241105_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5%28%B4%A9%B3%A2%29_12.jpg",
+        "https://ldb-phinf.pstatic.net/20241108_159/1731058067554rrMJX_JPEG/241105_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5%28%B4%A9%B3%A2%29_11.jpg"
+      ],
+      "menuId": "naver:1720159258_12",
+      "imageUrl": "https://ldb-phinf.pstatic.net/20241108_216/1731058071062cjr5S_JPEG/241105_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5%28%B4%A9%B3%A2%29_12.jpg",
+      "imageStatus": "verified",
+      "imageSource": "naver_place_menu",
+      "imageSourceUrl": "https://map.naver.com/p/entry/place/1720159258?placePath=/menu",
+      "imageAttribution": "Naver Place · Standard Bread Seongsu"
+    },
+    {
+      "naverKey": "Menu:1720159258_13",
+      "naverMenuId": "1720159258_13",
+      "index": 13,
+      "nameKo": "바질토마토 생 식빵 (half)",
+      "price": 7400,
+      "descriptionKo": "바질과 토마토, 모짜렐라 치즈가 들어있는 토마토 생 식빵",
+      "isSpecialty": false,
+      "images": [
+        "https://ldb-phinf.pstatic.net/20240906_168/1725612066873QpdIV_JPEG/240821_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_04.jpg",
+        "https://ldb-phinf.pstatic.net/20240906_103/1725612063125kqdmQ_JPEG/240821_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_03.jpg"
+      ],
+      "menuId": "naver:1720159258_13",
+      "imageUrl": "https://ldb-phinf.pstatic.net/20240906_168/1725612066873QpdIV_JPEG/240821_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_04.jpg",
+      "imageStatus": "verified",
+      "imageSource": "naver_place_menu",
+      "imageSourceUrl": "https://map.naver.com/p/entry/place/1720159258?placePath=/menu",
+      "imageAttribution": "Naver Place · Standard Bread Seongsu"
+    },
+    {
+      "naverKey": "Menu:1720159258_14",
+      "naverMenuId": "1720159258_14",
+      "index": 14,
+      "nameKo": "옥수수 브리오슈 식빵",
+      "price": 7900,
+      "descriptionKo": "고소한 옥수수크림과 톡톡 터지는 옥수수 들어간 식빵",
+      "isSpecialty": false,
+      "images": [
+        "https://ldb-phinf.pstatic.net/20240906_34/1725611940861UM7zB_JPEG/240805_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_02.jpg",
+        "https://ldb-phinf.pstatic.net/20240906_210/1725611938723e2zOt_JPEG/240805_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_01.jpg"
+      ],
+      "menuId": "naver:1720159258_14",
+      "imageUrl": "https://ldb-phinf.pstatic.net/20240906_34/1725611940861UM7zB_JPEG/240805_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_02.jpg",
+      "imageStatus": "verified",
+      "imageSource": "naver_place_menu",
+      "imageSourceUrl": "https://map.naver.com/p/entry/place/1720159258?placePath=/menu",
+      "imageAttribution": "Naver Place · Standard Bread Seongsu"
+    },
+    {
+      "naverKey": "Menu:1720159258_15",
+      "naverMenuId": "1720159258_15",
+      "index": 15,
+      "nameKo": "초코 생식빵",
+      "price": 8800,
+      "descriptionKo": "달달한 초코 식빵 안에 달콤한 초코 가나슈가 들어간 식빵",
+      "isSpecialty": false,
+      "images": [
+        "https://ldb-phinf.pstatic.net/20250519_10/17476264132163a0yg_JPEG/250226_SB%28%B4%A9%B3%A2%29_05.jpg",
+        "https://ldb-phinf.pstatic.net/20250519_82/1747626413218t2AUg_JPEG/250226_SB%28%B4%A9%B3%A2%29_06.jpg"
+      ],
+      "menuId": "naver:1720159258_15",
+      "imageUrl": "https://ldb-phinf.pstatic.net/20250519_10/17476264132163a0yg_JPEG/250226_SB%28%B4%A9%B3%A2%29_05.jpg",
+      "imageStatus": "verified",
+      "imageSource": "naver_place_menu",
+      "imageSourceUrl": "https://map.naver.com/p/entry/place/1720159258?placePath=/menu",
+      "imageAttribution": "Naver Place · Standard Bread Seongsu"
+    },
+    {
+      "naverKey": "Menu:1720159258_16",
+      "naverMenuId": "1720159258_16",
+      "index": 16,
+      "nameKo": "티슈식빵",
+      "price": 7900,
+      "descriptionKo": "겹겹이 쌓여 떼어먹는 재미가 있는 페스츄리 식빵",
+      "isSpecialty": false,
+      "images": [
+        "https://ldb-phinf.pstatic.net/20240906_117/1725611824442xVyuj_JPEG/240621_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_22.jpg",
+        "https://ldb-phinf.pstatic.net/20240906_102/17256118068053AuG3_JPEG/240621_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_24.jpg"
+      ],
+      "menuId": "naver:1720159258_16",
+      "imageUrl": "https://ldb-phinf.pstatic.net/20240906_117/1725611824442xVyuj_JPEG/240621_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_22.jpg",
+      "imageStatus": "verified",
+      "imageSource": "naver_place_menu",
+      "imageSourceUrl": "https://map.naver.com/p/entry/place/1720159258?placePath=/menu",
+      "imageAttribution": "Naver Place · Standard Bread Seongsu"
+    },
+    {
+      "naverKey": "Menu:1720159258_17",
+      "naverMenuId": "1720159258_17",
+      "index": 17,
+      "nameKo": "올리브 치즈 치아바타",
+      "price": 5300,
+      "descriptionKo": "짭짤한 올리브와 고소한 치즈를 넣어 구운 치아바타.",
+      "isSpecialty": false,
+      "images": [
+        "https://ldb-phinf.pstatic.net/20260220_212/1771576060676lzEo4_JPEG/251031_SB%28%B4%A9%B3%A2%29_07.jpg"
+      ],
+      "menuId": "naver:1720159258_17",
+      "imageUrl": "https://ldb-phinf.pstatic.net/20260220_212/1771576060676lzEo4_JPEG/251031_SB%28%B4%A9%B3%A2%29_07.jpg",
+      "imageStatus": "verified",
+      "imageSource": "naver_place_menu",
+      "imageSourceUrl": "https://map.naver.com/p/entry/place/1720159258?placePath=/menu",
+      "imageAttribution": "Naver Place · Standard Bread Seongsu"
+    },
+    {
+      "naverKey": "Menu:1720159258_18",
+      "naverMenuId": "1720159258_18",
+      "index": 18,
+      "nameKo": "토마토 치아바타",
+      "price": 5500,
+      "descriptionKo": "촉촉한 치아바타에 신선한 토마토를 더해 산뜻하게 즐기는 메뉴",
+      "isSpecialty": false,
+      "images": [
+        "https://ldb-phinf.pstatic.net/20260220_120/1771576108592WN2dl_JPEG/251031_SB%28%B4%A9%B3%A2%29_05.jpg"
+      ],
+      "menuId": "naver:1720159258_18",
+      "imageUrl": "https://ldb-phinf.pstatic.net/20260220_120/1771576108592WN2dl_JPEG/251031_SB%28%B4%A9%B3%A2%29_05.jpg",
+      "imageStatus": "verified",
+      "imageSource": "naver_place_menu",
+      "imageSourceUrl": "https://map.naver.com/p/entry/place/1720159258?placePath=/menu",
+      "imageAttribution": "Naver Place · Standard Bread Seongsu"
+    },
+    {
+      "naverKey": "Menu:1720159258_19",
+      "naverMenuId": "1720159258_19",
+      "index": 19,
+      "nameKo": "감자 치즈 깜빠뉴",
+      "price": 6500,
+      "descriptionKo": "쫀득한 깜빠뉴에 베이컨, 감자, 소금, 후추를 더해 짭짤하고 고소하게 즐기는 빵.",
+      "isSpecialty": false,
+      "images": [],
+      "menuId": "naver:1720159258_19",
+      "imageUrl": "",
+      "imageStatus": "not_available",
+      "imageSource": "naver_place_menu",
+      "imageSourceUrl": "https://map.naver.com/p/entry/place/1720159258?placePath=/menu",
+      "imageAttribution": "Naver Place · Standard Bread Seongsu"
+    },
+    {
+      "naverKey": "Menu:1720159258_20",
+      "naverMenuId": "1720159258_20",
+      "index": 20,
+      "nameKo": "가스파초 콜드스프 (여름 한정)",
+      "price": 8500,
+      "descriptionKo": "참외와 완숙 토마토를 베이스로 한 스페인식 차가운 수프",
+      "isSpecialty": false,
+      "images": [
+        "https://ldb-phinf.pstatic.net/20260616_213/17815971772946ib4u_JPEG/KakaoTalk_20260616_170530757.jpg"
+      ],
+      "menuId": "naver:1720159258_20",
+      "imageUrl": "https://ldb-phinf.pstatic.net/20260616_213/17815971772946ib4u_JPEG/KakaoTalk_20260616_170530757.jpg",
+      "imageStatus": "verified",
+      "imageSource": "naver_place_menu",
+      "imageSourceUrl": "https://map.naver.com/p/entry/place/1720159258?placePath=/menu",
+      "imageAttribution": "Naver Place · Standard Bread Seongsu"
+    },
+    {
+      "naverKey": "Menu:1720159258_21",
+      "naverMenuId": "1720159258_21",
+      "index": 21,
+      "nameKo": "토스트 푸딩",
+      "price": 6800,
+      "descriptionKo": "크림과 크루통, 바나나에 카라멜을 더한 달콤한 디저트.",
+      "isSpecialty": false,
+      "images": [
+        "https://ldb-phinf.pstatic.net/20260220_203/1771576329064EI0Ae_JPEG/240621_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_72.jpg"
+      ],
+      "menuId": "naver:1720159258_21",
+      "imageUrl": "https://ldb-phinf.pstatic.net/20260220_203/1771576329064EI0Ae_JPEG/240621_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_72.jpg",
+      "imageStatus": "verified",
+      "imageSource": "naver_place_menu",
+      "imageSourceUrl": "https://map.naver.com/p/entry/place/1720159258?placePath=/menu",
+      "imageAttribution": "Naver Place · Standard Bread Seongsu"
+    },
+    {
+      "naverKey": "Menu:1720159258_22",
+      "naverMenuId": "1720159258_22",
+      "index": 22,
+      "nameKo": "트러플 양송이 스프",
+      "price": 8500,
+      "descriptionKo": "트러플의 향긋함과 양송이 버섯의 감칠맛으로 만든 크림스프",
+      "isSpecialty": false,
+      "images": [
+        "https://ldb-phinf.pstatic.net/20240906_188/1725605188270S9xxD_JPEG/240621_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_58.jpg",
+        "https://ldb-phinf.pstatic.net/20240906_216/1725605188275imflN_JPEG/240621_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_59.jpg"
+      ],
+      "menuId": "naver:1720159258_22",
+      "imageUrl": "https://ldb-phinf.pstatic.net/20240906_188/1725605188270S9xxD_JPEG/240621_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_58.jpg",
+      "imageStatus": "verified",
+      "imageSource": "naver_place_menu",
+      "imageSourceUrl": "https://map.naver.com/p/entry/place/1720159258?placePath=/menu",
+      "imageAttribution": "Naver Place · Standard Bread Seongsu"
+    },
+    {
+      "naverKey": "Menu:1720159258_23",
+      "naverMenuId": "1720159258_23",
+      "index": 23,
+      "nameKo": "퍼플베리 크림치즈",
+      "price": 2900,
+      "descriptionKo": "블루베리와 블랙커런트가 어우러진 크림치즈 스프레드",
+      "isSpecialty": false,
+      "images": [
+        "https://ldb-phinf.pstatic.net/20240913_199/1726203233760PPsi4_JPEG/240911_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5%BC%BA%BC%F6_%B4%A9%B3%A2_08.jpg",
+        "https://ldb-phinf.pstatic.net/20240913_35/1726203230551FOSma_JPEG/240911_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5%BC%BA%BC%F6_%B4%A9%B3%A2_07.jpg"
+      ],
+      "menuId": "naver:1720159258_23",
+      "imageUrl": "https://ldb-phinf.pstatic.net/20240913_199/1726203233760PPsi4_JPEG/240911_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5%BC%BA%BC%F6_%B4%A9%B3%A2_08.jpg",
+      "imageStatus": "verified",
+      "imageSource": "naver_place_menu",
+      "imageSourceUrl": "https://map.naver.com/p/entry/place/1720159258?placePath=/menu",
+      "imageAttribution": "Naver Place · Standard Bread Seongsu"
+    },
+    {
+      "naverKey": "Menu:1720159258_24",
+      "naverMenuId": "1720159258_24",
+      "index": 24,
+      "nameKo": "청크베리 커스타드",
+      "price": 2900,
+      "descriptionKo": "달콤한 바닐라커스타드와 상큼한 청크베리잼을 함께 느낄 수 있는 제품",
+      "isSpecialty": false,
+      "images": [
+        "https://ldb-phinf.pstatic.net/20240913_246/1726203254531BfoKC_JPEG/240911_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5%BC%BA%BC%F6_%B4%A9%B3%A2_10.jpg",
+        "https://ldb-phinf.pstatic.net/20240913_59/17262032450452Y0JU_JPEG/240911_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5%BC%BA%BC%F6_%B4%A9%B3%A2_09.jpg"
+      ],
+      "menuId": "naver:1720159258_24",
+      "imageUrl": "https://ldb-phinf.pstatic.net/20240913_246/1726203254531BfoKC_JPEG/240911_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5%BC%BA%BC%F6_%B4%A9%B3%A2_10.jpg",
+      "imageStatus": "verified",
+      "imageSource": "naver_place_menu",
+      "imageSourceUrl": "https://map.naver.com/p/entry/place/1720159258?placePath=/menu",
+      "imageAttribution": "Naver Place · Standard Bread Seongsu"
+    },
+    {
+      "naverKey": "Menu:1720159258_25",
+      "naverMenuId": "1720159258_25",
+      "index": 25,
+      "nameKo": "아보카도 딜 크림치즈",
+      "price": 2900,
+      "descriptionKo": "향기로운 딜과 아보카도가 어우러진 스프레드\n*병입 150g 별도 구매 가능",
+      "isSpecialty": true,
+      "images": [
+        "https://ldb-phinf.pstatic.net/20240920_17/17268091060544Fgbk_JPEG/240911_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5%BC%BA%BC%F6_%B4%A9%B3%A2_32.jpg",
+        "https://ldb-phinf.pstatic.net/20240920_217/1726809101599veqdJ_JPEG/240911_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5%BC%BA%BC%F6_%B4%A9%B3%A2_31.jpg"
+      ],
+      "menuId": "naver:1720159258_25",
+      "imageUrl": "https://ldb-phinf.pstatic.net/20240920_17/17268091060544Fgbk_JPEG/240911_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5%BC%BA%BC%F6_%B4%A9%B3%A2_32.jpg",
+      "imageStatus": "verified",
+      "imageSource": "naver_place_menu",
+      "imageSourceUrl": "https://map.naver.com/p/entry/place/1720159258?placePath=/menu",
+      "imageAttribution": "Naver Place · Standard Bread Seongsu"
+    },
+    {
+      "naverKey": "Menu:1720159258_26",
+      "naverMenuId": "1720159258_26",
+      "index": 26,
+      "nameKo": "청키 스트로베리",
+      "price": 2900,
+      "descriptionKo": "딸기와 레드커런트를 통째로 넣어 과육이 살아있는 수제 딸기잼\n*병입 150g 구매 가능",
+      "isSpecialty": true,
+      "images": [
+        "https://ldb-phinf.pstatic.net/20240913_241/1726203052431gCX1s_JPEG/240911_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5%BC%BA%BC%F6_%B4%A9%B3%A2_16.jpg",
+        "https://ldb-phinf.pstatic.net/20240913_103/1726203046808F4WjQ_JPEG/240911_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5%BC%BA%BC%F6_%B4%A9%B3%A2_15.jpg",
+        "https://ldb-phinf.pstatic.net/20240906_111/172560515683459NjR_JPEG/240621_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_46.jpg"
+      ],
+      "menuId": "naver:1720159258_26",
+      "imageUrl": "https://ldb-phinf.pstatic.net/20240913_241/1726203052431gCX1s_JPEG/240911_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5%BC%BA%BC%F6_%B4%A9%B3%A2_16.jpg",
+      "imageStatus": "verified",
+      "imageSource": "naver_place_menu",
+      "imageSourceUrl": "https://map.naver.com/p/entry/place/1720159258?placePath=/menu",
+      "imageAttribution": "Naver Place · Standard Bread Seongsu"
+    },
+    {
+      "naverKey": "Menu:1720159258_27",
+      "naverMenuId": "1720159258_27",
+      "index": 27,
+      "nameKo": "블랙 트러플",
+      "price": 2900,
+      "descriptionKo": "블랙 트러플을 그대로 옮겨 담은 진한 맛의 스프레드\n*병입 150g 별도 구매 가능",
+      "isSpecialty": true,
+      "images": [
+        "https://ldb-phinf.pstatic.net/20240913_29/1726203093029rNF5I_JPEG/240911_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5%BC%BA%BC%F6_%B4%A9%B3%A2_22.jpg",
+        "https://ldb-phinf.pstatic.net/20240913_48/1726203085006bk2DB_JPEG/240911_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5%BC%BA%BC%F6_%B4%A9%B3%A2_21.jpg",
+        "https://ldb-phinf.pstatic.net/20240906_137/1725605114248MDavr_JPEG/240621_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_55.jpg"
+      ],
+      "menuId": "naver:1720159258_27",
+      "imageUrl": "https://ldb-phinf.pstatic.net/20240913_29/1726203093029rNF5I_JPEG/240911_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5%BC%BA%BC%F6_%B4%A9%B3%A2_22.jpg",
+      "imageStatus": "verified",
+      "imageSource": "naver_place_menu",
+      "imageSourceUrl": "https://map.naver.com/p/entry/place/1720159258?placePath=/menu",
+      "imageAttribution": "Naver Place · Standard Bread Seongsu"
+    },
+    {
+      "naverKey": "Menu:1720159258_28",
+      "naverMenuId": "1720159258_28",
+      "index": 28,
+      "nameKo": "카이막 스프레드",
+      "price": 2900,
+      "descriptionKo": "우유로 만들어 진하고 고소한 카이막과 달달한 꿀이 조화로운 스프레드",
+      "isSpecialty": false,
+      "images": [
+        "https://ldb-phinf.pstatic.net/20241202_254/1733099998145dIrWA_JPEG/241121_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5%28%B4%A9%B3%A2%29_13.jpg"
+      ],
+      "menuId": "naver:1720159258_28",
+      "imageUrl": "https://ldb-phinf.pstatic.net/20241202_254/1733099998145dIrWA_JPEG/241121_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5%28%B4%A9%B3%A2%29_13.jpg",
+      "imageStatus": "verified",
+      "imageSource": "naver_place_menu",
+      "imageSourceUrl": "https://map.naver.com/p/entry/place/1720159258?placePath=/menu",
+      "imageAttribution": "Naver Place · Standard Bread Seongsu"
+    },
+    {
+      "naverKey": "Menu:1720159258_29",
+      "naverMenuId": "1720159258_29",
+      "index": 29,
+      "nameKo": "피스타치오 베리",
+      "price": 2900,
+      "descriptionKo": "피스타치오 페이스트와 베리잼이 함께 들어간 스프레드\n*병입 150g 구매 가능",
+      "isSpecialty": false,
+      "images": [
+        "https://ldb-phinf.pstatic.net/20240913_94/1726203070440wPe9E_JPEG/240911_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5%BC%BA%BC%F6_%B4%A9%B3%A2_06.jpg",
+        "https://ldb-phinf.pstatic.net/20240913_241/1726203064547Yktpc_JPEG/240911_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5%BC%BA%BC%F6_%B4%A9%B3%A2_05.jpg",
+        "https://ldb-phinf.pstatic.net/20240906_131/17256051301303W5zx_JPEG/240621_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_43.jpg"
+      ],
+      "menuId": "naver:1720159258_29",
+      "imageUrl": "https://ldb-phinf.pstatic.net/20240913_94/1726203070440wPe9E_JPEG/240911_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5%BC%BA%BC%F6_%B4%A9%B3%A2_06.jpg",
+      "imageStatus": "verified",
+      "imageSource": "naver_place_menu",
+      "imageSourceUrl": "https://map.naver.com/p/entry/place/1720159258?placePath=/menu",
+      "imageAttribution": "Naver Place · Standard Bread Seongsu"
+    },
+    {
+      "naverKey": "Menu:1720159258_30",
+      "naverMenuId": "1720159258_30",
+      "index": 30,
+      "nameKo": "얼그레이 밀크티",
+      "price": 2900,
+      "descriptionKo": "얼그레이 향을 가득 담아 향긋한 수제 얼그레이 잼\n*병입 150g 구매 가능",
+      "isSpecialty": false,
+      "images": [
+        "https://ldb-phinf.pstatic.net/20240913_51/1726203117861FDmg3_JPEG/240911_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5%BC%BA%BC%F6_%B4%A9%B3%A2_02.jpg",
+        "https://ldb-phinf.pstatic.net/20240913_23/1726203115276U0o7R_JPEG/240911_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5%BC%BA%BC%F6_%B4%A9%B3%A2_01.jpg",
+        "https://ldb-phinf.pstatic.net/20240906_92/1725605046486848Ow_JPEG/240621_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_56.jpg"
+      ],
+      "menuId": "naver:1720159258_30",
+      "imageUrl": "https://ldb-phinf.pstatic.net/20240913_51/1726203117861FDmg3_JPEG/240911_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5%BC%BA%BC%F6_%B4%A9%B3%A2_02.jpg",
+      "imageStatus": "verified",
+      "imageSource": "naver_place_menu",
+      "imageSourceUrl": "https://map.naver.com/p/entry/place/1720159258?placePath=/menu",
+      "imageAttribution": "Naver Place · Standard Bread Seongsu"
+    },
+    {
+      "naverKey": "Menu:1720159258_31",
+      "naverMenuId": "1720159258_31",
+      "index": 31,
+      "nameKo": "솔티드 카라멜",
+      "price": 2900,
+      "descriptionKo": "진한 수제 카라멜과 고메버터의 풍미를 함께 담은 달콤한 스프레드\n*병입 150g 구매 가능",
+      "isSpecialty": false,
+      "images": [
+        "https://ldb-phinf.pstatic.net/20240913_223/172620313191705ekV_JPEG/240911_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5%BC%BA%BC%F6_%B4%A9%B3%A2_18.jpg",
+        "https://ldb-phinf.pstatic.net/20240913_261/1726203128032UPVev_JPEG/240911_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5%BC%BA%BC%F6_%B4%A9%B3%A2_17.jpg",
+        "https://ldb-phinf.pstatic.net/20240906_12/1725605017760QDbAa_JPEG/240621_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_53.jpg"
+      ],
+      "menuId": "naver:1720159258_31",
+      "imageUrl": "https://ldb-phinf.pstatic.net/20240913_223/172620313191705ekV_JPEG/240911_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5%BC%BA%BC%F6_%B4%A9%B3%A2_18.jpg",
+      "imageStatus": "verified",
+      "imageSource": "naver_place_menu",
+      "imageSourceUrl": "https://map.naver.com/p/entry/place/1720159258?placePath=/menu",
+      "imageAttribution": "Naver Place · Standard Bread Seongsu"
+    },
+    {
+      "naverKey": "Menu:1720159258_32",
+      "naverMenuId": "1720159258_32",
+      "index": 32,
+      "nameKo": "라즈베리 로즈",
+      "price": 2900,
+      "descriptionKo": "라즈베리, 리치 식용 장미가 들어가 상큼한 맛의 장미향 잼\n*병입 150g 구매 가능",
+      "isSpecialty": false,
+      "images": [
+        "https://ldb-phinf.pstatic.net/20240913_61/1726203175952ldBAD_JPEG/240911_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5%BC%BA%BC%F6_%B4%A9%B3%A2_14.jpg",
+        "https://ldb-phinf.pstatic.net/20240913_177/1726203171739ziKVH_JPEG/240911_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5%BC%BA%BC%F6_%B4%A9%B3%A2_13.jpg",
+        "https://ldb-phinf.pstatic.net/20240906_61/1725604921066FwN3s_JPEG/240621_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_48.jpg"
+      ],
+      "menuId": "naver:1720159258_32",
+      "imageUrl": "https://ldb-phinf.pstatic.net/20240913_61/1726203175952ldBAD_JPEG/240911_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5%BC%BA%BC%F6_%B4%A9%B3%A2_14.jpg",
+      "imageStatus": "verified",
+      "imageSource": "naver_place_menu",
+      "imageSourceUrl": "https://map.naver.com/p/entry/place/1720159258?placePath=/menu",
+      "imageAttribution": "Naver Place · Standard Bread Seongsu"
+    },
+    {
+      "naverKey": "Menu:1720159258_33",
+      "naverMenuId": "1720159258_33",
+      "index": 33,
+      "nameKo": "레드와인 무화과 처트니",
+      "price": 2900,
+      "descriptionKo": "무화과를 레드와인과 함께 졸여 만든 스프레드\n*병입 150g 구매 가능",
+      "isSpecialty": false,
+      "images": [
+        "https://ldb-phinf.pstatic.net/20241008_162/1728363570573SSHvs_JPEG/240911_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5%BC%BA%BC%F6_%B4%A9%B3%A2_12.jpg",
+        "https://ldb-phinf.pstatic.net/20241008_173/1728363568407Fb8RY_JPEG/240911_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5%BC%BA%BC%F6_%B4%A9%B3%A2_11.jpg"
+      ],
+      "menuId": "naver:1720159258_33",
+      "imageUrl": "https://ldb-phinf.pstatic.net/20241008_162/1728363570573SSHvs_JPEG/240911_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5%BC%BA%BC%F6_%B4%A9%B3%A2_12.jpg",
+      "imageStatus": "verified",
+      "imageSource": "naver_place_menu",
+      "imageSourceUrl": "https://map.naver.com/p/entry/place/1720159258?placePath=/menu",
+      "imageAttribution": "Naver Place · Standard Bread Seongsu"
+    },
+    {
+      "naverKey": "Menu:1720159258_34",
+      "naverMenuId": "1720159258_34",
+      "index": 34,
+      "nameKo": "생식빵 통 러스크",
+      "price": 3000,
+      "descriptionKo": "생식빵을 통으로 슬라이스하여 버터와 설탕으로 코팅한 제품",
+      "isSpecialty": false,
+      "images": [
+        "https://ldb-phinf.pstatic.net/20240906_25/1725605503019UViT0_JPEG/240621_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_75.jpg",
+        "https://ldb-phinf.pstatic.net/20240906_202/1725605498812kxRYC_JPEG/240621_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_74.jpg"
+      ],
+      "menuId": "naver:1720159258_34",
+      "imageUrl": "https://ldb-phinf.pstatic.net/20240906_25/1725605503019UViT0_JPEG/240621_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_75.jpg",
+      "imageStatus": "verified",
+      "imageSource": "naver_place_menu",
+      "imageSourceUrl": "https://map.naver.com/p/entry/place/1720159258?placePath=/menu",
+      "imageAttribution": "Naver Place · Standard Bread Seongsu"
+    },
+    {
+      "naverKey": "Menu:1720159258_35",
+      "naverMenuId": "1720159258_35",
+      "index": 35,
+      "nameKo": "스탠다드 슈페너",
+      "price": 6800,
+      "descriptionKo": "Only Ice",
+      "isSpecialty": false,
+      "images": [
+        "https://ldb-phinf.pstatic.net/20241125_227/1732495407001Y28Gi_JPEG/240621_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_85%28%C5%A9%B8%B2%C1%A6%B0%C5%29.jpg"
+      ],
+      "menuId": "naver:1720159258_35",
+      "imageUrl": "https://ldb-phinf.pstatic.net/20241125_227/1732495407001Y28Gi_JPEG/240621_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_85%28%C5%A9%B8%B2%C1%A6%B0%C5%29.jpg",
+      "imageStatus": "verified",
+      "imageSource": "naver_place_menu",
+      "imageSourceUrl": "https://map.naver.com/p/entry/place/1720159258?placePath=/menu",
+      "imageAttribution": "Naver Place · Standard Bread Seongsu"
+    },
+    {
+      "naverKey": "Menu:1720159258_36",
+      "naverMenuId": "1720159258_36",
+      "index": 36,
+      "nameKo": "스탠다드 모카",
+      "price": 6800,
+      "descriptionKo": "HOT/ICE",
+      "isSpecialty": false,
+      "images": [
+        "https://ldb-phinf.pstatic.net/20241125_115/1732495413880V060n_JPEG/240621_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_84%28%C5%A9%B8%B2%C1%A6%B0%C5%29.jpg"
+      ],
+      "menuId": "naver:1720159258_36",
+      "imageUrl": "https://ldb-phinf.pstatic.net/20241125_115/1732495413880V060n_JPEG/240621_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_84%28%C5%A9%B8%B2%C1%A6%B0%C5%29.jpg",
+      "imageStatus": "verified",
+      "imageSource": "naver_place_menu",
+      "imageSourceUrl": "https://map.naver.com/p/entry/place/1720159258?placePath=/menu",
+      "imageAttribution": "Naver Place · Standard Bread Seongsu"
+    },
+    {
+      "naverKey": "Menu:1720159258_37",
+      "naverMenuId": "1720159258_37",
+      "index": 37,
+      "nameKo": "말차 잼밀크",
+      "price": 6500,
+      "descriptionKo": "",
+      "isSpecialty": false,
+      "images": [
+        "https://ldb-phinf.pstatic.net/20250620_40/1750380057275HBqj7_JPEG/250617_SB%28%B4%A9%B3%A2%29_10.jpg"
+      ],
+      "menuId": "naver:1720159258_37",
+      "imageUrl": "https://ldb-phinf.pstatic.net/20250620_40/1750380057275HBqj7_JPEG/250617_SB%28%B4%A9%B3%A2%29_10.jpg",
+      "imageStatus": "verified",
+      "imageSource": "naver_place_menu",
+      "imageSourceUrl": "https://map.naver.com/p/entry/place/1720159258?placePath=/menu",
+      "imageAttribution": "Naver Place · Standard Bread Seongsu"
+    },
+    {
+      "naverKey": "Menu:1720159258_38",
+      "naverMenuId": "1720159258_38",
+      "index": 38,
+      "nameKo": "베리 잼밀크",
+      "price": 6500,
+      "descriptionKo": "",
+      "isSpecialty": false,
+      "images": [
+        "https://ldb-phinf.pstatic.net/20240906_282/1725604383176QbCGJ_JPEG/240621_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_77.jpg"
+      ],
+      "menuId": "naver:1720159258_38",
+      "imageUrl": "https://ldb-phinf.pstatic.net/20240906_282/1725604383176QbCGJ_JPEG/240621_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_77.jpg",
+      "imageStatus": "verified",
+      "imageSource": "naver_place_menu",
+      "imageSourceUrl": "https://map.naver.com/p/entry/place/1720159258?placePath=/menu",
+      "imageAttribution": "Naver Place · Standard Bread Seongsu"
+    },
+    {
+      "naverKey": "Menu:1720159258_39",
+      "naverMenuId": "1720159258_39",
+      "index": 39,
+      "nameKo": "너티 쇼콜라 잼밀크",
+      "price": 6500,
+      "descriptionKo": "",
+      "isSpecialty": false,
+      "images": [
+        "https://ldb-phinf.pstatic.net/20240906_159/1725604361043bI4B3_JPEG/240621_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_78.jpg"
+      ],
+      "menuId": "naver:1720159258_39",
+      "imageUrl": "https://ldb-phinf.pstatic.net/20240906_159/1725604361043bI4B3_JPEG/240621_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_78.jpg",
+      "imageStatus": "verified",
+      "imageSource": "naver_place_menu",
+      "imageSourceUrl": "https://map.naver.com/p/entry/place/1720159258?placePath=/menu",
+      "imageAttribution": "Naver Place · Standard Bread Seongsu"
+    },
+    {
+      "naverKey": "Menu:1720159258_40",
+      "naverMenuId": "1720159258_40",
+      "index": 40,
+      "nameKo": "크리미 바닐라 잼밀크",
+      "price": 6500,
+      "descriptionKo": "",
+      "isSpecialty": false,
+      "images": [
+        "https://ldb-phinf.pstatic.net/20240906_43/1725604397290hRPa9_JPEG/240621_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_76.jpg"
+      ],
+      "menuId": "naver:1720159258_40",
+      "imageUrl": "https://ldb-phinf.pstatic.net/20240906_43/1725604397290hRPa9_JPEG/240621_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_76.jpg",
+      "imageStatus": "verified",
+      "imageSource": "naver_place_menu",
+      "imageSourceUrl": "https://map.naver.com/p/entry/place/1720159258?placePath=/menu",
+      "imageAttribution": "Naver Place · Standard Bread Seongsu"
+    },
+    {
+      "naverKey": "Menu:1720159258_41",
+      "naverMenuId": "1720159258_41",
+      "index": 41,
+      "nameKo": "마일드 롱블랙",
+      "price": 5000,
+      "descriptionKo": "HOT/ICE",
+      "isSpecialty": false,
+      "images": [
+        "https://ldb-phinf.pstatic.net/20240906_270/1725613410317f66C3_JPEG/240621_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_80.jpg",
+        "https://ldb-phinf.pstatic.net/20240906_283/1725613399310VdiMR_JPEG/240621_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_96.jpg"
+      ],
+      "menuId": "naver:1720159258_41",
+      "imageUrl": "https://ldb-phinf.pstatic.net/20240906_270/1725613410317f66C3_JPEG/240621_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_80.jpg",
+      "imageStatus": "verified",
+      "imageSource": "naver_place_menu",
+      "imageSourceUrl": "https://map.naver.com/p/entry/place/1720159258?placePath=/menu",
+      "imageAttribution": "Naver Place · Standard Bread Seongsu"
+    },
+    {
+      "naverKey": "Menu:1720159258_42",
+      "naverMenuId": "1720159258_42",
+      "index": 42,
+      "nameKo": "디카페인 롱블랙",
+      "price": 5500,
+      "descriptionKo": "HOT/ICE",
+      "isSpecialty": false,
+      "images": [
+        "https://ldb-phinf.pstatic.net/20240906_135/1725613421902Q1QNH_JPEG/240621_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_79.jpg",
+        "https://ldb-phinf.pstatic.net/20240906_181/1725613418296C5OjL_JPEG/240621_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_96.jpg"
+      ],
+      "menuId": "naver:1720159258_42",
+      "imageUrl": "https://ldb-phinf.pstatic.net/20240906_135/1725613421902Q1QNH_JPEG/240621_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_79.jpg",
+      "imageStatus": "verified",
+      "imageSource": "naver_place_menu",
+      "imageSourceUrl": "https://map.naver.com/p/entry/place/1720159258?placePath=/menu",
+      "imageAttribution": "Naver Place · Standard Bread Seongsu"
+    },
+    {
+      "naverKey": "Menu:1720159258_43",
+      "naverMenuId": "1720159258_43",
+      "index": 43,
+      "nameKo": "카페라테",
+      "price": 6300,
+      "descriptionKo": "HOT/ICE\n*디카페인 변경 +500",
+      "isSpecialty": false,
+      "images": [
+        "https://ldb-phinf.pstatic.net/20240906_255/1725613435452BdIfp_JPEG/240621_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_83.jpg",
+        "https://ldb-phinf.pstatic.net/20240906_205/1725613209612S1E7i_JPEG/240621_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_93.jpg"
+      ],
+      "menuId": "naver:1720159258_43",
+      "imageUrl": "https://ldb-phinf.pstatic.net/20240906_255/1725613435452BdIfp_JPEG/240621_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_83.jpg",
+      "imageStatus": "verified",
+      "imageSource": "naver_place_menu",
+      "imageSourceUrl": "https://map.naver.com/p/entry/place/1720159258?placePath=/menu",
+      "imageAttribution": "Naver Place · Standard Bread Seongsu"
+    },
+    {
+      "naverKey": "Menu:1720159258_44",
+      "naverMenuId": "1720159258_44",
+      "index": 44,
+      "nameKo": "바닐라 카페라테",
+      "price": 6500,
+      "descriptionKo": "HOT/ICE\n*디카페인 변경 +500",
+      "isSpecialty": false,
+      "images": [
+        "https://ldb-phinf.pstatic.net/20240906_88/1725613443881pdHL4_JPEG/240621_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_83.jpg",
+        "https://ldb-phinf.pstatic.net/20240906_20/1725613332587aAq9W_JPEG/240621_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_93.jpg"
+      ],
+      "menuId": "naver:1720159258_44",
+      "imageUrl": "https://ldb-phinf.pstatic.net/20240906_88/1725613443881pdHL4_JPEG/240621_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_83.jpg",
+      "imageStatus": "verified",
+      "imageSource": "naver_place_menu",
+      "imageSourceUrl": "https://map.naver.com/p/entry/place/1720159258?placePath=/menu",
+      "imageAttribution": "Naver Place · Standard Bread Seongsu"
+    },
+    {
+      "naverKey": "Menu:1720159258_45",
+      "naverMenuId": "1720159258_45",
+      "index": 45,
+      "nameKo": "저당 바닐라 라테",
+      "price": 6500,
+      "descriptionKo": "HOT/ICE\n*디카페인 변경 +500",
+      "isSpecialty": false,
+      "images": [
+        "https://ldb-phinf.pstatic.net/20260118_42/1768711006427TwyfG_JPEG/240621_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_83.jpg",
+        "https://ldb-phinf.pstatic.net/20260118_177/1768710946866CK8yy_JPEG/240621_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_93.jpg"
+      ],
+      "menuId": "naver:1720159258_45",
+      "imageUrl": "https://ldb-phinf.pstatic.net/20260118_42/1768711006427TwyfG_JPEG/240621_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_83.jpg",
+      "imageStatus": "verified",
+      "imageSource": "naver_place_menu",
+      "imageSourceUrl": "https://map.naver.com/p/entry/place/1720159258?placePath=/menu",
+      "imageAttribution": "Naver Place · Standard Bread Seongsu"
+    },
+    {
+      "naverKey": "Menu:1720159258_46",
+      "naverMenuId": "1720159258_46",
+      "index": 46,
+      "nameKo": "저당 카라멜 라테",
+      "price": 6500,
+      "descriptionKo": "HOT/ICE\n*디카페인 변경 +500",
+      "isSpecialty": false,
+      "images": [
+        "https://ldb-phinf.pstatic.net/20260118_131/1768711042575uPY2j_JPEG/240621_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_83.jpg",
+        "https://ldb-phinf.pstatic.net/20260118_9/1768711038931uYjWa_JPEG/240621_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_93.jpg"
+      ],
+      "menuId": "naver:1720159258_46",
+      "imageUrl": "https://ldb-phinf.pstatic.net/20260118_131/1768711042575uPY2j_JPEG/240621_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_83.jpg",
+      "imageStatus": "verified",
+      "imageSource": "naver_place_menu",
+      "imageSourceUrl": "https://map.naver.com/p/entry/place/1720159258?placePath=/menu",
+      "imageAttribution": "Naver Place · Standard Bread Seongsu"
+    },
+    {
+      "naverKey": "Menu:1720159258_47",
+      "naverMenuId": "1720159258_47",
+      "index": 47,
+      "nameKo": "시트러스 스쿼시",
+      "price": 7300,
+      "descriptionKo": "Only Ice",
+      "isSpecialty": false,
+      "images": [
+        "https://ldb-phinf.pstatic.net/20240906_224/1725604156795f4xR1_JPEG/240621_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_86.jpg"
+      ],
+      "menuId": "naver:1720159258_47",
+      "imageUrl": "https://ldb-phinf.pstatic.net/20240906_224/1725604156795f4xR1_JPEG/240621_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_86.jpg",
+      "imageStatus": "verified",
+      "imageSource": "naver_place_menu",
+      "imageSourceUrl": "https://map.naver.com/p/entry/place/1720159258?placePath=/menu",
+      "imageAttribution": "Naver Place · Standard Bread Seongsu"
+    },
+    {
+      "naverKey": "Menu:1720159258_48",
+      "naverMenuId": "1720159258_48",
+      "index": 48,
+      "nameKo": "트로피칼 스쿼시",
+      "price": 7300,
+      "descriptionKo": "Only Ice",
+      "isSpecialty": false,
+      "images": [
+        "https://ldb-phinf.pstatic.net/20240906_202/17256041001268vYOu_JPEG/240621_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_87.jpg"
+      ],
+      "menuId": "naver:1720159258_48",
+      "imageUrl": "https://ldb-phinf.pstatic.net/20240906_202/17256041001268vYOu_JPEG/240621_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_87.jpg",
+      "imageStatus": "verified",
+      "imageSource": "naver_place_menu",
+      "imageSourceUrl": "https://map.naver.com/p/entry/place/1720159258?placePath=/menu",
+      "imageAttribution": "Naver Place · Standard Bread Seongsu"
+    },
+    {
+      "naverKey": "Menu:1720159258_49",
+      "naverMenuId": "1720159258_49",
+      "index": 49,
+      "nameKo": "베리베리 스쿼시",
+      "price": 7300,
+      "descriptionKo": "Only Ice",
+      "isSpecialty": false,
+      "images": [
+        "https://ldb-phinf.pstatic.net/20240906_167/1725604079948dNRxT_JPEG/240621_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_88.jpg"
+      ],
+      "menuId": "naver:1720159258_49",
+      "imageUrl": "https://ldb-phinf.pstatic.net/20240906_167/1725604079948dNRxT_JPEG/240621_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_88.jpg",
+      "imageStatus": "verified",
+      "imageSource": "naver_place_menu",
+      "imageSourceUrl": "https://map.naver.com/p/entry/place/1720159258?placePath=/menu",
+      "imageAttribution": "Naver Place · Standard Bread Seongsu"
+    },
+    {
+      "naverKey": "Menu:1720159258_50",
+      "naverMenuId": "1720159258_50",
+      "index": 50,
+      "nameKo": "밀크 쉐이크",
+      "price": 7300,
+      "descriptionKo": "",
+      "isSpecialty": false,
+      "images": [
+        "https://ldb-phinf.pstatic.net/20240913_260/1726203386612IBdTK_JPEG/240911_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5%BC%BA%BC%F6_%B4%A9%B3%A2_34.jpg"
+      ],
+      "menuId": "naver:1720159258_50",
+      "imageUrl": "https://ldb-phinf.pstatic.net/20240913_260/1726203386612IBdTK_JPEG/240911_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5%BC%BA%BC%F6_%B4%A9%B3%A2_34.jpg",
+      "imageStatus": "verified",
+      "imageSource": "naver_place_menu",
+      "imageSourceUrl": "https://map.naver.com/p/entry/place/1720159258?placePath=/menu",
+      "imageAttribution": "Naver Place · Standard Bread Seongsu"
+    },
+    {
+      "naverKey": "Menu:1720159258_51",
+      "naverMenuId": "1720159258_51",
+      "index": 51,
+      "nameKo": "딸기 밀크 쉐이크",
+      "price": 7300,
+      "descriptionKo": "",
+      "isSpecialty": false,
+      "images": [
+        "https://ldb-phinf.pstatic.net/20240913_185/1726203393893u1f0o_JPEG/240911_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5%BC%BA%BC%F6_%B4%A9%B3%A2_33.jpg"
+      ],
+      "menuId": "naver:1720159258_51",
+      "imageUrl": "https://ldb-phinf.pstatic.net/20240913_185/1726203393893u1f0o_JPEG/240911_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5%BC%BA%BC%F6_%B4%A9%B3%A2_33.jpg",
+      "imageStatus": "verified",
+      "imageSource": "naver_place_menu",
+      "imageSourceUrl": "https://map.naver.com/p/entry/place/1720159258?placePath=/menu",
+      "imageAttribution": "Naver Place · Standard Bread Seongsu"
+    },
+    {
+      "naverKey": "Menu:1720159258_52",
+      "naverMenuId": "1720159258_52",
+      "index": 52,
+      "nameKo": "얼그레이",
+      "price": 6500,
+      "descriptionKo": "HOT/ICE",
+      "isSpecialty": false,
+      "images": [
+        "https://ldb-phinf.pstatic.net/20240906_22/1725613367682jWET8_JPEG/240621_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_92.jpg",
+        "https://ldb-phinf.pstatic.net/20240906_178/1725613362477uKCh4_JPEG/240621_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_95.jpg"
+      ],
+      "menuId": "naver:1720159258_52",
+      "imageUrl": "https://ldb-phinf.pstatic.net/20240906_22/1725613367682jWET8_JPEG/240621_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_92.jpg",
+      "imageStatus": "verified",
+      "imageSource": "naver_place_menu",
+      "imageSourceUrl": "https://map.naver.com/p/entry/place/1720159258?placePath=/menu",
+      "imageAttribution": "Naver Place · Standard Bread Seongsu"
+    },
+    {
+      "naverKey": "Menu:1720159258_53",
+      "naverMenuId": "1720159258_53",
+      "index": 53,
+      "nameKo": "카모마일",
+      "price": 6500,
+      "descriptionKo": "HOT/ICE",
+      "isSpecialty": false,
+      "images": [
+        "https://ldb-phinf.pstatic.net/20240906_188/1725613381569otu05_JPEG/240621_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_91.jpg",
+        "https://ldb-phinf.pstatic.net/20240906_237/1725613378371bRd0a_JPEG/240621_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_94.jpg"
+      ],
+      "menuId": "naver:1720159258_53",
+      "imageUrl": "https://ldb-phinf.pstatic.net/20240906_188/1725613381569otu05_JPEG/240621_%BD%BA%C5%C4%B4%D9%B5%E5%BA%EA%B7%B9%B5%E5_%B4%A9%B3%A2_91.jpg",
+      "imageStatus": "verified",
+      "imageSource": "naver_place_menu",
+      "imageSourceUrl": "https://map.naver.com/p/entry/place/1720159258?placePath=/menu",
+      "imageAttribution": "Naver Place · Standard Bread Seongsu"
+    }
+  ]
+}

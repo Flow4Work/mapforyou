@@ -2,7 +2,7 @@ import "server-only";
 
 import { getSupabaseServerClient } from "@/lib/supabase";
 
-const ACTIVE_REGIONS = ["seongsu", "hongdae"] as const;
+const ACTIVE_REGIONS = ["seongsu", "hongdae", "geondae", "jongno"] as const;
 const DEFAULT_PER_REGION = 20;
 const MAX_PER_REGION = 50;
 
@@ -13,6 +13,14 @@ export type DiscoveryMenu = {
   nameJa: string;
   price: number;
   isSpecialty: boolean;
+  descriptionKo: string;
+  descriptionEn: string;
+  descriptionJa: string;
+  imageUrl: string;
+  imageSource: string;
+  imageSourceUrl: string;
+  imageAttribution: string;
+  imageStatus: "unchecked" | "verified" | "not_available" | "needs_review";
 };
 
 export type DiscoveryRestaurant = {
@@ -87,10 +95,18 @@ type MenuRow = {
   name_ja: string | null;
   price: number | string | null;
   is_specialty: boolean | null;
+  description_ko: string | null;
+  description_en: string | null;
+  description_ja: string | null;
+  image_url: string | null;
+  image_source: string | null;
+  image_source_url: string | null;
+  image_attribution: string | null;
+  image_status: "unchecked" | "verified" | "not_available" | "needs_review" | null;
 };
 
 const RESTAURANT_COLUMNS = "source_id,name,name_en,name_ja,road_address,road_address_en,road_address_ja,address,latitude,longitude,phone,category,license_type,introduction,introduction_en,introduction_ja,region_key,search_keyword,image_url,image_gallery_urls,image_source,image_attribution,image_source_url,instagram_url,instagram_username,updated_at";
-const MENU_COLUMNS = "menu_id,restaurant_id,name_ko,name_en,name_ja,price,is_specialty,sort_order";
+const MENU_COLUMNS = "menu_id,restaurant_id,name_ko,name_en,name_ja,price,is_specialty,sort_order,description_ko,description_en,description_ja,image_url,image_source,image_source_url,image_attribution,image_status";
 
 function optionalNumber(value: number | string | null) {
   const parsed = Number(value);
@@ -155,6 +171,14 @@ function mapMenu(row: MenuRow): DiscoveryMenu {
     nameJa: row.name_ja ?? "",
     price: Number(row.price ?? 0) || 0,
     isSpecialty: Boolean(row.is_specialty),
+    descriptionKo: row.description_ko ?? "",
+    descriptionEn: row.description_en ?? "",
+    descriptionJa: row.description_ja ?? "",
+    imageUrl: row.image_url ?? "",
+    imageSource: row.image_source ?? "",
+    imageSourceUrl: row.image_source_url ?? "",
+    imageAttribution: row.image_attribution ?? "",
+    imageStatus: row.image_status ?? "unchecked",
   };
 }
 
