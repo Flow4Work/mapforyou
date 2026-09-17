@@ -45,10 +45,16 @@ export async function POST(request: Request) {
       ? body.resultCount
       : null;
     const language = body.language === "ja" ? "ja" : "en";
+    const serverKey = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
+
+    if (!serverKey || serverKey.startsWith("sb_publishable_")) {
+      return new NextResponse(null, { status: 204 });
+    }
+
     const supabase = getSupabaseServerClient();
 
     if (!supabase) {
-      return NextResponse.json({ error: "Analytics unavailable" }, { status: 503 });
+      return new NextResponse(null, { status: 204 });
     }
 
     const { error } = await supabase.from("analytics_events").insert({
@@ -67,7 +73,7 @@ export async function POST(request: Request) {
 
     if (error) {
       console.error("analytics insert failed", error.message);
-      return NextResponse.json({ error: "Analytics unavailable" }, { status: 500 });
+      return new NextResponse(null, { status: 204 });
     }
 
     return new NextResponse(null, { status: 204 });
