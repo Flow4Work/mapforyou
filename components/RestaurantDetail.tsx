@@ -50,6 +50,7 @@ export default function RestaurantDetail({ store }: { store: DiscoveryRestaurant
     year: "numeric",
     month: "short",
     day: "numeric",
+    timeZone: "Asia/Seoul",
   });
 
   const copy = language === "ja"
