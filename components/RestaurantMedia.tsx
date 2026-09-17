@@ -50,7 +50,7 @@ export default function RestaurantMedia({
           </div>
           <div className={`restaurant-gallery ${additionalImages.length === 1 ? "single" : ""}`}>
             {additionalImages.map((url, index) => (
-              <img key={`${url}-${index}`} src={url} alt={`${store.name} ${copy.gallery} ${index + 2}`} loading="lazy" />
+              <img key={`${url}-${index}`} src={url} alt={`${store.name} ${copy.gallery} ${index + 2}`} loading="lazy" referrerPolicy="no-referrer" />
             ))}
           </div>
         </div>

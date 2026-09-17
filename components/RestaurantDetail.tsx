@@ -9,7 +9,10 @@ import {
   broadCategory,
   categoryLabel,
   googleMapUrl,
+  localizedAddress,
+  localizedIntroduction,
   localizedMenuName,
+  localizedRestaurantName,
   naverMapUrl,
   priceLabel,
   regionLabel,
@@ -97,7 +100,7 @@ export default function RestaurantDetail({ store }: { store: DiscoveryRestaurant
         <RestaurantCover store={store} language={language} />
         <div className="detail-hero-copy">
           <div className="detail-kicker">{regionLabel(store.regionKey, language)} · {categoryLabel(category, language)}</div>
-          <h1>{store.name}</h1>
+          <h1>{localizedRestaurantName(store, language)}</h1>
           <p>{copy.translated}</p>
           <div className="detail-quick-stats">
             <div><strong>{store.menus.length}</strong><span>{language === "ja" ? "翻訳メニュー" : "translated menus"}</span></div>
@@ -110,7 +113,7 @@ export default function RestaurantDetail({ store }: { store: DiscoveryRestaurant
         <section className="detail-main-column">
           <div className="detail-section-heading">
             <span>{copy.about}</span>
-            <h2>{store.introduction || copy.noIntro}</h2>
+            <h2>{localizedIntroduction(store, language) || copy.noIntro}</h2>
           </div>
 
           <div className="detail-section-heading menu-heading">
@@ -191,7 +194,7 @@ export default function RestaurantDetail({ store }: { store: DiscoveryRestaurant
         <aside className="detail-side-column">
           <section className="detail-info-card">
             <span>{copy.directions}</span>
-            <h2>{store.roadAddress || store.address}</h2>
+            <h2>{localizedAddress(store, language)}</h2>
             <div className="detail-action-grid">
               <a href={googleMapUrl(store)} target="_blank" rel="noreferrer">{copy.google}</a>
               <a href={naverMapUrl(store)} target="_blank" rel="noreferrer">{copy.naver}</a>

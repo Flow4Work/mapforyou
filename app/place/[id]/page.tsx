@@ -6,7 +6,8 @@ export const revalidate = 300;
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const store = await loadDiscoveryRestaurant(id);
+  const sourceId = decodeURIComponent(id);
+  const store = await loadDiscoveryRestaurant(sourceId);
   if (!store) return { title: "Restaurant not found | MapForYou" };
   return {
     title: `${store.name} Menu | MapForYou`,
@@ -16,7 +17,8 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
 export default async function PublicRestaurantPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const store = await loadDiscoveryRestaurant(id);
+  const sourceId = decodeURIComponent(id);
+  const store = await loadDiscoveryRestaurant(sourceId);
   if (!store) notFound();
   return <RestaurantDetail store={store} />;
 }

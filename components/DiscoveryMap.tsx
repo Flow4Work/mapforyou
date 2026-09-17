@@ -10,6 +10,7 @@ import {
   type PublicLanguage,
 } from "@/lib/discovery-ui";
 
+const HAS_CONFIGURED_NAVER_MAP_CLIENT_ID = Boolean(process.env.NEXT_PUBLIC_NAVER_MAP_CLIENT_ID);
 const NAVER_MAP_CLIENT_ID = process.env.NEXT_PUBLIC_NAVER_MAP_CLIENT_ID || "qlsdjge63h";
 const NAVER_SCRIPT_ID = "naver-map-sdk";
 
@@ -92,20 +93,14 @@ function mapLanguage(language: PublicLanguage): NaverLanguage {
   return language === "ja" ? "ja" : "en";
 }
 
-function removeExistingNaverScript() {
-  document.getElementById(NAVER_SCRIPT_ID)?.remove();
-  if (window.naver) delete window.naver;
-}
+let naverMapsPromise: Promise<NaverMapsNamespace> | null = null;
 
 function loadNaverMaps(language: NaverLanguage): Promise<NaverMapsNamespace> {
-  const existingScript = document.getElementById(NAVER_SCRIPT_ID) as HTMLScriptElement | null;
-  if (existingScript?.dataset.language === language && window.naver?.maps) {
-    return Promise.resolve(window.naver.maps);
-  }
+  if (window.naver?.maps) return Promise.resolve(window.naver.maps);
+  if (naverMapsPromise) return naverMapsPromise;
 
-  removeExistingNaverScript();
-
-  return new Promise((resolve, reject) => {
+  document.getElementById(NAVER_SCRIPT_ID)?.remove();
+  naverMapsPromise = new Promise((resolve, reject) => {
     const script = document.createElement("script");
     script.id = NAVER_SCRIPT_ID;
     script.dataset.language = language;
@@ -113,13 +108,19 @@ function loadNaverMaps(language: NaverLanguage): Promise<NaverMapsNamespace> {
     script.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${encodeURIComponent(NAVER_MAP_CLIENT_ID)}&language=${language}`;
     script.onload = () => {
       if (window.naver?.maps) resolve(window.naver.maps);
-      else reject(new Error("NAVER Maps SDK was loaded without a map namespace."));
+      else {
+        naverMapsPromise = null;
+        reject(new Error("NAVER Maps SDK was loaded without a map namespace."));
+      }
     };
-    script.onerror = () => reject(new Error("NAVER Maps SDK failed to load."));
+    script.onerror = () => {
+      naverMapsPromise = null;
+      reject(new Error("NAVER Maps SDK failed to load."));
+    };
     document.head.appendChild(script);
   });
+  return naverMapsPromise;
 }
-
 function clusterBucketSize(zoom: number) {
   if (zoom <= 11) return 0.04;
   if (zoom === 12) return 0.025;
@@ -308,7 +309,7 @@ export default function DiscoveryMap({
         icon: isCluster ? clusterIcon(maps, group.stores.length) : markerIcon(maps, store, selected),
         title: isCluster
           ? `${group.stores.length} places`
-          : localizedRestaurantName(store, language),
+          : store.nameEn || store.name || store.nameJa,
         zIndex: selected ? 500 : isCluster ? 200 : 100,
       });
 
@@ -344,7 +345,7 @@ export default function DiscoveryMap({
       }
       lastStoreKeyRef.current = storeKey;
     }
-  }, [clearMarkers, language, onSelect, selectedId, stores]);
+  }, [clearMarkers, onSelect, selectedId, stores]);
 
   drawMarkersRef.current = drawMarkers;
 
@@ -353,6 +354,12 @@ export default function DiscoveryMap({
     let observer: ResizeObserver | null = null;
     setMapState("loading");
     lastStoreKeyRef.current = "";
+
+    const host = window.location.hostname;
+    if (!HAS_CONFIGURED_NAVER_MAP_CLIENT_ID && (host === "localhost" || host === "127.0.0.1")) {
+      setMapState("error");
+      return;
+    }
 
     loadNaverMaps(mapLanguage(language))
       .then((maps) => {
@@ -397,7 +404,7 @@ export default function DiscoveryMap({
       mapRef.current = null;
       mapsRef.current = null;
     };
-  }, [clearMarkers, language]);
+  }, [clearMarkers]);
 
   useEffect(() => {
     if (mapState === "ready") drawMarkers();

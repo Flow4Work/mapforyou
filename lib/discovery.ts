@@ -189,24 +189,30 @@ async function loadMenusByRestaurant(ids: string[]) {
   const supabase = getSupabaseServerClient();
   if (!supabase) return menusByRestaurant;
 
-  const { data: menuData, error: menuError } = await supabase
-    .from("public_data_menus")
-    .select(MENU_COLUMNS)
-    .in("restaurant_id", ids)
-    .order("sort_order", { ascending: true });
+  const pageSize = 1000;
+  for (let from = 0; ; from += pageSize) {
+    const { data: menuData, error: menuError } = await supabase
+      .from("public_data_menus")
+      .select(MENU_COLUMNS)
+      .in("restaurant_id", ids)
+      .order("restaurant_id", { ascending: true })
+      .order("sort_order", { ascending: true })
+      .range(from, from + pageSize - 1);
 
-  if (menuError) throw new Error(`공개 메뉴 조회 실패: ${menuError.message}`);
+    if (menuError) throw new Error(`공개 메뉴 조회 실패: ${menuError.message}`);
 
-  for (const row of (menuData ?? []) as MenuRow[]) {
-    const restaurantId = String(row.restaurant_id);
-    const current = menusByRestaurant.get(restaurantId) ?? [];
-    current.push(mapMenu(row));
-    menusByRestaurant.set(restaurantId, current);
+    const rows = (menuData ?? []) as MenuRow[];
+    for (const row of rows) {
+      const restaurantId = String(row.restaurant_id);
+      const current = menusByRestaurant.get(restaurantId) ?? [];
+      current.push(mapMenu(row));
+      menusByRestaurant.set(restaurantId, current);
+    }
+    if (rows.length < pageSize) break;
   }
 
   return menusByRestaurant;
 }
-
 function attachMenus(restaurants: RestaurantRow[], menusByRestaurant: Map<string, DiscoveryMenu[]>) {
   return restaurants
     .map((row) => mapRestaurant(row, menusByRestaurant.get(String(row.source_id)) ?? []))

@@ -507,8 +507,18 @@ export default function DiscoveryApp({
                 {selectedStore.menus.map((menu, index) => {
                   const menuKey = `${selectedStore.id}:${menu.id}:${index}`;
                   const revealed = revealedMenuId === menuKey;
+                  const localizedName = localizedMenuName(menu, language);
+                  const description = language === "ja"
+                    ? menu.descriptionJa || menu.descriptionKo
+                    : menu.descriptionEn || menu.descriptionKo;
+                  const hasVerifiedImage = menu.imageStatus === "verified" && /^https?:\/\//i.test(menu.imageUrl);
                   return (
-                    <article className="inline-menu-card" key={menuKey}>
+                    <article className={`inline-menu-card${hasVerifiedImage ? " has-image" : ""}`} key={menuKey}>
+                      {hasVerifiedImage && (
+                        <a className="inline-menu-image-link" href={menu.imageSourceUrl || menu.imageUrl} target="_blank" rel="noreferrer" aria-label={`${localizedName} image source`}>
+                          <img className="inline-menu-image" src={menu.imageUrl} alt={localizedName} loading="lazy" />
+                        </a>
+                      )}
                       <div className="inline-menu-row">
                         <div>
                           {menu.isSpecialty && (
@@ -516,7 +526,8 @@ export default function DiscoveryApp({
                               {copy.featured}
                             </span>
                           )}
-                          <h2>{localizedMenuName(menu, language)}</h2>
+                          <h2>{localizedName}</h2>
+                          {description && <p className="inline-menu-description">{description}</p>}
                         </div>
                         <div className="inline-price">
                           <strong>{formatPrice(menu.price)}</strong>
