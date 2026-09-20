@@ -4,9 +4,9 @@
 }
 
 .naver-map-marker {
-  --marker-color: #8c5b18;
-  --marker-bg: #fff9e7;
-  --marker-border: #e8c676;
+  --marker-color: #a66c12;
+  --marker-bg: #fff6d9;
+  --marker-border: #e1bd65;
   position: relative;
   display: grid;
   place-items: center;
@@ -23,21 +23,27 @@
 }
 
 .naver-map-marker.category-cafe {
-  --marker-color: #247c72;
-  --marker-bg: #f1fffb;
-  --marker-border: #91cec6;
+  --marker-color: #9b5a2b;
+  --marker-bg: #fff2dc;
+  --marker-border: #e3ae68;
 }
 
-.naver-map-marker.category-bbq {
-  --marker-color: #b4402d;
-  --marker-bg: #fff3ee;
-  --marker-border: #e7a092;
+.naver-map-marker.category-korean {
+  --marker-color: #c45132;
+  --marker-bg: #fff0e6;
+  --marker-border: #e8a28c;
 }
 
-.naver-map-marker.category-restaurant {
-  --marker-color: #8c5b18;
-  --marker-bg: #fff9e7;
-  --marker-border: #e8c676;
+.naver-map-marker.category-grill {
+  --marker-color: #8f382b;
+  --marker-bg: #ffebe6;
+  --marker-border: #d98270;
+}
+
+.naver-map-marker.category-global {
+  --marker-color: #a66c12;
+  --marker-bg: #fff6d9;
+  --marker-border: #e1bd65;
 }
 
 .naver-map-marker::after {

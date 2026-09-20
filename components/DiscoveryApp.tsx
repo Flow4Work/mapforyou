@@ -6,6 +6,8 @@ import ImageViewer from "@/components/ImageViewer";
 import RestaurantCover from "@/components/RestaurantCover";
 import type { DiscoveryRestaurant } from "@/lib/discovery";
 import {
+  bookingHomeUrl,
+  bookingPlaceUrl,
   broadCategory,
   categoryIcon,
   categoryLabel,
@@ -56,20 +58,35 @@ const FALLBACK_RATES: ExchangeRates = {
   isFallback: true,
 };
 
-const BOOKING_BASE_URL = "https://booking-daijoubu.vercel.app/";
+function recommendationScore(store: DiscoveryRestaurant) {
+  const category = broadCategory(store);
+  const mealPlaceBonus = category === "cafe" || category === "dessert" ? 0 : 10000;
+  const featuredMenus = store.menus.filter((menu) => menu.isSpecialty).length;
+  const pricedMenus = store.menus.filter((menu) => menu.price > 0).length;
+  const verifiedImages = store.menus.filter(
+    (menu) => menu.imageStatus === "verified" && /^https?:\/\//i.test(menu.imageUrl),
+  ).length;
+  const galleryCount = Math.min(store.imageGalleryUrls.length, 8);
+  const dataCompleteness = [
+    store.nameEn,
+    store.nameJa,
+    store.roadAddressEn,
+    store.roadAddressJa,
+    store.imageUrl,
+  ].filter((value) => Boolean(value?.trim())).length;
 
-function bookingHomeUrl(language: PublicLanguage) {
-  return `${BOOKING_BASE_URL}?lang=${language}`;
+  return (
+    mealPlaceBonus +
+    featuredMenus * 450 +
+    Math.min(pricedMenus, 30) * 45 +
+    Math.min(verifiedImages, 24) * 30 +
+    galleryCount * 75 +
+    dataCompleteness * 80
+  );
 }
 
-function bookingPlaceUrl(store: DiscoveryRestaurant, language: PublicLanguage) {
-  const params = new URLSearchParams({
-    lang: language,
-    restaurant: store.name,
-    url: naverMapUrl(store),
-    address: store.roadAddress || store.address,
-  });
-  return `${BOOKING_BASE_URL}?${params.toString()}`;
+function defaultRecommendationCompare(a: DiscoveryRestaurant, b: DiscoveryRestaurant) {
+  return recommendationScore(b) - recommendationScore(a) || a.id.localeCompare(b.id);
 }
 
 export default function DiscoveryApp({
@@ -82,7 +99,9 @@ export default function DiscoveryApp({
   const [search, setSearch] = useState("");
   const [region, setRegion] = useState("all");
   const [category, setCategory] = useState<"all" | BroadCategory>("all");
-  const [selectedId, setSelectedId] = useState(initialStores[0]?.id ?? "");
+  const [selectedId, setSelectedId] = useState(
+    () => [...initialStores].sort(defaultRecommendationCompare)[0]?.id ?? "",
+  );
   const [showConvertedPrice, setShowConvertedPrice] = useState(false);
   const [rates, setRates] = useState<ExchangeRates>(FALLBACK_RATES);
   const [revealedMenuId, setRevealedMenuId] = useState("");
@@ -121,7 +140,7 @@ export default function DiscoveryApp({
           compactView: "名前・価格",
           bookingTicker: "韓国のお店予約をもっと簡単に",
           bookingHeader: "予約サポート",
-          bookingPlace: "このお店を予約",
+          bookingPlace: "予約する",
           noPrice: "価格未確認",
           dataNotice:
             "公開データを整理した参考情報です。価格・営業情報は店舗で変更される場合があります。",
@@ -157,7 +176,7 @@ export default function DiscoveryApp({
           compactView: "Name + price",
           bookingTicker: "Need help booking a place in Korea?",
           bookingHeader: "Booking Help",
-          bookingPlace: "Book this place",
+          bookingPlace: "Book a table",
           noPrice: "Price unavailable",
           dataNotice:
             "This is reference information organized from public data. Prices and operating details may change at the restaurant.",
@@ -243,7 +262,7 @@ export default function DiscoveryApp({
 
   const filteredStores = useMemo(() => {
     const query = search.trim().toLowerCase();
-    return stores.filter((store) => {
+    const filtered = stores.filter((store) => {
       if (region !== "all" && store.regionKey !== region) return false;
       if (category !== "all" && broadCategory(store) !== category) return false;
       if (!query) return true;
@@ -256,6 +275,11 @@ export default function DiscoveryApp({
         .toLowerCase()
         .includes(query);
     });
+
+    if (!query && category === "all") {
+      return [...filtered].sort(defaultRecommendationCompare);
+    }
+    return filtered;
   }, [stores, region, category, search, language]);
 
   useEffect(() => {
@@ -517,25 +541,51 @@ export default function DiscoveryApp({
                     target="_blank"
                     rel="noreferrer"
                   >
-                    {copy.bookingPlace}<span aria-hidden="true">↗</span>
+                    <span>{copy.bookingPlace}</span>
+                    <span className="booking-place-arrow" aria-hidden="true">↗</span>
                   </a>
                   <div className="detail-secondary-actions">
                     <a
                       href={`${googleMapUrl(selectedStore)}&hl=${language}`}
                       target="_blank"
                       rel="noreferrer"
+                      aria-label="Google Maps"
+                      title="Google Maps"
                     >
-                      Google Maps
+                      <span className="secondary-action-icon google" aria-hidden="true">G</span>
+                      <span>Google</span>
                     </a>
                     <a
                       href={naverMapUrl(selectedStore)}
                       target="_blank"
                       rel="noreferrer"
+                      aria-label="Naver Map"
+                      title="Naver Map"
                     >
-                      Naver Map
+                      <span className="secondary-action-icon naver" aria-hidden="true">N</span>
+                      <span>NAVER</span>
                     </a>
+                    {selectedStore.instagramUrl && (
+                      <a
+                        href={selectedStore.instagramUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        aria-label="Instagram"
+                        title="Instagram"
+                      >
+                        <span className="secondary-action-icon instagram" aria-hidden="true">IG</span>
+                        <span>Instagram</span>
+                      </a>
+                    )}
                     {selectedStore.phone && (
-                      <a href={`tel:${selectedStore.phone}`}>{copy.call}</a>
+                      <a
+                        href={`tel:${selectedStore.phone}`}
+                        aria-label={copy.call}
+                        title={copy.call}
+                      >
+                        <span className="secondary-action-icon call" aria-hidden="true">☎</span>
+                        <span>{copy.call}</span>
+                      </a>
                     )}
                   </div>
                 </div>
@@ -547,7 +597,7 @@ export default function DiscoveryApp({
               </section>
 
               <div className="menu-panel-heading">
-                <div>
+                <div className="menu-panel-title">
                   <span>{copy.menuTitle}</span>
                   <strong>
                     {selectedStore.menus.length} {copy.menus}

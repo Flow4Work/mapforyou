@@ -235,3 +235,163 @@
   margin: 0;
   font-size: 13px;
 }
+
+/* Final detail hierarchy polish */
+.detail-panel-header {
+  padding: 15px 16px 12px;
+}
+
+.detail-panel-actions,
+.standalone-detail-actions {
+  gap: 9px;
+  margin-top: 14px;
+}
+
+.booking-place-cta {
+  position: relative;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 46px;
+  border-radius: 14px;
+  font-size: 12px;
+  letter-spacing: -.01em;
+  box-shadow: 0 9px 22px rgba(159,45,33,.20);
+}
+
+.booking-place-cta > span:first-child {
+  width: 100%;
+  text-align: center;
+}
+
+.booking-place-arrow {
+  position: absolute;
+  right: 16px;
+  font-size: 14px;
+}
+.detail-secondary-actions {
+  display: flex;
+  flex-wrap: wrap;
+  grid-template-columns: none;
+  gap: 7px;
+}
+
+.detail-secondary-actions a {
+  display: inline-flex;
+  flex: 0 0 auto;
+  min-height: 34px;
+  gap: 6px;
+  padding: 4px 9px 4px 5px;
+  border-radius: 999px;
+  color: #746058;
+  background: #fffdf9;
+  font-size: 8.5px;
+  font-weight: 850;
+}
+
+.secondary-action-icon {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  color: #fff;
+  background: #9f7666;
+  font-size: 8px;
+  font-weight: 950;
+}
+.secondary-action-icon.google { color: #704f43; background: #f5e6dc; }
+.secondary-action-icon.naver { background: #24a45a; }
+.secondary-action-icon.instagram { background: linear-gradient(145deg,#f9a13b,#e44167 52%,#7b3fc6); font-size: 7px; }
+.secondary-action-icon.call { color: #7d4b2c; background: #ffe6bd; font-size: 11px; }
+
+.restaurant-detail-panel .restaurant-media {
+  margin: 0 14px 12px;
+  gap: 8px;
+}
+
+.restaurant-detail-panel .instagram-profile-link {
+  min-height: 38px;
+  padding: 6px 8px;
+}
+
+.menu-panel-heading {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  padding: 10px 14px 12px;
+  border-top: 1px solid rgba(234,223,216,.75);
+}
+
+.menu-panel-title {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+.menu-panel-title span {
+  font-size: 9px;
+  letter-spacing: .08em;
+}
+
+.menu-panel-title strong {
+  color: #4f342b;
+  font-size: 13px;
+}
+
+.menu-panel-actions {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.menu-view-toggle {
+  flex: 1 1 auto;
+  max-width: 220px;
+  gap: 3px;
+  padding: 3px;
+  border-radius: 12px;
+  background: #fff7f1;
+}
+
+.menu-view-toggle button {
+  min-height: 32px;
+  border-radius: 8px;
+  font-size: 9px;
+}
+
+.menu-view-toggle button + button { border-left: 0; }
+.menu-currency-button {
+  flex: 0 0 auto;
+  min-height: 34px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: #fffdf9;
+  font-size: 8.5px;
+}
+
+.standalone-menu-controls {
+  display: flex;
+  justify-content: flex-start;
+  margin: -6px 0 14px;
+}
+
+.standalone-menu-controls .menu-view-toggle {
+  width: min(280px, 100%);
+  max-width: 280px;
+}
+
+.detail-menu-list.compact {
+  gap: 6px;
+}
+
+.detail-menu-card.compact {
+  padding: 12px 14px;
+}
+
+.detail-menu-image-link {
+  padding: 0;
+  border: 0;
+  cursor: zoom-in;
+}

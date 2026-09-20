@@ -3,9 +3,11 @@
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import ImageViewer from "@/components/ImageViewer";
 import RestaurantCover from "@/components/RestaurantCover";
 import type { DiscoveryRestaurant } from "@/lib/discovery";
 import {
+  bookingPlaceUrl,
   broadCategory,
   categoryLabel,
   googleMapUrl,
@@ -41,6 +43,8 @@ export default function RestaurantDetail({ store }: { store: DiscoveryRestaurant
   const [language, setLanguage] = useState<PublicLanguage>("en");
   const [revealedMenuId, setRevealedMenuId] = useState("");
   const [revealedPhrase, setRevealedPhrase] = useState("");
+  const [menuViewMode, setMenuViewMode] = useState<"photo" | "compact">("photo");
+  const [menuImageViewer, setMenuImageViewer] = useState<{ src: string; alt: string } | null>(null);
   const category = broadCategory(store);
   const menus = useMemo(
     () => [...store.menus].sort((a, b) => Number(b.isSpecialty) - Number(a.isSpecialty)),
@@ -64,7 +68,10 @@ export default function RestaurantDetail({ store }: { store: DiscoveryRestaurant
         directions: "地図・連絡先",
         google: "Google Maps",
         naver: "Naver Map",
-        call: "電話する",
+        call: "電話",
+        booking: "予約する",
+        photoView: "写真",
+        compactView: "名前・価格",
         phrases: "注文に使える韓国語",
         phraseHelp: "ボタンを押して、韓国語の画面をスタッフに見せてください。",
         checked: `最終データ確認 ${updatedDate}。価格は店舗で変更される場合があります。`,
@@ -80,7 +87,10 @@ export default function RestaurantDetail({ store }: { store: DiscoveryRestaurant
         directions: "Maps & contact",
         google: "Google Maps",
         naver: "Naver Map",
-        call: "Call restaurant",
+        call: "Call",
+        booking: "Book a table",
+        photoView: "Photos",
+        compactView: "Name + price",
         phrases: "Useful Korean for ordering",
         phraseHelp: "Tap a phrase and show the Korean screen to the staff.",
         checked: `Data last checked ${updatedDate}. Prices may change at the restaurant.`,
@@ -122,7 +132,26 @@ export default function RestaurantDetail({ store }: { store: DiscoveryRestaurant
             <h2>{language === "ja" ? "価格まで読めるメニュー" : "Translated names with prices"}</h2>
           </div>
 
-          <div className="detail-menu-list">
+          <div className="standalone-menu-controls">
+            <div className="menu-view-toggle" role="group" aria-label={copy.menu}>
+              <button
+                className={menuViewMode === "photo" ? "active" : ""}
+                type="button"
+                onClick={() => setMenuViewMode("photo")}
+              >
+                {copy.photoView}
+              </button>
+              <button
+                className={menuViewMode === "compact" ? "active" : ""}
+                type="button"
+                onClick={() => setMenuViewMode("compact")}
+              >
+                {copy.compactView}
+              </button>
+            </div>
+          </div>
+
+          <div className={`detail-menu-list ${menuViewMode === "compact" ? "compact" : ""}`}>
             {menus.map((menu) => {
               const revealed = revealedMenuId === menu.id;
               const localizedName = localizedMenuName(menu, language);
@@ -130,18 +159,32 @@ export default function RestaurantDetail({ store }: { store: DiscoveryRestaurant
                 ? menu.descriptionJa || menu.descriptionKo
                 : menu.descriptionEn || menu.descriptionKo;
               const hasVerifiedImage = menu.imageStatus === "verified" && /^https?:\/\//i.test(menu.imageUrl);
+              if (menuViewMode === "compact") {
+                return (
+                  <article className="detail-menu-card compact" key={menu.id}>
+                    <div className="detail-menu-main">
+                      <div>
+                        {menu.isSpecialty && (
+                          <span className="featured-chip">{language === "ja" ? "おすすめ" : "Featured"}</span>
+                        )}
+                        <h3>{localizedName}</h3>
+                      </div>
+                      <strong>{priceLabel(menu.price, language)}</strong>
+                    </div>
+                  </article>
+                );
+              }
               return (
                 <article className={`detail-menu-card${hasVerifiedImage ? " has-image" : ""}`} key={menu.id}>
                   {hasVerifiedImage && (
-                    <a
+                    <button
                       className="detail-menu-image-link"
-                      href={menu.imageSourceUrl || menu.imageUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      aria-label={`${localizedName} image source`}
+                      type="button"
+                      aria-label={`${localizedName} image`}
+                      onClick={() => setMenuImageViewer({ src: menu.imageUrl, alt: localizedName })}
                     >
                       <img className="detail-menu-image" src={menu.imageUrl} alt={localizedName} loading="lazy" />
-                    </a>
+                    </button>
                   )}
                   <div className="detail-menu-body">
                     <div className="detail-menu-main">
@@ -196,10 +239,38 @@ export default function RestaurantDetail({ store }: { store: DiscoveryRestaurant
           <section className="detail-info-card">
             <span>{copy.directions}</span>
             <h2>{localizedAddress(store, language)}</h2>
-            <div className="detail-action-grid">
-              <a href={googleMapUrl(store)} target="_blank" rel="noreferrer">{copy.google}</a>
-              <a href={naverMapUrl(store)} target="_blank" rel="noreferrer">{copy.naver}</a>
-              {store.phone && <a className="full" href={`tel:${store.phone}`}>{copy.call} · {store.phone}</a>}
+            <div className="detail-panel-actions standalone-detail-actions">
+              <a
+                className="booking-place-cta"
+                href={bookingPlaceUrl(store, language)}
+                target="_blank"
+                rel="noreferrer"
+              >
+                <span>{copy.booking}</span>
+                <span className="booking-place-arrow" aria-hidden="true">↗</span>
+              </a>
+              <div className="detail-secondary-actions">
+                <a href={googleMapUrl(store)} target="_blank" rel="noreferrer" aria-label={copy.google} title={copy.google}>
+                  <span className="secondary-action-icon google" aria-hidden="true">G</span>
+                  <span>Google</span>
+                </a>
+                <a href={naverMapUrl(store)} target="_blank" rel="noreferrer" aria-label={copy.naver} title={copy.naver}>
+                  <span className="secondary-action-icon naver" aria-hidden="true">N</span>
+                  <span>NAVER</span>
+                </a>
+                {store.instagramUrl && (
+                  <a href={store.instagramUrl} target="_blank" rel="noreferrer" aria-label="Instagram" title="Instagram">
+                    <span className="secondary-action-icon instagram" aria-hidden="true">IG</span>
+                    <span>Instagram</span>
+                  </a>
+                )}
+                {store.phone && (
+                  <a href={`tel:${store.phone}`} aria-label={copy.call} title={copy.call}>
+                    <span className="secondary-action-icon call" aria-hidden="true">☎</span>
+                    <span>{copy.call}</span>
+                  </a>
+                )}
+              </div>
             </div>
           </section>
 
@@ -210,6 +281,13 @@ export default function RestaurantDetail({ store }: { store: DiscoveryRestaurant
           <div className="detail-data-note">✓ {copy.checked}</div>
         </aside>
       </div>
+      {menuImageViewer && (
+        <ImageViewer
+          src={menuImageViewer.src}
+          alt={menuImageViewer.alt}
+          onClose={() => setMenuImageViewer(null)}
+        />
+      )}
     </main>
   );
 }

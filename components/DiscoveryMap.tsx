@@ -79,7 +79,7 @@ type MarkerGroup = {
   stores: DiscoveryRestaurant[];
 };
 
-type MarkerCategory = "cafe" | "bbq" | "restaurant";
+type MarkerCategory = "cafe" | "korean" | "grill" | "global";
 
 const SEOUL_CENTER = { latitude: 37.5666103, longitude: 126.9783882 };
 const SEOUL_BOUNDS = {
@@ -166,9 +166,10 @@ function groupStores(stores: DiscoveryRestaurant[], zoom: number, selectedId: st
 
 function markerCategory(store: DiscoveryRestaurant): MarkerCategory {
   const category = broadCategory(store);
-  if (category === "cafe") return "cafe";
-  if (category === "meat") return "bbq";
-  return "restaurant";
+  if (category === "cafe" || category === "dessert") return "cafe";
+  if (category === "meat") return "grill";
+  if (category === "korean") return "korean";
+  return "global";
 }
 
 function markerSvg(category: MarkerCategory) {
@@ -177,10 +178,12 @@ function markerSvg(category: MarkerCategory) {
   switch (category) {
     case "cafe":
       return `<svg ${common}><path d="M4 6h10v5a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4V6Z"/><path d="M14 8h1.5a2.5 2.5 0 0 1 0 5H14"/><path d="M5 19h12"/></svg>`;
-    case "bbq":
-      return `<svg ${common}><path d="M12.2 3.5c.7 2.7-.4 4.2-1.8 5.5-1.1 1-1.9 2.2-1.9 4a3.5 3.5 0 0 0 7 0c0-1.4-.7-2.7-2-4 .1 1.8-.8 2.9-1.9 3.4.5-2.4-1.1-4.6-2.6-6.4-2.2 2.1-4 4.5-4 7.4a7 7 0 0 0 14 0c0-4.3-3.1-7.7-6.8-9.9Z"/></svg>`;
+    case "korean":
+      return `<svg ${common}><path d="M5 10h14a7 7 0 0 1-14 0Z"/><path d="M7 10V8M12 10V7M17 10V8"/><path d="M8 5h8"/></svg>`;
+    case "grill":
+      return `<svg ${common}><rect x="5" y="7" width="14" height="9" rx="2"/><path d="M8 10h8M8 13h8M9 16l-2 4M15 16l2 4"/></svg>`;
     default:
-      return `<svg ${common}><path d="M7 3v7M4 3v4a3 3 0 0 0 6 0V3M7 10v11"/><path d="M17 3v18M17 3c3 2 3 6 0 8"/></svg>`;
+      return `<svg ${common}><path d="M5 14h14"/><path d="M7 14a5 5 0 0 1 10 0"/><path d="M12 6v2"/><path d="M4 18h16"/></svg>`;
   }
 }
 

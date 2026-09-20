@@ -367,3 +367,19 @@ export function naverMapUrl(store: DiscoveryRestaurant) {
   const query = `${store.name} ${store.roadAddress || store.address}`.trim();
   return `https://map.naver.com/p/search/${encodeURIComponent(query)}`;
 }
+
+const BOOKING_BASE_URL = "https://booking-daijoubu.vercel.app/";
+
+export function bookingHomeUrl(language: PublicLanguage) {
+  return `${BOOKING_BASE_URL}?lang=${language}`;
+}
+
+export function bookingPlaceUrl(store: DiscoveryRestaurant, language: PublicLanguage) {
+  const params = new URLSearchParams({
+    lang: language,
+    restaurant: store.name,
+    url: naverMapUrl(store),
+    address: store.roadAddress || store.address,
+  });
+  return `${BOOKING_BASE_URL}?${params.toString()}`;
+}

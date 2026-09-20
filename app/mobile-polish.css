@@ -637,3 +637,147 @@
     aspect-ratio: auto;
   }
 }
+
+/* Final mobile detail hierarchy */
+@media (max-width: 900px) {
+  .restaurant-detail-panel .booking-place-cta,
+  .detail-page .booking-place-cta {
+    min-height: 48px;
+    padding-inline: 46px;
+    font-size: 12px;
+  }
+
+  .restaurant-detail-panel .detail-secondary-actions a,
+  .detail-page .detail-secondary-actions a {
+    min-height: 34px;
+    font-size: 8.5px;
+  }
+}
+
+@media (max-width: 560px) {
+  .detail-panel-header {
+    padding: 14px 14px 10px;
+  }
+
+  .detail-panel-actions,
+  .standalone-detail-actions {
+    margin-top: 13px;
+  }
+
+  .detail-secondary-actions {
+    display: flex;
+    justify-content: flex-start;
+    gap: 7px;
+  }
+  .detail-secondary-actions a {
+    min-width: 0;
+    padding: 4px 8px 4px 5px;
+  }
+
+  .secondary-action-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  .menu-panel-heading {
+    gap: 9px;
+    padding: 11px 14px 12px;
+  }
+
+  .menu-panel-title {
+    min-width: 0;
+  }
+
+  .menu-panel-title strong {
+    flex: 0 0 auto;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  .menu-panel-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    width: 100%;
+    gap: 8px;
+  }
+  .menu-view-toggle {
+    width: 100%;
+    max-width: none;
+  }
+
+  .menu-view-toggle button {
+    min-width: 0;
+    padding-inline: 6px;
+    white-space: nowrap;
+  }
+
+  .menu-currency-button {
+    min-width: 0;
+    white-space: nowrap;
+  }
+
+  .restaurant-detail-panel .restaurant-media {
+    margin: 0 12px 10px;
+  }
+
+  .standalone-menu-controls {
+    margin-bottom: 12px;
+  }
+
+  .standalone-menu-controls .menu-view-toggle {
+    max-width: 100%;
+  }
+
+  .detail-menu-card.compact .detail-menu-main {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+@media (max-width: 380px) {
+  .menu-panel-actions {
+    grid-template-columns: 1fr;
+  }
+  .menu-currency-button {
+    justify-self: start;
+  }
+
+  .detail-secondary-actions a > span:last-child {
+    display: none;
+  }
+
+  .detail-secondary-actions a {
+    width: 34px;
+    padding: 4px;
+  }
+
+  .secondary-action-icon {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+@media (max-width: 560px) {
+  .restaurant-detail-panel .restaurant-media {
+    width: auto;
+    max-width: none;
+  }
+
+  .menu-panel-actions .menu-view-toggle {
+    width: auto;
+    min-width: 0;
+  }
+}
+
+@media (min-width: 381px) and (max-width: 560px) {
+  .restaurant-detail-panel .menu-panel-actions {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .restaurant-detail-panel .menu-panel-actions .menu-view-toggle {
+    flex: 1 1 auto;
+  }
+}
