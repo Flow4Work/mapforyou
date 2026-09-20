@@ -6,6 +6,7 @@ import "./discovery-map.css";
 import "./media.css";
 import "./detail-cleanup.css";
 import "./mobile-polish.css";
+import "./final-ui-polish.css";
 
 export const metadata: Metadata = {
   title: "MapForYou | Translated Seoul Menus",

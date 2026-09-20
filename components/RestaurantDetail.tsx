@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import ImageViewer from "@/components/ImageViewer";
+import DetailActionIcon from "@/components/DetailActionIcon";
 import RestaurantCover from "@/components/RestaurantCover";
 import type { DiscoveryRestaurant } from "@/lib/discovery";
 import {
@@ -246,27 +247,28 @@ export default function RestaurantDetail({ store }: { store: DiscoveryRestaurant
                 target="_blank"
                 rel="noreferrer"
               >
-                <span>{copy.booking}</span>
+                <span className="booking-place-spacer" aria-hidden="true" />
+                <span className="booking-place-label">{copy.booking}</span>
                 <span className="booking-place-arrow" aria-hidden="true">↗</span>
               </a>
               <div className="detail-secondary-actions">
                 <a href={googleMapUrl(store)} target="_blank" rel="noreferrer" aria-label={copy.google} title={copy.google}>
-                  <span className="secondary-action-icon google" aria-hidden="true">G</span>
+                  <DetailActionIcon kind="google" />
                   <span>Google</span>
                 </a>
                 <a href={naverMapUrl(store)} target="_blank" rel="noreferrer" aria-label={copy.naver} title={copy.naver}>
-                  <span className="secondary-action-icon naver" aria-hidden="true">N</span>
+                  <DetailActionIcon kind="naver" />
                   <span>NAVER</span>
                 </a>
                 {store.instagramUrl && (
                   <a href={store.instagramUrl} target="_blank" rel="noreferrer" aria-label="Instagram" title="Instagram">
-                    <span className="secondary-action-icon instagram" aria-hidden="true">IG</span>
+                    <DetailActionIcon kind="instagram" />
                     <span>Instagram</span>
                   </a>
                 )}
                 {store.phone && (
                   <a href={`tel:${store.phone}`} aria-label={copy.call} title={copy.call}>
-                    <span className="secondary-action-icon call" aria-hidden="true">☎</span>
+                    <DetailActionIcon kind="call" />
                     <span>{copy.call}</span>
                   </a>
                 )}

@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import ImageViewer from "@/components/ImageViewer";
+import DetailActionIcon from "@/components/DetailActionIcon";
 import RestaurantCover from "@/components/RestaurantCover";
 import type { DiscoveryRestaurant } from "@/lib/discovery";
 import {
@@ -531,7 +532,8 @@ export default function DiscoveryApp({
                     target="_blank"
                     rel="noreferrer"
                   >
-                    <span>{copy.bookingPlace}</span>
+                    <span className="booking-place-spacer" aria-hidden="true" />
+                    <span className="booking-place-label">{copy.bookingPlace}</span>
                     <span className="booking-place-arrow" aria-hidden="true">↗</span>
                   </a>
                   <div className="detail-secondary-actions">
@@ -542,7 +544,7 @@ export default function DiscoveryApp({
                       aria-label="Google Maps"
                       title="Google Maps"
                     >
-                      <span className="secondary-action-icon google" aria-hidden="true">G</span>
+                      <DetailActionIcon kind="google" />
                       <span>Google</span>
                     </a>
                     <a
@@ -552,7 +554,7 @@ export default function DiscoveryApp({
                       aria-label="Naver Map"
                       title="Naver Map"
                     >
-                      <span className="secondary-action-icon naver" aria-hidden="true">N</span>
+                      <DetailActionIcon kind="naver" />
                       <span>NAVER</span>
                     </a>
                     {selectedStore.instagramUrl && (
@@ -563,7 +565,7 @@ export default function DiscoveryApp({
                         aria-label="Instagram"
                         title="Instagram"
                       >
-                        <span className="secondary-action-icon instagram" aria-hidden="true">IG</span>
+                        <DetailActionIcon kind="instagram" />
                         <span>Instagram</span>
                       </a>
                     )}
@@ -573,7 +575,7 @@ export default function DiscoveryApp({
                         aria-label={copy.call}
                         title={copy.call}
                       >
-                        <span className="secondary-action-icon call" aria-hidden="true">☎</span>
+                        <DetailActionIcon kind="call" />
                         <span>{copy.call}</span>
                       </a>
                     )}

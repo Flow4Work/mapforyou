@@ -198,17 +198,17 @@ function markerCategory(store: DiscoveryRestaurant): MarkerCategory {
 }
 
 function markerSvg(category: MarkerCategory) {
-  const common = 'viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"';
+  const common = 'viewBox="0 0 24 24" aria-hidden="true"';
 
   switch (category) {
     case "cafe":
-      return `<svg ${common}><path d="M4 6h10v5a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4V6Z"/><path d="M14 8h1.5a2.5 2.5 0 0 1 0 5H14"/><path d="M5 19h12"/></svg>`;
+      return `<svg ${common}><path fill="currentColor" d="M5 6.5h10v6a5 5 0 0 1-5 5 5 5 0 0 1-5-5v-6Zm10 2h1.5a3 3 0 1 1 0 6H15v-2h1.5a1 1 0 1 0 0-2H15v-2ZM6 19h12v2H6z"/></svg>`;
     case "korean":
-      return `<svg ${common}><path d="M5 10h14a7 7 0 0 1-14 0Z"/><path d="M7 10V8M12 10V7M17 10V8"/><path d="M8 5h8"/></svg>`;
+      return `<svg ${common}><path fill="currentColor" d="M4.5 10h15a7.5 7.5 0 0 1-15 0Zm2.2 7.2h10.6V19H6.7z"/><path d="M8 8V5.8M12 8V4.8M16 8V5.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
     case "grill":
-      return `<svg ${common}><rect x="5" y="7" width="14" height="9" rx="2"/><path d="M8 10h8M8 13h8M9 16l-2 4M15 16l2 4"/></svg>`;
+      return `<svg ${common}><path fill="currentColor" fill-rule="evenodd" d="M5.3 7.1c2.2-2.7 7-3.2 10.3-.9 3.6 2.5 4.8 6.3 2.6 9.2-2.1 2.8-7 3.6-10.5 1.7-3.8-2.1-4.8-7-2.4-10Zm8.2 2.1a2.2 2.2 0 1 0 0 4.4 2.2 2.2 0 0 0 0-4.4Z"/></svg>`;
     default:
-      return `<svg ${common}><path d="M5 14h14"/><path d="M7 14a5 5 0 0 1 10 0"/><path d="M12 6v2"/><path d="M4 18h16"/></svg>`;
+      return `<svg ${common}><path fill="currentColor" d="M5 3h2v7h1V3h2v7a4 4 0 0 1-2 3.5V21H6v-7.5A4 4 0 0 1 4 10V3h1Zm10 0h2v8h2V3h2v18h-2v-8h-4V3Z"/></svg>`;
   }
 }
 

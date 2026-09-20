@@ -1,0 +1,271 @@
+/* Final production UI polish: detail hierarchy + category markers */
+.booking-place-cta {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) 28px;
+  align-items: center;
+  width: 100%;
+  min-height: 48px;
+  padding: 0 14px;
+  border-radius: 14px;
+  font-size: 12px;
+  letter-spacing: -.01em;
+  box-shadow: 0 9px 22px rgba(159,45,33,.20);
+}
+
+.booking-place-spacer { width: 28px; }
+.booking-place-label {
+  min-width: 0;
+  text-align: center;
+}
+.booking-place-arrow {
+  position: static;
+  justify-self: end;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.detail-secondary-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.detail-secondary-actions a {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  gap: 7px;
+  padding: 5px 10px 5px 7px;
+  border: 1px solid #eadfd8;
+  border-radius: 10px;
+  color: #746058;
+  background: #fffdf9;
+  font-size: 8.5px;
+  font-weight: 850;
+}
+.secondary-action-icon {
+  display: grid;
+  flex: 0 0 22px;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  color: #67534b;
+  background: transparent;
+  border-radius: 0;
+}
+.secondary-action-icon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.secondary-action-icon.call { padding: 2px; color: #6f554b; }
+.menu-panel-heading {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 9px;
+  padding: 11px 14px 12px;
+}
+.menu-panel-title {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 2px;
+}
+.menu-panel-title span {
+  font-size: 9px;
+  letter-spacing: .09em;
+}
+.menu-panel-title strong {
+  color: #5a443b;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+.menu-panel-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  width: 100%;
+  gap: 8px;
+}
+.menu-panel-actions .menu-view-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+  gap: 3px;
+  padding: 3px;
+  border: 1px solid #ead8cc;
+  border-radius: 10px;
+  background: #fff7f1;
+}
+.menu-panel-actions .menu-view-toggle button {
+  min-width: 0;
+  min-height: 28px;
+  padding: 0 8px;
+  border-radius: 7px;
+  font-size: 9px;
+  line-height: 1;
+  white-space: nowrap;
+}
+.menu-panel-actions .menu-view-toggle button + button { border-left: 0; }
+.menu-panel-actions .menu-currency-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 0 10px;
+  border-radius: 10px;
+  background: #fffdf9;
+  font-size: 8.5px;
+  line-height: 1;
+  white-space: nowrap;
+}
+.naver-map-marker {
+  --marker-color: #6251A3;
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  box-sizing: border-box;
+  border: 2px solid rgba(255,255,255,.96);
+  border-radius: 50%;
+  color: #fff;
+  background: var(--marker-color);
+  box-shadow: 0 1px 2px rgba(38,28,24,.16), 0 6px 14px rgba(38,28,24,.24);
+  cursor: pointer;
+  transition: width .15s ease, height .15s ease, transform .15s ease, box-shadow .15s ease;
+}
+.naver-map-marker.category-cafe { --marker-color: #8B5A3C; }
+.naver-map-marker.category-korean { --marker-color: #E76F20; }
+.naver-map-marker.category-grill { --marker-color: #B42318; }
+.naver-map-marker.category-global { --marker-color: #6251A3; }
+
+.naver-map-marker::after {
+  position: absolute;
+  z-index: 0;
+  left: 50%;
+  bottom: -4px;
+  width: 8px;
+  height: 8px;
+  content: "";
+  background: var(--marker-color);
+  border-right: 2px solid rgba(255,255,255,.96);
+  border-bottom: 2px solid rgba(255,255,255,.96);
+  transform: translateX(-50%) rotate(45deg);
+  border-radius: 0 0 2px 0;
+}
+.naver-map-marker-icon {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 19px;
+  height: 19px;
+}
+.naver-map-marker-icon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.naver-map-marker.selected {
+  width: 42px;
+  height: 42px;
+  border: 3px solid #fff;
+  color: #fff;
+  background: var(--marker-color);
+  box-shadow: 0 0 0 3px rgba(50,42,38,.22), 0 9px 22px rgba(45,34,30,.34);
+  transform: translateY(-1px);
+}
+.naver-map-marker.selected::after {
+  bottom: -5px;
+  width: 11px;
+  height: 11px;
+  border-right: 3px solid #fff;
+  border-bottom: 3px solid #fff;
+}
+.naver-map-marker.selected .naver-map-marker-icon {
+  width: 23px;
+  height: 23px;
+}
+.naver-map-cluster {
+  color: #514843;
+  background: rgba(255,255,255,.97);
+  box-shadow: 0 0 0 2px rgba(81,72,67,.28), 0 7px 18px rgba(55,47,43,.2);
+}
+
+@media (max-width: 560px) {
+  .detail-secondary-actions { justify-content: flex-start; }
+  .detail-secondary-actions a {
+    min-height: 36px;
+    padding: 5px 9px 5px 6px;
+  }
+  .menu-panel-actions {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 7px;
+  }
+  .menu-panel-actions .menu-view-toggle button { padding-inline: 6px; }
+  .menu-panel-actions .menu-currency-button { padding-inline: 9px; }
+}
+@media (max-width: 359px) {
+  .menu-panel-actions {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+  .menu-panel-actions .menu-view-toggle {
+    width: min(100%, 236px);
+  }
+  .menu-panel-actions .menu-currency-button {
+    justify-self: center;
+  }
+  .detail-secondary-actions a {
+    width: 36px;
+    min-width: 36px;
+    padding: 6px;
+  }
+  .detail-secondary-actions a > span:last-child {
+    display: none;
+  }
+  .secondary-action-icon {
+    flex-basis: 22px;
+    width: 22px;
+    height: 22px;
+  }
+}
+
+/* Beat older mobile selector specificity without changing layout semantics. */
+.restaurant-detail-panel .menu-panel-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  width: 100%;
+}
+.restaurant-detail-panel .menu-panel-actions .menu-view-toggle {
+  width: 100%;
+  min-width: 0;
+}
+@media (max-width: 359px) {
+  .restaurant-detail-panel .menu-panel-actions {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+}
+
+
+.restaurant-detail-panel .booking-place-cta,
+.detail-page .booking-place-cta {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) 28px;
+  align-items: center;
+  width: 100%;
+  padding: 0 14px;
+}
+.restaurant-detail-panel .detail-secondary-actions a,
+.detail-page .detail-secondary-actions a {
+  min-height: 36px;
+}
