@@ -33,6 +33,7 @@ type NaverPoint = object;
 type NaverMap = {
   destroy?: () => void;
   fitBounds: (bounds: NaverLatLngBounds) => void;
+  getCenter: () => NaverLatLng;
   getZoom: () => number;
   panTo: (coordinate: NaverLatLng) => void;
   setCenter: (coordinate: NaverLatLng) => void;
@@ -79,6 +80,12 @@ type MarkerGroup = {
   stores: DiscoveryRestaurant[];
 };
 
+type MarkerEntry = {
+  marker: NaverMarker;
+  listener: NaverListener;
+  selected: boolean;
+};
+
 type MarkerCategory = "cafe" | "korean" | "grill" | "global";
 
 const SEOUL_CENTER = { latitude: 37.5666103, longitude: 126.9783882 };
@@ -94,22 +101,39 @@ function mapLanguage(language: PublicLanguage): NaverLanguage {
   return language === "ja" ? "ja" : "en";
 }
 
-let naverMapsPromise: Promise<NaverMapsNamespace> | null = null;
+let loadedNaverLanguage: NaverLanguage | null = null;
+let naverMapsPromise: { language: NaverLanguage; promise: Promise<NaverMapsNamespace> } | null = null;
 
 function loadNaverMaps(language: NaverLanguage): Promise<NaverMapsNamespace> {
-  if (window.naver?.maps) return Promise.resolve(window.naver.maps);
-  if (naverMapsPromise) return naverMapsPromise;
+  const existingScript = document.getElementById(NAVER_SCRIPT_ID) as HTMLScriptElement | null;
+  const existingLanguage = existingScript?.dataset.language as NaverLanguage | undefined;
+  if (window.naver?.maps && (loadedNaverLanguage === language || existingLanguage === language)) {
+    loadedNaverLanguage = language;
+    return Promise.resolve(window.naver.maps);
+  }
+  if (naverMapsPromise) {
+    if (naverMapsPromise.language === language) return naverMapsPromise.promise;
+    return naverMapsPromise.promise
+      .catch(() => undefined)
+      .then(() => loadNaverMaps(language));
+  }
 
-  document.getElementById(NAVER_SCRIPT_ID)?.remove();
-  naverMapsPromise = new Promise((resolve, reject) => {
+  existingScript?.remove();
+  window.naver = undefined;
+  loadedNaverLanguage = null;
+
+  const promise = new Promise<NaverMapsNamespace>((resolve, reject) => {
     const script = document.createElement("script");
     script.id = NAVER_SCRIPT_ID;
     script.dataset.language = language;
     script.async = true;
     script.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${encodeURIComponent(NAVER_MAP_CLIENT_ID)}&language=${language}`;
     script.onload = () => {
-      if (window.naver?.maps) resolve(window.naver.maps);
-      else {
+      if (window.naver?.maps) {
+        loadedNaverLanguage = language;
+        naverMapsPromise = null;
+        resolve(window.naver.maps);
+      } else {
         naverMapsPromise = null;
         reject(new Error("NAVER Maps SDK was loaded without a map namespace."));
       }
@@ -120,7 +144,8 @@ function loadNaverMaps(language: NaverLanguage): Promise<NaverMapsNamespace> {
     };
     document.head.appendChild(script);
   });
-  return naverMapsPromise;
+  naverMapsPromise = { language, promise };
+  return promise;
 }
 function clusterBucketSize(zoom: number) {
   if (zoom <= 11) return 0.04;
@@ -221,10 +246,10 @@ export default function DiscoveryMap({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<NaverMap | null>(null);
   const mapsRef = useRef<NaverMapsNamespace | null>(null);
-  const markersRef = useRef<NaverMarker[]>([]);
-  const listenersRef = useRef<NaverListener[]>([]);
+  const markersRef = useRef<Map<string, MarkerEntry>>(new Map());
   const zoomListenerRef = useRef<NaverListener | null>(null);
   const lastStoreKeyRef = useRef("");
+  const preservedViewRef = useRef<{ center: { lat: number; lng: number }; zoom: number } | null>(null);
   const drawMarkersRef = useRef<() => void>(() => undefined);
   const [mapState, setMapState] = useState<"loading" | "ready" | "error">("loading");
 
@@ -235,12 +260,11 @@ export default function DiscoveryMap({
 
   const clearMarkers = useCallback(() => {
     const maps = mapsRef.current;
-    if (maps) {
-      for (const listener of listenersRef.current) maps.Event.removeListener(listener);
+    for (const { marker, listener } of markersRef.current.values()) {
+      if (maps) maps.Event.removeListener(listener);
+      marker.setMap(null);
     }
-    listenersRef.current = [];
-    for (const marker of markersRef.current) marker.setMap(null);
-    markersRef.current = [];
+    markersRef.current.clear();
   }, []);
 
   const drawMarkers = useCallback(() => {
@@ -248,15 +272,30 @@ export default function DiscoveryMap({
     const maps = mapsRef.current;
     if (!map || !maps) return;
 
-    clearMarkers();
     const zoom = map.getZoom();
     const groups = groupStores(stores, zoom, selectedId);
+    const desiredKeys = new Set<string>();
 
     for (const group of groups) {
       const coordinate = new maps.LatLng(group.latitude, group.longitude);
       const isCluster = group.stores.length > 1;
       const store = group.stores[0];
       const selected = !isCluster && store.id === selectedId;
+      const key = isCluster
+        ? `cluster:${zoom}:${group.stores.map((item) => item.id).sort().join("|")}`
+        : `store:${store.id}`;
+      desiredKeys.add(key);
+
+      const existing = markersRef.current.get(key);
+      if (existing) {
+        if (!isCluster && existing.selected !== selected) {
+          existing.marker.setIcon(markerIcon(maps, store, selected));
+          existing.marker.setZIndex(selected ? 500 : 100);
+          existing.selected = selected;
+        }
+        continue;
+      }
+
       const marker = new maps.Marker({
         map,
         position: coordinate,
@@ -266,7 +305,6 @@ export default function DiscoveryMap({
           : store.nameEn || store.name || store.nameJa,
         zIndex: selected ? 500 : isCluster ? 200 : 100,
       });
-
       marker.setZIndex(selected ? 500 : isCluster ? 200 : 100);
       const listener = maps.Event.addListener(marker, "click", () => {
         if (isCluster) {
@@ -276,9 +314,14 @@ export default function DiscoveryMap({
           onSelect(store.id);
         }
       });
+      markersRef.current.set(key, { marker, listener, selected });
+    }
 
-      markersRef.current.push(marker);
-      listenersRef.current.push(listener);
+    for (const [key, entry] of markersRef.current) {
+      if (desiredKeys.has(key)) continue;
+      maps.Event.removeListener(entry.listener);
+      entry.marker.setMap(null);
+      markersRef.current.delete(key);
     }
 
     const storeKey = stores
@@ -307,7 +350,6 @@ export default function DiscoveryMap({
     let active = true;
     let observer: ResizeObserver | null = null;
     setMapState("loading");
-    lastStoreKeyRef.current = "";
 
     const host = window.location.hostname;
     if (!HAS_CONFIGURED_NAVER_MAP_CLIENT_ID && (host === "localhost" || host === "127.0.0.1")) {
@@ -323,9 +365,12 @@ export default function DiscoveryMap({
           new maps.LatLng(SEOUL_BOUNDS.south, SEOUL_BOUNDS.west),
           new maps.LatLng(SEOUL_BOUNDS.north, SEOUL_BOUNDS.east),
         );
+        const preservedView = preservedViewRef.current;
         const map = new maps.Map(containerRef.current, {
-          center: new maps.LatLng(SEOUL_CENTER.latitude, SEOUL_CENTER.longitude),
-          zoom: 12,
+          center: preservedView
+            ? new maps.LatLng(preservedView.center.lat, preservedView.center.lng)
+            : new maps.LatLng(SEOUL_CENTER.latitude, SEOUL_CENTER.longitude),
+          zoom: preservedView?.zoom ?? 12,
           minZoom: SEOUL_MIN_ZOOM,
           maxZoom: 19,
           maxBounds: seoulBounds,
@@ -354,6 +399,13 @@ export default function DiscoveryMap({
     return () => {
       active = false;
       observer?.disconnect();
+      if (mapRef.current) {
+        const center = mapRef.current.getCenter();
+        preservedViewRef.current = {
+          center: { lat: center.lat(), lng: center.lng() },
+          zoom: mapRef.current.getZoom(),
+        };
+      }
       clearMarkers();
       if (zoomListenerRef.current && mapsRef.current) {
         mapsRef.current.Event.removeListener(zoomListenerRef.current);
@@ -363,7 +415,7 @@ export default function DiscoveryMap({
       mapRef.current = null;
       mapsRef.current = null;
     };
-  }, [clearMarkers]);
+  }, [clearMarkers, language]);
 
   useEffect(() => {
     if (mapState === "ready") drawMarkers();

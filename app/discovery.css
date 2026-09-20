@@ -66,7 +66,7 @@
 .discovery-list-heading strong { font-size: 13px; }
 .discovery-list-heading span { color: var(--food-muted); font-size: 9px; font-weight: 700; }
 .discovery-list { flex: 1 1 auto; min-height: 0; padding: 0 9px 18px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #dbc7bb transparent; }
-.discovery-card { display: grid; grid-template-columns: 92px minmax(0, 1fr); width: 100%; gap: 11px; margin: 0 0 8px; padding: 8px; border: 1px solid #eadfd8; border-radius: 15px; color: inherit; text-align: left; background: white; transition: border-color .15s, box-shadow .15s, transform .15s; }
+.discovery-card { display: grid; grid-template-columns: 92px minmax(0, 1fr); width: 100%; gap: 11px; margin: 0 0 8px; padding: 8px; border: 1px solid #eadfd8; border-radius: 15px; color: inherit; text-align: left; background: white; transition: border-color .15s, box-shadow .15s, transform .15s; content-visibility: auto; contain-intrinsic-size: 120px; }
 .discovery-card:hover { transform: translateY(-1px); border-color: #edb29f; box-shadow: 0 9px 24px rgba(103,56,37,.08); }
 .discovery-card.selected { border-color: var(--food-red); box-shadow: 0 0 0 2px rgba(232,75,53,.10), 0 10px 26px rgba(110,54,35,.08); }
 .discovery-card-body { display: block; min-width: 0; padding: 2px 2px 2px 0; }

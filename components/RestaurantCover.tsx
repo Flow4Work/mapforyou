@@ -86,6 +86,7 @@ export default function RestaurantCover({
           src={activeImage}
           alt={localizedRestaurantName(store, language)}
           loading={compact ? "lazy" : "eager"}
+          decoding="async"
           onError={() => markImageFailed(activeImage)}
           style={{
             position: "absolute",

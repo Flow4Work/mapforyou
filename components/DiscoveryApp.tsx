@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import ImageViewer from "@/components/ImageViewer";
 import RestaurantCover from "@/components/RestaurantCover";
 import type { DiscoveryRestaurant } from "@/lib/discovery";
@@ -46,10 +46,6 @@ type ExchangeRates = {
   isFallback: boolean;
 };
 
-type DiscoveryResponse = {
-  stores?: DiscoveryRestaurant[];
-};
-
 const FALLBACK_RATES: ExchangeRates = {
   usdPerKrw: 0.00072,
   jpyPerKrw: 0.108,
@@ -89,6 +85,71 @@ function defaultRecommendationCompare(a: DiscoveryRestaurant, b: DiscoveryRestau
   return recommendationScore(b) - recommendationScore(a) || a.id.localeCompare(b.id);
 }
 
+const DiscoveryListCard = memo(function DiscoveryListCard({
+  store,
+  selected,
+  language,
+  menusLabel,
+  showConvertedPrice,
+  rates,
+  onSelect,
+}: {
+  store: DiscoveryRestaurant;
+  selected: boolean;
+  language: PublicLanguage;
+  menusLabel: string;
+  showConvertedPrice: boolean;
+  rates: ExchangeRates;
+  onSelect: (id: string) => void;
+}) {
+  const sampleMenu = representativeMenu(store);
+  const storeCategory = broadCategory(store);
+  let samplePrice = "";
+  if (sampleMenu?.price) {
+    if (!showConvertedPrice) samplePrice = `₩${sampleMenu.price.toLocaleString("en-US")}`;
+    else if (language === "ja") {
+      samplePrice = `約 ¥${Math.round(sampleMenu.price * rates.jpyPerKrw).toLocaleString("ja-JP")}`;
+    } else {
+      const value = sampleMenu.price * rates.usdPerKrw;
+      samplePrice = `≈ $${value.toLocaleString("en-US", {
+        minimumFractionDigits: value < 10 ? 2 : 0,
+        maximumFractionDigits: 2,
+      })}`;
+    }
+  }
+
+  return (
+    <button
+      className={`discovery-card ${selected ? "selected" : ""}`}
+      type="button"
+      onClick={() => onSelect(store.id)}
+    >
+      <RestaurantCover store={store} language={language} compact />
+      <span className="discovery-card-body">
+        <span className="discovery-card-topline">
+          <span>
+            {regionLabel(store.regionKey, language)} ·{" "}
+            {categoryLabel(storeCategory, language)}
+          </span>
+          <small>{store.menus.length} {menusLabel}</small>
+        </span>
+        <strong className="restaurant-card-name">
+          {localizedRestaurantName(store, language)}
+        </strong>
+        <span className="discovery-address">
+          {localizedAddress(store, language)}
+        </span>
+        {sampleMenu && (
+          <span className="menu-preview-row">
+            <span>{localizedMenuName(sampleMenu, language)}</span>
+            {samplePrice && <strong>{samplePrice}</strong>}
+          </span>
+        )}
+      </span>
+    </button>
+  );
+});
+
 export default function DiscoveryApp({
   initialStores,
 }: {
@@ -108,7 +169,6 @@ export default function DiscoveryApp({
   const [menuViewMode, setMenuViewMode] = useState<"photo" | "compact">("photo");
   const [menuImageViewer, setMenuImageViewer] = useState<{ src: string; alt: string } | null>(null);
   const [mobilePanel, setMobilePanel] = useState<"places" | "menu">("places");
-  const refreshAbortRef = useRef<AbortController | null>(null);
 
   const copy =
     language === "ja"
@@ -188,46 +248,6 @@ export default function DiscoveryApp({
   useEffect(() => {
     setStores(initialStores);
   }, [initialStores]);
-
-  const refreshStores = useCallback(async () => {
-    refreshAbortRef.current?.abort();
-    const controller = new AbortController();
-    refreshAbortRef.current = controller;
-
-    try {
-      const response = await fetch(
-        `/api/discovery?offset=0&perRegion=1000&_=${Date.now()}`,
-        {
-          cache: "no-store",
-          headers: {
-            "Cache-Control": "no-cache",
-            Pragma: "no-cache",
-          },
-          signal: controller.signal,
-        },
-      );
-
-      if (!response.ok) return;
-
-      const data = (await response.json()) as DiscoveryResponse;
-      if (Array.isArray(data.stores)) setStores(data.stores);
-    } catch (error) {
-      if (!(error instanceof Error && error.name === "AbortError")) {
-        console.error("Failed to refresh discovery data", error);
-      }
-    } finally {
-      if (refreshAbortRef.current === controller)
-        refreshAbortRef.current = null;
-    }
-  }, []);
-
-  useEffect(() => {
-    void refreshStores();
-
-    return () => {
-      refreshAbortRef.current?.abort();
-    };
-  }, [refreshStores]);
 
   useEffect(() => {
     let active = true;
@@ -463,48 +483,18 @@ export default function DiscoveryApp({
             </div>
           ) : (
             <div className="discovery-list">
-              {filteredStores.map((store) => {
-                const selected = selectedStore?.id === store.id;
-                const sampleMenu = representativeMenu(store);
-                const storeCategory = broadCategory(store);
-                return (
-                  <button
-                    className={`discovery-card ${selected ? "selected" : ""}`}
-                    type="button"
-                    key={store.id}
-                    onClick={() => handleSelect(store.id)}
-                  >
-                    <RestaurantCover
-                      store={store}
-                      language={language}
-                      compact
-                    />
-                    <span className="discovery-card-body">
-                      <span className="discovery-card-topline">
-                        <span>
-                          {regionLabel(store.regionKey, language)} ·{" "}
-                          {categoryLabel(storeCategory, language)}
-                        </span>
-                        <small>
-                          {store.menus.length} {copy.menus}
-                        </small>
-                      </span>
-                      <strong className="restaurant-card-name">
-                        {localizedRestaurantName(store, language)}
-                      </strong>
-                      <span className="discovery-address">
-                        {localizedAddress(store, language)}
-                      </span>
-                      {sampleMenu && (
-                        <span className="menu-preview-row">
-                          <span>{localizedMenuName(sampleMenu, language)}</span>
-                          {sampleMenu.price > 0 && <strong>{formatPrice(sampleMenu.price)}</strong>}
-                        </span>
-                      )}
-                    </span>
-                  </button>
-                );
-              })}
+              {filteredStores.map((store) => (
+                <DiscoveryListCard
+                  key={store.id}
+                  store={store}
+                  selected={selectedStore?.id === store.id}
+                  language={language}
+                  menusLabel={copy.menus}
+                  showConvertedPrice={showConvertedPrice}
+                  rates={showConvertedPrice ? rates : FALLBACK_RATES}
+                  onSelect={handleSelect}
+                />
+              ))}
             </div>
           )}
         </aside>
