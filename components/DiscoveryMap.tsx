@@ -202,11 +202,11 @@ function markerSvg(category: MarkerCategory) {
 
   switch (category) {
     case "cafe":
-      return `<svg ${common}><path fill="currentColor" d="M5 6.5h10v6a5 5 0 0 1-5 5 5 5 0 0 1-5-5v-6Zm10 2h1.5a3 3 0 1 1 0 6H15v-2h1.5a1 1 0 1 0 0-2H15v-2ZM6 19h12v2H6z"/></svg>`;
+      return `<svg ${common}><path fill="currentColor" d="M5 9h10v4.2a5 5 0 0 1-10 0V9Zm10 1h1.5a3 3 0 1 1 0 6H15v-2h1.5a1 1 0 1 0 0-2H15v-2ZM5 19h13v2H5z"/><path d="M8.2 6.7c0-1.1 1-1.2 1-2.4M12.2 6.7c0-1.1 1-1.2 1-2.4" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>`;
     case "korean":
-      return `<svg ${common}><path fill="currentColor" d="M4.5 10h15a7.5 7.5 0 0 1-15 0Zm2.2 7.2h10.6V19H6.7z"/><path d="M8 8V5.8M12 8V4.8M16 8V5.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
+      return `<svg ${common}><path fill="currentColor" d="M5 11h14c-.5 4.2-3.2 7-7 7s-6.5-2.8-7-7Zm2.2-1.5C8 7.4 9.6 6.3 12 6.3s4 1.1 4.8 3.2H7.2ZM7 19h10v2H7z"/><path d="M16.3 4 14.4 10M19 4.8 16.8 10.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>`;
     case "grill":
-      return `<svg ${common}><path fill="currentColor" fill-rule="evenodd" d="M5.3 7.1c2.2-2.7 7-3.2 10.3-.9 3.6 2.5 4.8 6.3 2.6 9.2-2.1 2.8-7 3.6-10.5 1.7-3.8-2.1-4.8-7-2.4-10Zm8.2 2.1a2.2 2.2 0 1 0 0 4.4 2.2 2.2 0 0 0 0-4.4Z"/></svg>`;
+      return `<svg ${common}><path d="M5 10h14M6.2 10a5.8 5.8 0 0 0 11.6 0M8.2 13.8 6.5 20M15.8 13.8 17.5 20M8 7.2h8M8.2 10v2.3M12 10v3.1M15.8 10v2.3" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
     default:
       return `<svg ${common}><path fill="currentColor" d="M5 3h2v7h1V3h2v7a4 4 0 0 1-2 3.5V21H6v-7.5A4 4 0 0 1 4 10V3h1Zm10 0h2v8h2V3h2v18h-2v-8h-4V3Z"/></svg>`;
   }

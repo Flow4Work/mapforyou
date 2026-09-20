@@ -189,7 +189,8 @@ export default function DiscoveryApp({
           directions: "地図を開く",
           call: "電話",
           about: "このお店について",
-          menuTitle: "翻訳メニュー",
+          menuTitle: "メニュー",
+          currencyLabel: "JPY",
           featured: "おすすめ",
           showStaff: "スタッフに見せる",
           closeStaff: "閉じる",
@@ -198,7 +199,7 @@ export default function DiscoveryApp({
           convertOn: "円の目安で見る",
           convertOff: "ウォンで見る",
           photoView: "写真",
-          compactView: "名前・価格",
+          compactView: "一覧",
           bookingTicker: "韓国のお店予約をもっと簡単に",
           bookingHeader: "予約サポート",
           bookingPlace: "予約する",
@@ -225,7 +226,8 @@ export default function DiscoveryApp({
           directions: "Open maps",
           call: "Call",
           about: "About this place",
-          menuTitle: "Translated menu",
+          menuTitle: "Menu",
+          currencyLabel: "USD",
           featured: "Featured",
           showStaff: "Show to staff",
           closeStaff: "Close Korean",
@@ -234,7 +236,7 @@ export default function DiscoveryApp({
           convertOn: "Estimate in USD",
           convertOff: "Show in won",
           photoView: "Photos",
-          compactView: "Name + price",
+          compactView: "List",
           bookingTicker: "Need help booking a place in Korea?",
           bookingHeader: "Booking Help",
           bookingPlace: "Book a table",
@@ -589,11 +591,10 @@ export default function DiscoveryApp({
               </section>
 
               <div className="menu-panel-heading">
-                <div className="menu-panel-title">
+                <div className="menu-toolbar-meta">
                   <span>{copy.menuTitle}</span>
-                  <strong>
-                    {selectedStore.menus.length} {copy.menus}
-                  </strong>
+                  <span aria-hidden="true">·</span>
+                  <strong>{selectedStore.menus.length}</strong>
                 </div>
                 <div className="menu-panel-actions">
                   <div className="menu-view-toggle" role="group" aria-label={copy.menuTitle}>
@@ -616,9 +617,10 @@ export default function DiscoveryApp({
                     className={`menu-currency-button ${showConvertedPrice ? "active" : ""}`}
                     type="button"
                     title={rateTooltip}
+                    aria-pressed={showConvertedPrice}
                     onClick={() => setShowConvertedPrice((current) => !current)}
                   >
-                    {showConvertedPrice ? copy.convertOff : copy.convertOn} ⓘ
+                    {copy.currencyLabel} <span aria-hidden="true">ⓘ</span>
                   </button>
                 </div>
               </div>

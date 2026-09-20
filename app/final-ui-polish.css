@@ -47,68 +47,88 @@
 }
 .secondary-action-icon {
   display: grid;
-  flex: 0 0 22px;
+  flex: 0 0 20px;
   place-items: center;
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  overflow: visible;
   color: #67534b;
+  background: transparent;
+  border-radius: 0;
+}
+.secondary-action-icon.google,
+.secondary-action-icon.naver,
+.secondary-action-icon.instagram,
+.secondary-action-icon.call {
   background: transparent;
   border-radius: 0;
 }
 .secondary-action-icon svg {
   display: block;
-  width: 100%;
-  height: 100%;
+  width: 20px;
+  height: 20px;
+  max-width: none;
+  overflow: visible;
 }
-.secondary-action-icon.call { padding: 2px; color: #6f554b; }
+.secondary-action-icon.call {
+  color: #6f554b;
+}
+.secondary-action-icon.call svg {
+  width: 17px;
+  height: 17px;
+}
 .menu-panel-heading {
-  flex-direction: column;
-  align-items: stretch;
-  gap: 9px;
-  padding: 11px 14px 12px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px 9px;
+  border-top: 1px solid rgba(234,223,216,.75);
 }
-.menu-panel-title {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: flex-start;
-  justify-content: flex-start;
-  gap: 2px;
-}
-.menu-panel-title span {
-  font-size: 9px;
-  letter-spacing: .09em;
-}
-.menu-panel-title strong {
-  color: #5a443b;
-  font-size: 12px;
+.menu-toolbar-meta {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  min-width: 0;
+  color: #725d54;
+  font-size: 10px;
   font-weight: 800;
-  line-height: 1.2;
+  line-height: 1;
+  white-space: nowrap;
+}
+.menu-toolbar-meta strong {
+  color: #5a443b;
+  font-size: 10.5px;
+  font-weight: 850;
 }
 .menu-panel-actions {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  display: flex;
   align-items: center;
-  width: 100%;
-  gap: 8px;
+  justify-content: flex-end;
+  min-width: 0;
+  width: auto;
+  gap: 6px;
 }
 .menu-panel-actions .menu-view-toggle {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  width: 100%;
+  grid-template-columns: auto auto;
+  flex: 0 1 auto;
+  width: auto;
   min-width: 0;
   max-width: none;
-  gap: 3px;
-  padding: 3px;
+  gap: 2px;
+  padding: 2px;
   border: 1px solid #ead8cc;
-  border-radius: 10px;
-  background: #fff7f1;
+  border-radius: 9px;
+  background: #fff8f3;
 }
 .menu-panel-actions .menu-view-toggle button {
-  min-width: 0;
+  min-width: 54px;
   min-height: 28px;
   padding: 0 8px;
-  border-radius: 7px;
-  font-size: 9px;
+  border-radius: 6px;
+  font-size: 8.5px;
   line-height: 1;
   white-space: nowrap;
 }
@@ -117,9 +137,10 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 36px;
-  padding: 0 10px;
-  border-radius: 10px;
+  min-width: 50px;
+  min-height: 34px;
+  padding: 0 8px;
+  border-radius: 9px;
   background: #fffdf9;
   font-size: 8.5px;
   line-height: 1;
@@ -141,7 +162,7 @@
   cursor: pointer;
   transition: width .15s ease, height .15s ease, transform .15s ease, box-shadow .15s ease;
 }
-.naver-map-marker.category-cafe { --marker-color: #8B5A3C; }
+.naver-map-marker.category-cafe { --marker-color: #8C4A2F; }
 .naver-map-marker.category-korean { --marker-color: #E76F20; }
 .naver-map-marker.category-grill { --marker-color: #B42318; }
 .naver-map-marker.category-global { --marker-color: #6251A3; }
@@ -179,7 +200,7 @@
   border: 3px solid #fff;
   color: #fff;
   background: var(--marker-color);
-  box-shadow: 0 0 0 3px rgba(50,42,38,.22), 0 9px 22px rgba(45,34,30,.34);
+  box-shadow: 0 9px 22px rgba(45,34,30,.38);
   transform: translateY(-1px);
 }
 .naver-map-marker.selected::after {
@@ -205,54 +226,72 @@
     min-height: 36px;
     padding: 5px 9px 5px 6px;
   }
-  .menu-panel-actions {
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: 7px;
+  .menu-panel-heading {
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 8px;
   }
-  .menu-panel-actions .menu-view-toggle button { padding-inline: 6px; }
-  .menu-panel-actions .menu-currency-button { padding-inline: 9px; }
-}
-@media (max-width: 359px) {
-  .menu-panel-actions {
-    grid-template-columns: 1fr;
-    justify-items: center;
-  }
-  .menu-panel-actions .menu-view-toggle {
-    width: min(100%, 236px);
+  .menu-panel-actions { gap: 5px; }
+  .menu-panel-actions .menu-view-toggle button {
+    min-width: 48px;
+    padding-inline: 6px;
   }
   .menu-panel-actions .menu-currency-button {
-    justify-self: center;
+    min-width: 47px;
+    padding-inline: 7px;
   }
+}
+@media (max-width: 359px) {
   .detail-secondary-actions a {
-    width: 36px;
-    min-width: 36px;
-    padding: 6px;
+    width: 34px;
+    min-width: 34px;
+    padding: 5px;
   }
   .detail-secondary-actions a > span:last-child {
     display: none;
   }
-  .secondary-action-icon {
-    flex-basis: 22px;
-    width: 22px;
-    height: 22px;
-  }
 }
 
 /* Beat older mobile selector specificity without changing layout semantics. */
-.restaurant-detail-panel .menu-panel-actions {
+.restaurant-detail-panel .menu-panel-heading {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
-  width: 100%;
 }
-.restaurant-detail-panel .menu-panel-actions .menu-view-toggle {
-  width: 100%;
+.restaurant-detail-panel .menu-panel-actions {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+  width: auto;
   min-width: 0;
 }
-@media (max-width: 359px) {
+.restaurant-detail-panel .menu-panel-actions .menu-view-toggle {
+  width: auto;
+  min-width: 0;
+  flex: 0 1 auto;
+}
+@media (min-width: 360px) and (max-width: 380px) {
+  .restaurant-detail-panel .detail-secondary-actions,
+  .detail-page .detail-secondary-actions {
+    gap: 5px;
+  }
+  .restaurant-detail-panel .detail-secondary-actions a,
+  .detail-page .detail-secondary-actions a {
+    width: auto;
+    min-width: 0;
+    padding: 5px 7px 5px 5px;
+  }
+  .restaurant-detail-panel .detail-secondary-actions a > span:last-child,
+  .detail-page .detail-secondary-actions a > span:last-child {
+    display: inline;
+  }
+}
+@media (max-width: 380px) {
   .restaurant-detail-panel .menu-panel-actions {
-    grid-template-columns: 1fr;
-    justify-items: center;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
   }
 }
 
