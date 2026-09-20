@@ -362,6 +362,8 @@ export function googleMapUrl(store: DiscoveryRestaurant) {
 }
 
 export function naverMapUrl(store: DiscoveryRestaurant) {
+  const naverPlaceId = store.id.match(/^naver:(\d+)$/)?.[1];
+  if (naverPlaceId) return `https://map.naver.com/p/entry/place/${naverPlaceId}`;
   const query = `${store.name} ${store.roadAddress || store.address}`.trim();
   return `https://map.naver.com/p/search/${encodeURIComponent(query)}`;
 }

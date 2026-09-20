@@ -4,19 +4,40 @@
 }
 
 .naver-map-marker {
+  --marker-color: #8c5b18;
+  --marker-bg: #fff9e7;
+  --marker-border: #e8c676;
   position: relative;
   display: grid;
   place-items: center;
   width: 34px;
   height: 34px;
   box-sizing: border-box;
-  border: 1.5px solid #f0d5c8;
+  border: 1.5px solid var(--marker-border);
   border-radius: 50%;
-  color: #d7633d;
-  background: #fffdf9;
+  color: var(--marker-color);
+  background: var(--marker-bg);
   box-shadow: 0 1px 2px rgba(88, 48, 31, .12), 0 5px 12px rgba(88, 48, 31, .18);
   cursor: pointer;
   transition: width .15s ease, height .15s ease, color .15s ease, background .15s ease, border-color .15s ease, box-shadow .15s ease;
+}
+
+.naver-map-marker.category-cafe {
+  --marker-color: #247c72;
+  --marker-bg: #f1fffb;
+  --marker-border: #91cec6;
+}
+
+.naver-map-marker.category-bbq {
+  --marker-color: #b4402d;
+  --marker-bg: #fff3ee;
+  --marker-border: #e7a092;
+}
+
+.naver-map-marker.category-restaurant {
+  --marker-color: #8c5b18;
+  --marker-bg: #fff9e7;
+  --marker-border: #e8c676;
 }
 
 .naver-map-marker::after {
@@ -28,8 +49,8 @@
   height: 8px;
   content: "";
   background: inherit;
-  border-right: 1.5px solid #f0d5c8;
-  border-bottom: 1.5px solid #f0d5c8;
+  border-right: 1.5px solid var(--marker-border);
+  border-bottom: 1.5px solid var(--marker-border);
   transform: translateX(-50%) rotate(45deg);
   border-radius: 0 0 2px 0;
 }
@@ -49,28 +70,13 @@
   height: 100%;
 }
 
-/* Only uncategorized restaurants use the standard fork-and-knife symbol. */
-.naver-map-marker.category-restaurant .naver-map-marker-icon svg {
-  display: none;
-}
-
-.naver-map-marker.category-restaurant .naver-map-marker-icon::before {
-  width: 100%;
-  height: 100%;
-  content: "";
-  background: currentColor;
-  -webkit-mask: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='black' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 3v7M4 3v4a3 3 0 0 0 6 0V3M7 10v11'/%3E%3Cpath d='M17 3v18M17 3c3 2 3 6 0 8'/%3E%3C/g%3E%3C/svg%3E") center / contain no-repeat;
-  mask: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='black' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 3v7M4 3v4a3 3 0 0 0 6 0V3M7 10v11'/%3E%3Cpath d='M17 3v18M17 3c3 2 3 6 0 8'/%3E%3C/g%3E%3C/svg%3E") center / contain no-repeat;
-}
-
 .naver-map-marker.selected {
-  width: 44px;
-  height: 44px;
+  width: 42px;
+  height: 42px;
   border: 3px solid #fff;
-  border-radius: 50%;
   color: #fff;
-  background: #e55f32;
-  box-shadow: 0 0 0 3px rgba(229, 95, 50, .22), 0 8px 20px rgba(82, 48, 33, .3);
+  background: var(--marker-color);
+  box-shadow: 0 0 0 3px rgba(55, 38, 29, .2), 0 8px 20px rgba(82, 48, 33, .3);
 }
 
 .naver-map-marker.selected::after {

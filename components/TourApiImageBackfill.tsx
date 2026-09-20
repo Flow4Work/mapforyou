@@ -217,7 +217,7 @@ export default function TourApiImageBackfill() {
             <span>STEP 2 · TOUR API</span>
             <h2 style={{ marginBottom: 4 }}>한국관광공사 이미지 보강</h2>
             <p style={{ margin: 0, color: "var(--muted)", fontSize: 13 }}>
-              REDTABLE에 사진이 없는 성수·홍대 가게만 음식메뉴 이미지 → 대표 이미지 → 일반 이미지 순으로 확인합니다.
+              REDTABLE에 사진이 없는 성수·자양·홍대·종로 가게만 음식메뉴 이미지 → 대표 이미지 → 일반 이미지 순으로 확인합니다.
             </p>
           </div>
           <strong>{status.configured ? "키 등록됨" : "키 없음"}</strong>

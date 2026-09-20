@@ -5,7 +5,7 @@ export const runtime = "nodejs";
 
 const MAX_ROWS = 20_000;
 const PAGE_SIZE = 1_000;
-const ACTIVE_REGIONS = new Set(["seongsu", "hongdae"]);
+const ACTIVE_REGIONS = new Set(["seongsu", "hongdae", "geondae", "jongno"]);
 
 type ImageCandidate = {
   url?: string;

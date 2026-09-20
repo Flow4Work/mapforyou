@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import ImageViewer from "@/components/ImageViewer";
 import RestaurantCover from "@/components/RestaurantCover";
 import type { DiscoveryRestaurant } from "@/lib/discovery";
 import {
@@ -18,6 +19,7 @@ import {
   type BroadCategory,
   type PublicLanguage,
 } from "@/lib/discovery-ui";
+import { representativeMenu } from "@/lib/restaurant-images";
 
 const DiscoveryMap = dynamic(() => import("@/components/DiscoveryMap"), {
   ssr: false,
@@ -54,6 +56,22 @@ const FALLBACK_RATES: ExchangeRates = {
   isFallback: true,
 };
 
+const BOOKING_BASE_URL = "https://booking-daijoubu.vercel.app/";
+
+function bookingHomeUrl(language: PublicLanguage) {
+  return `${BOOKING_BASE_URL}?lang=${language}`;
+}
+
+function bookingPlaceUrl(store: DiscoveryRestaurant, language: PublicLanguage) {
+  const params = new URLSearchParams({
+    lang: language,
+    restaurant: store.name,
+    url: naverMapUrl(store),
+    address: store.roadAddress || store.address,
+  });
+  return `${BOOKING_BASE_URL}?${params.toString()}`;
+}
+
 export default function DiscoveryApp({
   initialStores,
 }: {
@@ -68,6 +86,8 @@ export default function DiscoveryApp({
   const [showConvertedPrice, setShowConvertedPrice] = useState(false);
   const [rates, setRates] = useState<ExchangeRates>(FALLBACK_RATES);
   const [revealedMenuId, setRevealedMenuId] = useState("");
+  const [menuViewMode, setMenuViewMode] = useState<"photo" | "compact">("photo");
+  const [menuImageViewer, setMenuImageViewer] = useState<{ src: string; alt: string } | null>(null);
   const [mobilePanel, setMobilePanel] = useState<"places" | "menu">("places");
   const refreshAbortRef = useRef<AbortController | null>(null);
 
@@ -97,6 +117,11 @@ export default function DiscoveryApp({
           orderPhrase: "これを一つお願いします",
           convertOn: "円の目安で見る",
           convertOff: "ウォンで見る",
+          photoView: "写真",
+          compactView: "名前・価格",
+          bookingTicker: "韓国のお店予約をもっと簡単に",
+          bookingHeader: "予約サポート",
+          bookingPlace: "このお店を予約",
           noPrice: "価格未確認",
           dataNotice:
             "公開データを整理した参考情報です。価格・営業情報は店舗で変更される場合があります。",
@@ -128,6 +153,11 @@ export default function DiscoveryApp({
           orderPhrase: "One of this, please",
           convertOn: "Estimate in USD",
           convertOff: "Show in won",
+          photoView: "Photos",
+          compactView: "Name + price",
+          bookingTicker: "Need help booking a place in Korea?",
+          bookingHeader: "Booking Help",
+          bookingPlace: "Book this place",
           noPrice: "Price unavailable",
           dataNotice:
             "This is reference information organized from public data. Prices and operating details may change at the restaurant.",
@@ -241,6 +271,11 @@ export default function DiscoveryApp({
     [filteredStores, selectedId],
   );
 
+  useEffect(() => {
+    setRevealedMenuId("");
+    setMenuImageViewer(null);
+  }, [selectedStore?.id]);
+
   const handleSelect = useCallback((id: string) => {
     setSelectedId(id);
     setRevealedMenuId("");
@@ -254,7 +289,7 @@ export default function DiscoveryApp({
   }
 
   function formatPrice(price: number) {
-    if (!price) return copy.noPrice;
+    if (!price) return "";
     if (!showConvertedPrice) return `₩${price.toLocaleString("en-US")}`;
     if (language === "ja")
       return `約 ¥${Math.round(price * rates.jpyPerKrw).toLocaleString("ja-JP")}`;
@@ -276,6 +311,21 @@ export default function DiscoveryApp({
             MapForYou<small>{copy.tagline}</small>
           </span>
         </div>
+        <a
+          className="booking-header-cta"
+          href={bookingHomeUrl(language)}
+          target="_blank"
+          rel="noreferrer"
+          aria-label={copy.bookingHeader}
+        >
+          <span className="booking-ticker-window">
+            <span className="booking-ticker-track">
+              <span>{copy.bookingTicker}</span>
+              <span aria-hidden="true">{copy.bookingTicker}</span>
+            </span>
+          </span>
+          <strong>{copy.bookingHeader}<span aria-hidden="true"> ↗</span></strong>
+        </a>
         <div className="header-actions">
           <button
             className={`currency-header-button ${showConvertedPrice ? "active" : ""}`}
@@ -391,7 +441,7 @@ export default function DiscoveryApp({
             <div className="discovery-list">
               {filteredStores.map((store) => {
                 const selected = selectedStore?.id === store.id;
-                const sampleMenu = store.menus[0];
+                const sampleMenu = representativeMenu(store);
                 const storeCategory = broadCategory(store);
                 return (
                   <button
@@ -424,7 +474,7 @@ export default function DiscoveryApp({
                       {sampleMenu && (
                         <span className="menu-preview-row">
                           <span>{localizedMenuName(sampleMenu, language)}</span>
-                          <strong>{formatPrice(sampleMenu.price)}</strong>
+                          {sampleMenu.price > 0 && <strong>{formatPrice(sampleMenu.price)}</strong>}
                         </span>
                       )}
                     </span>
@@ -462,22 +512,32 @@ export default function DiscoveryApp({
                 <p>{localizedAddress(selectedStore, language)}</p>
                 <div className="detail-panel-actions">
                   <a
-                    href={`${googleMapUrl(selectedStore)}&hl=${language}`}
+                    className="booking-place-cta"
+                    href={bookingPlaceUrl(selectedStore, language)}
                     target="_blank"
                     rel="noreferrer"
                   >
-                    Google Maps
+                    {copy.bookingPlace}<span aria-hidden="true">↗</span>
                   </a>
-                  <a
-                    href={naverMapUrl(selectedStore)}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    Naver Map
-                  </a>
-                  {selectedStore.phone && (
-                    <a href={`tel:${selectedStore.phone}`}>{copy.call}</a>
-                  )}
+                  <div className="detail-secondary-actions">
+                    <a
+                      href={`${googleMapUrl(selectedStore)}&hl=${language}`}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Google Maps
+                    </a>
+                    <a
+                      href={naverMapUrl(selectedStore)}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Naver Map
+                    </a>
+                    {selectedStore.phone && (
+                      <a href={`tel:${selectedStore.phone}`}>{copy.call}</a>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -493,17 +553,35 @@ export default function DiscoveryApp({
                     {selectedStore.menus.length} {copy.menus}
                   </strong>
                 </div>
-                <button
-                  className={showConvertedPrice ? "active" : ""}
-                  type="button"
-                  title={rateTooltip}
-                  onClick={() => setShowConvertedPrice((current) => !current)}
-                >
-                  {showConvertedPrice ? copy.convertOff : copy.convertOn} ⓘ
-                </button>
+                <div className="menu-panel-actions">
+                  <div className="menu-view-toggle" role="group" aria-label={copy.menuTitle}>
+                    <button
+                      className={menuViewMode === "photo" ? "active" : ""}
+                      type="button"
+                      onClick={() => setMenuViewMode("photo")}
+                    >
+                      {copy.photoView}
+                    </button>
+                    <button
+                      className={menuViewMode === "compact" ? "active" : ""}
+                      type="button"
+                      onClick={() => setMenuViewMode("compact")}
+                    >
+                      {copy.compactView}
+                    </button>
+                  </div>
+                  <button
+                    className={`menu-currency-button ${showConvertedPrice ? "active" : ""}`}
+                    type="button"
+                    title={rateTooltip}
+                    onClick={() => setShowConvertedPrice((current) => !current)}
+                  >
+                    {showConvertedPrice ? copy.convertOff : copy.convertOn} ⓘ
+                  </button>
+                </div>
               </div>
 
-              <div className="inline-menu-list">
+              <div className={`inline-menu-list ${menuViewMode === "compact" ? "compact" : ""}`}>
                 {selectedStore.menus.map((menu, index) => {
                   const menuKey = `${selectedStore.id}:${menu.id}:${index}`;
                   const revealed = revealedMenuId === menuKey;
@@ -512,12 +590,34 @@ export default function DiscoveryApp({
                     ? menu.descriptionJa || menu.descriptionKo
                     : menu.descriptionEn || menu.descriptionKo;
                   const hasVerifiedImage = menu.imageStatus === "verified" && /^https?:\/\//i.test(menu.imageUrl);
+                  if (menuViewMode === "compact") {
+                    return (
+                      <article className="inline-menu-card compact" key={menuKey}>
+                        <div className="inline-menu-row">
+                          <h2>{localizedName}</h2>
+                          {menu.price > 0 && (
+                            <div className="inline-price">
+                              <strong>{formatPrice(menu.price)}</strong>
+                              {showConvertedPrice && (
+                                <small>₩{menu.price.toLocaleString("en-US")}</small>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </article>
+                    );
+                  }
                   return (
                     <article className={`inline-menu-card${hasVerifiedImage ? " has-image" : ""}`} key={menuKey}>
                       {hasVerifiedImage && (
-                        <a className="inline-menu-image-link" href={menu.imageSourceUrl || menu.imageUrl} target="_blank" rel="noreferrer" aria-label={`${localizedName} image source`}>
+                        <button
+                          className="inline-menu-image-link"
+                          type="button"
+                          aria-label={`${localizedName} image`}
+                          onClick={() => setMenuImageViewer({ src: menu.imageUrl, alt: localizedName })}
+                        >
                           <img className="inline-menu-image" src={menu.imageUrl} alt={localizedName} loading="lazy" />
-                        </a>
+                        </button>
                       )}
                       <div className="inline-menu-row">
                         <div>
@@ -529,12 +629,14 @@ export default function DiscoveryApp({
                           <h2>{localizedName}</h2>
                           {description && <p className="inline-menu-description">{description}</p>}
                         </div>
-                        <div className="inline-price">
-                          <strong>{formatPrice(menu.price)}</strong>
-                          {showConvertedPrice && menu.price > 0 && (
-                            <small>₩{menu.price.toLocaleString("en-US")}</small>
-                          )}
-                        </div>
+                        {menu.price > 0 && (
+                          <div className="inline-price">
+                            <strong>{formatPrice(menu.price)}</strong>
+                            {showConvertedPrice && (
+                              <small>₩{menu.price.toLocaleString("en-US")}</small>
+                            )}
+                          </div>
+                        )}
                       </div>
                       <button
                         className="show-staff-button"
@@ -569,6 +671,13 @@ export default function DiscoveryApp({
           )}
         </aside>
       </section>
+      {menuImageViewer && (
+        <ImageViewer
+          src={menuImageViewer.src}
+          alt={menuImageViewer.alt}
+          onClose={() => setMenuImageViewer(null)}
+        />
+      )}
     </main>
   );
 }

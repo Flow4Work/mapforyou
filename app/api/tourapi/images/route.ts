@@ -7,7 +7,7 @@ export const maxDuration = 60;
 const BASE_URL = "https://apis.data.go.kr/B551011/KorService2";
 const KEY_SETTING = "tourapi_korservice_key";
 const CHECKED_SETTING = "tourapi_image_checked_ids";
-const ACTIVE_REGIONS = ["seongsu", "hongdae"];
+const ACTIVE_REGIONS = ["seongsu", "hongdae", "geondae", "jongno"];
 const DEFAULT_LIMIT = 6;
 
 type StoreRow = {
@@ -68,7 +68,7 @@ function normalize(value: string) {
 function baseName(value: string) {
   return value
     .replace(/\([^)]*\)|\[[^\]]*\]/g, " ")
-    .replace(/\b(성수|홍대|서울|왕십리|마포|성동)\s*(점|본점|지점)?\b/g, " ")
+    .replace(/\b(성수|홍대|서울|왕십리|마포|성동|자양|건대|광진|종로|인사동|익선동|삼청동|안국)\s*(점|본점|지점)?\b/g, " ")
     .replace(/\s+/g, " ")
     .trim();
 }
@@ -175,8 +175,14 @@ function candidateScore(store: StoreRow, item: SearchItem) {
 
   const storeAddress = `${store.road_address ?? ""} ${store.address ?? ""}`;
   const itemAddress = `${item.addr1 ?? ""} ${item.addr2 ?? ""}`;
-  const district = store.region_key === "hongdae" ? "마포구" : "성동구";
-  if (itemAddress.includes(district)) score += 15;
+  const districtByRegion: Record<string, string> = {
+    seongsu: "성동구",
+    hongdae: "마포구",
+    geondae: "광진구",
+    jongno: "종로구",
+  };
+  const district = districtByRegion[store.region_key || ""] || "";
+  if (district && itemAddress.includes(district)) score += 15;
 
   const roadTokens = storeAddress.match(/[가-힣A-Za-z0-9]+(?:로|길)\s*\d*/g) ?? [];
   if (roadTokens.some((token) => itemAddress.replace(/\s/g, "").includes(token.replace(/\s/g, "")))) score += 15;

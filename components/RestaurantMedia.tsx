@@ -21,36 +21,54 @@ function instagramHandle(store: DiscoveryRestaurant) {
 export default function RestaurantMedia({
   store,
   language,
-  compact = false,
+  images,
+  selectedImage,
+  onSelectImage,
+  onImageError,
 }: {
   store: DiscoveryRestaurant;
   language: PublicLanguage;
-  compact?: boolean;
+  images: string[];
+  selectedImage: string;
+  onSelectImage: (url: string) => void;
+  onImageError: (url: string) => void;
 }) {
   const instagramUrl = String(store.instagramUrl || "").trim();
-  const additionalImages = (store.imageGalleryUrls || [])
-    .filter((url) => url && url !== store.imageUrl)
-    .slice(0, compact ? 3 : 4);
   const hasInstagramPost = instagramContentUrl(instagramUrl);
   const hasInstagramProfile = Boolean(instagramUrl) && !hasInstagramPost;
 
-  if (!hasInstagramPost && !hasInstagramProfile && additionalImages.length === 0) return null;
+  if (!hasInstagramPost && !hasInstagramProfile && images.length === 0) return null;
 
   const copy = language === "ja"
-    ? { social: "公式Instagram", open: "Instagram", gallery: "写真" }
+    ? { social: "Official Instagram", open: "Instagram", gallery: "\u5199\u771f" }
     : { social: "Official Instagram", open: "Instagram", gallery: "Photos" };
 
   return (
-    <section className={`restaurant-media ${compact ? "restaurant-media-compact" : ""}`}>
-      {additionalImages.length > 0 && (
+    <section className="restaurant-media">
+      {images.length > 0 && (
         <div className="restaurant-gallery-block">
           <div className="restaurant-gallery-heading">
             <span>{copy.gallery}</span>
-            <strong>{additionalImages.length + (store.imageUrl ? 1 : 0)}</strong>
+            <strong>{images.length}</strong>
           </div>
-          <div className={`restaurant-gallery ${additionalImages.length === 1 ? "single" : ""}`}>
-            {additionalImages.map((url, index) => (
-              <img key={`${url}-${index}`} src={url} alt={`${store.name} ${copy.gallery} ${index + 2}`} loading="lazy" referrerPolicy="no-referrer" />
+          <div className={`restaurant-gallery ${images.length === 1 ? "single" : ""}`}>
+            {images.map((url, index) => (
+              <button
+                className={`restaurant-gallery-thumb ${selectedImage === url ? "active" : ""}`}
+                type="button"
+                key={`${url}-${index}`}
+                aria-label={`${store.name} ${copy.gallery} ${index + 1}`}
+                aria-pressed={selectedImage === url}
+                onClick={() => onSelectImage(url)}
+              >
+                <img
+                  src={url}
+                  alt={`${store.name} ${copy.gallery} ${index + 1}`}
+                  loading="lazy"
+                  referrerPolicy="no-referrer"
+                  onError={() => onImageError(url)}
+                />
+              </button>
             ))}
           </div>
         </div>
@@ -72,9 +90,9 @@ export default function RestaurantMedia({
 
       {hasInstagramProfile && (
         <a className="instagram-profile-link" href={instagramUrl} target="_blank" rel="noreferrer">
-          <span className="instagram-profile-link-icon">◎</span>
+          <span className="instagram-profile-link-icon">IG</span>
           <span><small>{copy.social}</small><strong>@{instagramHandle(store)}</strong></span>
-          <b>↗</b>
+          <b aria-hidden="true">↗</b>
         </a>
       )}
     </section>

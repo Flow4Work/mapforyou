@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import ImageViewer from "@/components/ImageViewer";
 import RestaurantMedia from "@/components/RestaurantMedia";
 import type { DiscoveryRestaurant } from "@/lib/discovery";
 import {
@@ -10,6 +11,7 @@ import {
   localizedRestaurantName,
   type PublicLanguage,
 } from "@/lib/discovery-ui";
+import { restaurantPhotoCandidates } from "@/lib/restaurant-images";
 
 export default function RestaurantCover({
   store,
@@ -21,14 +23,18 @@ export default function RestaurantCover({
   compact?: boolean;
 }) {
   const category = broadCategory(store);
-  const [failed, setFailed] = useState(false);
   const stackRef = useRef<HTMLDivElement>(null);
-  const hasImage = Boolean(store.imageUrl) && !failed;
-  const isTourApiImage = store.imageSource.startsWith("tourapi_");
-  const isEditableTourApiImage = store.imageSource.includes("type1");
-  const preserveOriginal = isTourApiImage && !isEditableTourApiImage;
+  const photoCandidates = useMemo(() => restaurantPhotoCandidates(store), [store]);
+  const preferredImage = photoCandidates[0] ?? "";
+  const [selectedImage, setSelectedImage] = useState(preferredImage);
+  const [viewerImage, setViewerImage] = useState("");
+  const [failedImages, setFailedImages] = useState<Set<string>>(() => new Set());
 
-  useEffect(() => setFailed(false), [store.imageUrl]);
+  useEffect(() => {
+    setSelectedImage(preferredImage);
+    setViewerImage("");
+    setFailedImages(new Set());
+  }, [store.id, preferredImage]);
 
   useEffect(() => {
     if (compact) return;
@@ -36,17 +42,51 @@ export default function RestaurantCover({
     if (scroller instanceof HTMLElement) scroller.scrollTo({ top: 0, behavior: "auto" });
   }, [store.id, compact]);
 
+  const fallbackImage = photoCandidates.find((url) => !failedImages.has(url)) ?? "";
+  const activeImage = selectedImage && !failedImages.has(selectedImage) ? selectedImage : fallbackImage;
+  const hasImage = Boolean(activeImage);
+  const isOriginalImage = activeImage === store.imageUrl;
+  const isTourApiImage = isOriginalImage && store.imageSource.startsWith("tourapi_");
+  const isEditableTourApiImage = store.imageSource.includes("type1");
+  const preserveOriginal = isTourApiImage && !isEditableTourApiImage;
+
+  function selectImage(url: string) {
+    if (!photoCandidates.includes(url) || failedImages.has(url)) return;
+    setSelectedImage(url);
+  }
+
+  function markImageFailed(url: string) {
+    setFailedImages((current) => {
+      const next = new Set(current);
+      next.add(url);
+      const replacement = photoCandidates.find((candidate) => !next.has(candidate));
+      if (selectedImage === url) setSelectedImage(replacement ?? "");
+      if (viewerImage === url) setViewerImage("");
+      return next;
+    });
+  }
+
   const cover = (
     <div
-      className={`restaurant-cover cover-${category} ${compact ? "restaurant-cover-compact" : ""}`}
+      className={`restaurant-cover cover-${category} ${compact ? "restaurant-cover-compact" : "restaurant-cover-expandable"}`}
       style={{ position: "relative", overflow: "hidden", background: preserveOriginal ? "#f1eee7" : undefined }}
+      role={!compact && hasImage ? "button" : undefined}
+      tabIndex={!compact && hasImage ? 0 : undefined}
+      aria-label={!compact && hasImage ? `${localizedRestaurantName(store, language)} image` : undefined}
+      onClick={!compact && hasImage ? () => setViewerImage(activeImage) : undefined}
+      onKeyDown={!compact && hasImage ? (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          setViewerImage(activeImage);
+        }
+      } : undefined}
     >
       {hasImage && (
         <img
-          src={store.imageUrl}
-          alt=""
-          loading="lazy"
-          onError={() => setFailed(true)}
+          src={activeImage}
+          alt={localizedRestaurantName(store, language)}
+          loading={compact ? "lazy" : "eager"}
+          onError={() => markImageFailed(activeImage)}
           style={{
             position: "absolute",
             inset: preserveOriginal ? "0 0 42px" : 0,
@@ -97,7 +137,21 @@ export default function RestaurantCover({
   return (
     <div className="restaurant-cover-stack" ref={stackRef}>
       {cover}
-      <RestaurantMedia store={store} language={language} />
+      <RestaurantMedia
+        store={store}
+        language={language}
+        images={photoCandidates.filter((url) => !failedImages.has(url))}
+        selectedImage={activeImage}
+        onSelectImage={selectImage}
+        onImageError={markImageFailed}
+      />
+      {viewerImage && (
+        <ImageViewer
+          src={viewerImage}
+          alt={localizedRestaurantName(store, language)}
+          onClose={() => setViewerImage("")}
+        />
+      )}
     </div>
   );
 }

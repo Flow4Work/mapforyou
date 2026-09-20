@@ -4,7 +4,7 @@ import { getSupabaseServerClient } from "@/lib/supabase";
 
 const ACTIVE_REGIONS = ["seongsu", "hongdae", "geondae", "jongno"] as const;
 const DEFAULT_PER_REGION = 20;
-const MAX_PER_REGION = 50;
+const MAX_PER_REGION = 100;
 
 export type DiscoveryMenu = {
   id: string;
