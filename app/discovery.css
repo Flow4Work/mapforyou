@@ -145,6 +145,7 @@
 .restaurant-cover-label > span { width: fit-content; padding: 5px 7px; border-radius: 999px; background: rgba(87,32,22,.48); font-size: 7px; font-weight: 900; text-transform: uppercase; letter-spacing: .07em; backdrop-filter: blur(7px); }
 .restaurant-cover-label strong { overflow: hidden; font-size: clamp(26px, 4vw, 48px); letter-spacing: -.05em; text-overflow: ellipsis; }
 .restaurant-cover-compact .restaurant-cover-label strong { display: none; }
+.restaurant-cover-compact .restaurant-cover-label > span { backdrop-filter: none; }
 .cover-cafe { background: radial-gradient(circle at 72% 22%, #ffd76a, transparent 28%), linear-gradient(145deg,#cb6a38,#6e2f27); }
 .cover-korean { background: radial-gradient(circle at 25% 24%, #ffcf54, transparent 25%), linear-gradient(145deg,#d85031,#6d291f); }
 .cover-japanese { background: radial-gradient(circle at 70% 20%, #ffe0a1, transparent 28%), linear-gradient(145deg,#b93f36,#672c35); }
