@@ -1,0 +1,272 @@
+{
+  "date": "2026-09-25",
+  "reviewType": "targeted editorial corrections to high-risk AI-generated menu names, including allergens and dish types",
+  "edits": [
+    {
+      "menu_id": "naver:1121324125:menu:dom_17",
+      "name_ko": "고추냉이 명이참치김밥",
+      "name_en": "Wasabi, wild garlic leaf & tuna gimbap",
+      "name_ja": "わさび・行者ニンニク・ツナのキンパ",
+      "approvedNumericException": null
+    },
+    {
+      "menu_id": "naver:1126882398:menu:dom_14",
+      "name_ko": "순살 옛날 양념치킨",
+      "name_en": "Boneless classic sweet-spicy Korean fried chicken",
+      "name_ja": "骨なし昔ながらのヤンニョムチキン",
+      "approvedNumericException": null
+    },
+    {
+      "menu_id": "naver:1126882398:menu:dom_27",
+      "name_ko": "속초착한먹태",
+      "name_en": "Sokcho Chakan Meoktae (semi-dried pollock)",
+      "name_ja": "束草チャッカン・モクテ（半干しスケトウダラ）",
+      "approvedNumericException": null
+    },
+    {
+      "menu_id": "naver:1229825670:menu:dom_10",
+      "name_ko": "모둠가츠정식",
+      "name_en": "Assorted katsu set meal",
+      "name_ja": "盛り合わせカツ定食",
+      "approvedNumericException": null
+    },
+    {
+      "menu_id": "naver:1255960333:menu:dom_18",
+      "name_ko": "절임배추볶음酸菜粉",
+      "name_en": "Stir-fried pickled cabbage & glass noodles (Suancai Fen)",
+      "name_ja": "酸菜と春雨の炒め物",
+      "approvedNumericException": null
+    },
+    {
+      "menu_id": "naver:1258564823:menu:dom_14",
+      "name_ko": "팔계갈비솥밥정식",
+      "name_en": "Palgye Galbi pot rice set",
+      "name_ja": "パルゲカルビ釜飯定食",
+      "approvedNumericException": null
+    },
+    {
+      "menu_id": "naver:1258564823:menu:dom_3",
+      "name_ko": "팔계집모듬차림 둘",
+      "name_en": "Palgyejip assorted set for two",
+      "name_ja": "パルゲチプの盛り合わせセット（2人前）",
+      "approvedNumericException": null
+    },
+    {
+      "menu_id": "naver:1258564823:menu:dom_4",
+      "name_ko": "듀록 급냉삼겹살",
+      "name_en": "Quick-frozen Duroc pork belly (samgyeopsal)",
+      "name_ja": "急速冷凍デュロック豚バラ（サムギョプサル）",
+      "approvedNumericException": null
+    },
+    {
+      "menu_id": "naver:1348526323:menu:dom_3",
+      "name_ko": "양념소왕갈비",
+      "name_en": "Marinated king-size beef short ribs",
+      "name_ja": "味付け牛の大ぶりカルビ",
+      "approvedNumericException": null
+    },
+    {
+      "menu_id": "naver:1414264972:menu:dom_3",
+      "name_ko": "20식한정)미야자키식 치킨난반 정식",
+      "name_en": "Miyazaki-style chicken nanban set (limited to 20 servings)",
+      "name_ja": "20食限定・宮崎風チキン南蛮定食",
+      "approvedNumericException": null
+    },
+    {
+      "menu_id": "naver:1547261740:menu:dom_3",
+      "name_ko": "한우 3인 SET(600g)",
+      "name_en": "Hanwoo 3-person set (600g)",
+      "name_ja": "韓牛3人前セット（600g）",
+      "approvedNumericException": null
+    },
+    {
+      "menu_id": "naver:1680391092:menu:dom_13",
+      "name_ko": "돼지생갈비(1인분 250g 국내산)",
+      "name_en": "Fresh Korean pork ribs (1 serving, 250g)",
+      "name_ja": "韓国産豚の生カルビ（1人前・250g）",
+      "approvedNumericException": null
+    },
+    {
+      "menu_id": "naver:1680391092:menu:dom_14",
+      "name_ko": "돼지양념갈비(1인분 250g 국내산)",
+      "name_en": "Marinated Korean pork ribs (1 serving, 250g)",
+      "name_ja": "韓国産豚の味付けカルビ（1人前・250g）",
+      "approvedNumericException": null
+    },
+    {
+      "menu_id": "naver:1680391092:menu:dom_3",
+      "name_ko": "1++ No.9 한우 새우살",
+      "name_en": "1++ No.9 Hanwoo ribeye cap (Saewusal)",
+      "name_ja": "1++ No.9 韓牛リブキャップ（セウサル）",
+      "approvedNumericException": null
+    },
+    {
+      "menu_id": "naver:1825043711:menu:dom_42",
+      "name_ko": "탱글한 새우살/ 새우튀김",
+      "name_en": "Plump shrimp / shrimp tempura",
+      "name_ja": "ぷりぷりエビ／エビ天ぷら",
+      "approvedNumericException": null
+    },
+    {
+      "menu_id": "naver:1929517117:menu:dom_14",
+      "name_ko": "더덕구이",
+      "name_en": "Grilled Deodeok root",
+      "name_ja": "トドク（ツルニンジン）の焼き物",
+      "approvedNumericException": null
+    },
+    {
+      "menu_id": "naver:1953053720:menu:dom_17",
+      "name_ko": "미나리 감자탕",
+      "name_en": "Water-parsley Gamjatang (pork bone stew)",
+      "name_ja": "韓国セリ入りカムジャタン（豚背骨の煮込み）",
+      "approvedNumericException": null
+    },
+    {
+      "menu_id": "naver:1953053720:menu:dom_23",
+      "name_ko": "매운직화무뼈닭발",
+      "name_en": "Spicy flame-grilled boneless chicken feet",
+      "name_ja": "骨なし直火焼き辛口鶏足",
+      "approvedNumericException": null
+    },
+    {
+      "menu_id": "naver:1953053720:menu:dom_3",
+      "name_ko": "수육국밥",
+      "name_en": "Boiled pork soup with rice (Suyuk Gukbap)",
+      "name_ja": "茹で豚入りクッパ（スユククッパ）",
+      "approvedNumericException": null
+    },
+    {
+      "menu_id": "naver:2001389336:menu:dom_11",
+      "name_ko": "연탄 전어구이",
+      "name_en": "Briquette-grilled gizzard shad",
+      "name_ja": "練炭焼きコノシロ",
+      "approvedNumericException": null
+    },
+    {
+      "menu_id": "naver:2028793825:menu:dom_20",
+      "name_ko": "연남 즉석 닭갈비 떡볶이",
+      "name_en": "Yeonnam instant Dakgalbi Tteokbokki",
+      "name_ja": "延南の即席タッカルビ・トッポッキ",
+      "approvedNumericException": null
+    },
+    {
+      "menu_id": "naver:2028793825:menu:dom_37",
+      "name_ko": "튀김쥐포 [연남동 회식]",
+      "name_en": "Fried dried filefish (Jwipo) [Yeonnam group dining]",
+      "name_ja": "揚げチィポ（カワハギの干物）【延南洞の飲み会】",
+      "approvedNumericException": null
+    },
+    {
+      "menu_id": "naver:2051676381:menu:dom_14",
+      "name_ko": "소불고기전골 보쌈 공기밥 세트",
+      "name_en": "Beef bulgogi hot pot, bossam & rice set",
+      "name_ja": "牛プルコギ鍋・ボッサム・ご飯のセット",
+      "approvedNumericException": null
+    },
+    {
+      "menu_id": "naver:2051676381:menu:dom_7",
+      "name_ko": "열무비빔밥",
+      "name_en": "Yeolmu Bibimbap (young radish kimchi)",
+      "name_ja": "ヨルムキムチのビビンバ",
+      "approvedNumericException": null
+    },
+    {
+      "menu_id": "naver:2056833208:menu:dom_27",
+      "name_ko": "과일 쟁반국수",
+      "name_en": "Fruit-topped large-platter mixed noodles",
+      "name_ja": "フルーツ入り大皿混ぜ麺",
+      "approvedNumericException": null
+    },
+    {
+      "menu_id": "naver:2056833208:menu:dom_31",
+      "name_ko": "통영 어리굴젓(계절메뉴 10월~3월)",
+      "name_en": "Tongyeong Eoriguljeot (seasonal salted oysters, October–March)",
+      "name_ja": "統営のオリグルジョッ（牡蠣の塩辛、季節限定：10月〜3月）",
+      "approvedNumericException": "English month names October–March correspond to Korean 10월~3월"
+    },
+    {
+      "menu_id": "naver:2066786830:menu:dom_17",
+      "name_ko": "묵사발",
+      "name_en": "Cold Muk jelly soup (Muksabal)",
+      "name_ja": "ムクサバル（韓国風ゼリー入り冷製スープ）",
+      "approvedNumericException": null
+    },
+    {
+      "menu_id": "naver:2066786830:menu:dom_22",
+      "name_ko": "메밀전병",
+      "name_en": "Buckwheat crepe roll (Memil Jeonbyeong)",
+      "name_ja": "そば粉の薄焼き巻き（メミルジョンビョン）",
+      "approvedNumericException": null
+    },
+    {
+      "menu_id": "naver:2066786830:menu:dom_8",
+      "name_ko": "8첩 쌈밥 정식(제육,보쌈)",
+      "name_en": "Ssambap set with 8 side dishes (spicy pork & bossam)",
+      "name_ja": "おかず8品付きサムパプ定食（甘辛豚炒め・ボッサム）",
+      "approvedNumericException": null
+    },
+    {
+      "menu_id": "naver:2072437309:menu:dom_3",
+      "name_ko": "[모둠한판]청양고추곱창(550g)",
+      "name_en": "[Assorted platter] Cheongyang chili gopchang (550g)",
+      "name_ja": "【盛り合わせ】青唐辛子コプチャン（550g）",
+      "approvedNumericException": null
+    },
+    {
+      "menu_id": "naver:2081150287:menu:dom_24",
+      "name_ko": "베스츠 그레이트 웨스턴 빈 N0 쉬라",
+      "name_en": "Best's Great Western Bin No. 0 Shiraz",
+      "name_ja": "ベスツ・グレート・ウェスタン Bin No.0 シラーズ",
+      "approvedNumericException": null
+    },
+    {
+      "menu_id": "naver:2086743678:menu:dom_20",
+      "name_ko": "(응큼 사이드 1등) 응큼 쫀득 찰순대(순대장인소량생산)",
+      "name_en": "Eungkeum chewy sundae (No. 1 side, small-batch made)",
+      "name_ja": "ウンクムのもっちりスンデ（人気サイド1位・少量生産）",
+      "approvedNumericException": null
+    },
+    {
+      "menu_id": "naver:2086743678:menu:dom_21",
+      "name_ko": "(응큼 사이드 2등) 응큼 황금빛 모듬튀김(바삭함의 정점)",
+      "name_en": "Eungkeum golden assorted fritters (No. 2 side)",
+      "name_ja": "ウンクムの黄金盛り揚げ（人気サイド2位）",
+      "approvedNumericException": null
+    },
+    {
+      "menu_id": "naver:2086743678:menu:dom_6",
+      "name_ko": "떡튀순+음료 세트(고퀄리티 음료1개선택)",
+      "name_en": "Tteokbokki, fried snacks & sundae set (choose 1 premium drink)",
+      "name_ja": "トッポッキ・揚げ物・スンデとドリンクのセット（プレミアムドリンク1杯選択）",
+      "approvedNumericException": null
+    },
+    {
+      "menu_id": "naver:2096733482:menu:dom_10",
+      "name_ko": "무 뼈 직 화 닭 발",
+      "name_en": "Boneless flame-grilled chicken feet",
+      "name_ja": "骨なし直火焼き鶏足",
+      "approvedNumericException": null
+    },
+    {
+      "menu_id": "naver:2096733482:menu:dom_17",
+      "name_ko": "순두부열라면",
+      "name_en": "Spicy Yeol Ramen with soft tofu",
+      "name_ja": "スンドゥブ入りヨルラーメン（辛口）",
+      "approvedNumericException": null
+    },
+    {
+      "menu_id": "naver:2097330967:menu:dom_22",
+      "name_ko": "[완도산활어 3KG이상 대광어] 광어초밥(10p)",
+      "name_en": "[Large live Wando flounder, 3kg+] Flounder sushi (10 pieces)",
+      "name_ja": "【莞島産の活け大ヒラメ（3kg以上）】ヒラメ寿司（10貫）",
+      "approvedNumericException": null
+    },
+    {
+      "menu_id": "naver:2098069129:menu:dom_12",
+      "name_ko": "계란찜(side)",
+      "name_en": "Steamed egg (side dish)",
+      "name_ja": "ケランチム（韓国風茶わん蒸し・サイド）",
+      "approvedNumericException": null
+    }
+  ]
+}

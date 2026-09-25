@@ -1,0 +1,276 @@
+{
+  "date": "2026-09-25",
+  "reviewType": "Targeted editorial correction of high-risk AI-translated menu descriptions",
+  "edits": [
+    {
+      "menu_id": "naver:1429106063:menu:dom_8",
+      "description_ko": "사골을 12시간 동안 전통 방식으로 정성스럽게 우려내 깊고 진한 맛과 담백함이 특징입니다.",
+      "description_en": "Traditional beef-bone broth simmered carefully for 12 hours, with a rich yet clean flavor.",
+      "description_ja": "牛骨を伝統的な製法で12時間じっくり煮込んだ、濃厚ながらすっきりした味わい。"
+    },
+    {
+      "menu_id": "naver:1547261740:menu:dom_0",
+      "description_ko": "홍대 한우 데이트, 목살+갈비+오늘의한우 600g 푸짐 세트",
+      "description_en": "Hongdae Korean beef date set: pork neck + ribs + today's Korean beef (600g)",
+      "description_ja": "弘大韓牛デートセット：豚肩ロース＋カルビ＋本日の韓牛（600g）"
+    },
+    {
+      "menu_id": "naver:1547261740:menu:dom_1",
+      "description_ko": "홍대 고기 가성비, 목살+갈비+삼겹 600g 한돈 2인 세트",
+      "description_en": "Hongdae value Korean pork set: pork neck + ribs + pork belly (600g) for 2",
+      "description_ja": "弘大コスパ韓国産豚肉セット：豚肩ロース＋カルビ＋サムギョプサル（600g）2人前"
+    },
+    {
+      "menu_id": "naver:1547261740:menu:dom_4",
+      "description_ko": "목살 + 갈비 + 한우등심 + 한우갈비",
+      "description_en": "Pork neck + ribs + Hanwoo sirloin + Hanwoo ribs (750g) for 3",
+      "description_ja": "豚肩ロース＋カルビ＋韓牛ロース＋韓牛カルビ（750g）3人前"
+    },
+    {
+      "menu_id": "naver:1547261740:menu:dom_6",
+      "description_ko": "홍대 한돈 가성비, 목살+갈비+삼겹+가브리 900g 3인",
+      "description_en": "Hongdae value Korean pork set: pork neck + ribs + pork belly + gabri (900g) for 3",
+      "description_ja": "弘大コスパ韓国産豚肉セット：豚肩ロース＋カルビ＋サムギョプサル＋ガブリサル（900g）3人前"
+    },
+    {
+      "menu_id": "naver:1547261740:menu:dom_7",
+      "description_ko": "홍대 대용량 회식, 목살+갈비+삼겹+가브리 1200g 4인",
+      "description_en": "Hongdae large-capacity group dinner: pork neck + ribs + pork belly + gabri (1200g) for 4",
+      "description_ja": "弘大大容量会食セット：豚肩ロース＋カルビ＋サムギョプサル＋ガブリサル（1200g）4人前"
+    },
+    {
+      "menu_id": "naver:1547261740:menu:dom_12",
+      "description_ko": "홍대 목살 맛집, 국내산 특목살 부드럽고 육즙 가득한 맛",
+      "description_en": "Hongdae mok-sal specialty: domestic special pork neck, tender and juicy",
+      "description_ja": "弘大豚肩ロースの名店：国内産特選豚肩ロース、柔らかくジューシー"
+    },
+    {
+      "menu_id": "naver:1258564823:menu:dom_4",
+      "description_ko": "세계 3대 프리미엄 암돼지 듀록",
+      "description_en": "Duroc, promoted by the restaurant as one of the world's three premium breeds of female pigs.",
+      "description_ja": "店が世界3大プレミアム雌豚のひとつと紹介するデュロック種。"
+    },
+    {
+      "menu_id": "naver:1258564823:menu:dom_31",
+      "description_ko": "세련되고 매끄러운스타일 기본에 충실한 1등 청량감, 클래식 레몬 하이볼",
+      "description_en": "Classic lemon highball, promoted for its refined smoothness and No. 1 refreshing taste.",
+      "description_ja": "洗練されたなめらかさとNo.1の爽快感をうたう、クラシックレモンハイボール。"
+    },
+    {
+      "menu_id": "naver:1271463480:menu:dom_0",
+      "description_ko": "특대 싸이즈 꽃게 2마리와 꾸덕한 칠리소스의 만남! 녹진한 싱가포르 칠리크랩을 느껴보세요!",
+      "description_en": "Two extra-large swimming crabs coated in thick, rich chili sauce, Singapore-style.",
+      "description_ja": "特大のワタリガニ2杯を濃厚なチリソースで仕上げたシンガポール風チリクラブ。"
+    },
+    {
+      "menu_id": "naver:1229825670:menu:dom_7",
+      "description_ko": "국내산 등심과 새우1마리를 겉은 바삭 속은 촉촉하게 튀겨 간장소스와 계란반숙을 입힌덮밥",
+      "description_en": "Korean pork loin and one shrimp, fried crisp outside and tender inside, over rice with special soy sauce and a soft-cooked egg.",
+      "description_ja": "国産豚ロースとエビ1尾を外はカリッと、中はジューシーに揚げ、特製醤油ソースと半熟卵をかけた丼。"
+    },
+    {
+      "menu_id": "naver:1402516922:menu:dom_15",
+      "description_ko": "새우 대가리와 각종야채로 2시간우려낸 기름과 마늘,새우,토마토,버섯 그리고 바게트",
+      "description_en": "Gambas made with oil infused for 2 hours with shrimp heads and vegetables, garlic, shrimp, tomatoes and mushrooms, served with baguette.",
+      "description_ja": "エビの頭と野菜を2時間煮出したオイルに、ニンニク、エビ、トマト、キノコを合わせたガンバス。バゲット付き。"
+    },
+    {
+      "menu_id": "naver:2097330967:menu:dom_3",
+      "description_ko": "으뜸스시에서 가장 잘 나가는 Top 7 초밥을 2개씩 즐기실 수 있는 메뉴입니다. 즐거운 식사 시간 되세요~ 광어2p+연어2p+마늘가리비2p+계란새우2p+장어2p+치즈소라2p+육회초밥2p",
+      "description_en": "Seven of the restaurant's most popular sushi varieties, two pieces each (14 pieces): flounder, salmon, garlic scallop, egg shrimp, eel, cheese conch and yukhoe.",
+      "description_ja": "人気の寿司7種類を各2貫、合計14貫。ヒラメ、サーモン、ニンニクホタテ、卵エビ、ウナギ、チーズ入りツブ貝、ユッケ寿司。"
+    },
+    {
+      "menu_id": "naver:2086743678:menu:dom_19",
+      "description_ko": "메이저 브랜드 2마리 분량 정량 초과 치킨 튀기기전 1kg 이상..배터지는 치킨.",
+      "description_en": "An extra-generous portion exceeding two typical chain-brand chickens, weighing over 1kg before frying.",
+      "description_ja": "大手ブランドの鶏2羽分を超えるボリューム。揚げる前の重量は1kg以上。"
+    },
+    {
+      "menu_id": "naver:2086743678:menu:dom_22",
+      "description_ko": "신선함이 톡 잡내 없이 고소하고 쫄깃한 5가지 특수부위를 산더미처럼 응큼하게 담았습니다",
+      "description_en": "A heaping platter of five fresh and chewy specialty cuts, savory and without unpleasant odor.",
+      "description_ja": "新鮮で臭みがなく、香ばしく歯ごたえのある5種類の希少部位をたっぷり盛り付けました。"
+    },
+    {
+      "menu_id": "naver:2086743678:menu:dom_53",
+      "description_ko": "커피 전문점 직원들만 먹는다는 복숭아 아이스티와 아라비카 1샷 추가의 절묘한 맛",
+      "description_en": "Peach iced tea with one extra shot of Arabica coffee.",
+      "description_ja": "桃のアイスティーにアラビカコーヒーを1ショット加えたドリンク。"
+    },
+    {
+      "menu_id": "naver:1825043711:menu:dom_48",
+      "description_ko": "33,000원",
+      "description_en": "₩33,000",
+      "description_ja": "33,000ウォン"
+    },
+    {
+      "menu_id": "naver:2081150287:menu:dom_13",
+      "description_ko": "붉은 시트릭, 노란 단맛 부드러운 거품 3박자로 마실 수 있는 시그니쳐 칵테일입니다.",
+      "description_en": "Signature cocktail combining red citrus notes, mellow yellow sweetness and soft foam in three layers.",
+      "description_ja": "赤いシトラスの酸味、黄色い甘み、やわらかな泡の3つが調和するシグネチャーカクテル。"
+    },
+    {
+      "menu_id": "naver:1414264972:menu:dom_9",
+      "description_ko": "신메뉴)스텝밀 먹다가 알게 된 최강 조합 커리와 마제가 만난 커리마제소바 1/26일판매시작",
+      "description_en": "New curry mazesoba, combining curry and mazesoba after the idea came from a staff meal. On sale from January 26.",
+      "description_ja": "スタッフの食事から生まれた、カレーとまぜそばの新しい組み合わせ。1月26日より販売。"
+    },
+    {
+      "menu_id": "naver:1414264972:menu:dom_17",
+      "description_ko": "부드러운 계란,매콤한김볶,바삭한 새우 3단 조화",
+      "description_en": "Three flavors in harmony: soft egg, spicy kimchi fried rice and crispy fried shrimp.",
+      "description_ja": "やわらかい卵、ピリ辛キムチチャーハン、サクサクのエビフライ、3つの味の組み合わせ。"
+    },
+    {
+      "menu_id": "naver:2066786830:menu:dom_17",
+      "description_ko": "무더운 여름 시원하고 쫄깃한 묵과 새콤달콤한 양념의 상큼함으로 리프레쉬.",
+      "description_en": "Chilled, chewy Korean muk jelly with a refreshing sweet-and-sour sauce, ideal for hot summer days.",
+      "description_ja": "暑い夏にぴったりの、冷たくもちもちした韓国のムクと甘酸っぱいタレ。"
+    },
+    {
+      "menu_id": "naver:1402516922:menu:dom_6",
+      "description_ko": "하루동안 정성을 들여 만든 수제간장의 연어장과 고소한 들기름 냉파스타(카펠리니)",
+      "description_en": "House-made soy-marinated salmon with fragrant perilla oil and chilled capellini pasta.",
+      "description_ja": "1日かけて仕込んだ自家製醤油漬けサーモンと、香り豊かなエゴマ油の冷製カペリーニ。"
+    },
+    {
+      "menu_id": "naver:1157398737:menu:dom_6",
+      "description_ko": "고소한 1등급 생 치즈가 듬뿍! 매콤한 불카츠 소스가 한데 어우러지는 수제 생 등심카츠",
+      "description_en": "Handmade fresh pork loin katsu with generous first-grade cheese and spicy bul-katsu sauce.",
+      "description_ja": "1等級のチーズをたっぷりのせ、辛いブルカツソースを合わせた手作りロースとんかつ。"
+    },
+    {
+      "menu_id": "naver:1157398737:menu:dom_24",
+      "description_ko": "코카콜라, 사이다, 제로콜라가 있습니다 시원한 얼음컵과 함께 드려요!",
+      "description_en": "Coca-Cola, Korean lemon-lime soda, or Coke Zero, served with ice.",
+      "description_ja": "コカ・コーラ、韓国のサイダー、またはコカ・コーラゼロ（氷付き）。"
+    },
+    {
+      "menu_id": "naver:2098069129:menu:dom_0",
+      "description_ko": "신선한 국내산 민물장어를 참숯에 노릇하게 구워 즐기는 만로의 대표 메뉴",
+      "description_en": "Manro's signature fresh domestic freshwater eel, charcoal-grilled until golden brown.",
+      "description_ja": "マンロの代表メニュー。新鮮な国産淡水ウナギを炭火でこんがり焼き上げた一品。"
+    },
+    {
+      "menu_id": "naver:2098069129:menu:dom_4",
+      "description_ko": "고르게 퍼진 마블링으로 고소하고 부드러운 냉장 프라임 살치살",
+      "description_en": "Refrigerated prime marbled salchisal beef, 180g, tender and rich in flavor.",
+      "description_ja": "霜降りが均等に入った冷蔵プライム牛サルチサル180g。柔らかく濃厚な味わい。"
+    },
+    {
+      "menu_id": "naver:2098069129:menu:dom_5",
+      "description_ko": "부드러운 육질과 고소한 풍미를 살린 냉장 프라임 부채살",
+      "description_en": "Refrigerated prime flat iron beef (buchae-sal), 180g, tender and savory.",
+      "description_ja": "冷蔵プライム牛ミスジ（ブチェサル）180g。柔らかく風味豊か。"
+    },
+    {
+      "menu_id": "naver:2098069129:menu:dom_7",
+      "description_ko": "진하게 우려낸 장어 육수에 들깨의 고소함을 더한 만로 특제 장어탕",
+      "description_en": "Manro's special eel soup made with rich eel broth and nutty ground perilla seeds.",
+      "description_ja": "濃厚なウナギ出汁に香ばしいすりエゴマを加えたマンロ特製ウナギスープ。"
+    },
+    {
+      "menu_id": "naver:2098069129:menu:dom_8",
+      "description_ko": "향긋한 더덕에 특제 양념을 더해 구워낸 별미 구워서 제공됩니다",
+      "description_en": "Grilled aromatic deodeok root seasoned with Manro's special marinade.",
+      "description_ja": "香り豊かなツルニンジン（トドク）をマンロ特製のタレで味付けして焼いた一品。"
+    },
+    {
+      "menu_id": "naver:2098069129:menu:dom_16",
+      "description_ko": "육즙 가득한 부채살 스테이크를 듬뿍 올린 든든한 한 끼",
+      "description_en": "Hearty rice bowl topped with juicy flat iron beef (buchae-sal) steak.",
+      "description_ja": "ジューシーな牛ミスジ（ブチェサル）ステーキをたっぷりのせた丼。"
+    },
+    {
+      "menu_id": "naver:2098069129:menu:dom_22",
+      "description_ko": "진하게 우려낸 장어 육수에 들깨의 고소함을 더한 만로 특제 장어탕",
+      "description_en": "Manro's special eel soup with richly extracted eel broth and nutty ground perilla seeds.",
+      "description_ja": "濃厚なウナギ出汁に香ばしいすりエゴマを加えたマンロ特製ウナギスープ。"
+    },
+    {
+      "menu_id": "naver:2066786830:menu:dom_6",
+      "description_ko": "들기름과 김페스토, 갓김치가 올라간 고소한 막국수",
+      "description_en": "Nutty buckwheat makguksu with perilla oil, seaweed pesto and mustard-leaf kimchi.",
+      "description_ja": "エゴマ油、海苔ペスト、カラシナのキムチを添えた香ばしいそばのマッククス。"
+    },
+    {
+      "menu_id": "naver:1157398737:menu:dom_7",
+      "description_ko": "할라피뇨와 치즈가 들어가 진하고 매콤한 수제 크림소스를 얹은 제주산 생등심카츠",
+      "description_en": "Jeju fresh pork loin katsu topped with rich, spicy homemade cream sauce containing jalapeños and cheese.",
+      "description_ja": "ハラペーニョとチーズ入り濃厚スパイシー自家製クリームソースをかけた済州産生ロースとんかつ"
+    },
+    {
+      "menu_id": "naver:1157398737:menu:dom_8",
+      "description_ko": "매운 청양고추와 국내산 꿀로 만든 매콤 달달한 양념을 얹은 제주산 생등심카츠",
+      "description_en": "Jeju fresh pork loin katsu topped with spicy-sweet seasoning made from Cheongyang chili peppers and domestic honey.",
+      "description_ja": "清陽唐辛子と国産蜂蜜で作った辛甘味付けをかけた済州産生ロースとんかつ"
+    },
+    {
+      "menu_id": "naver:1157398737:menu:dom_9",
+      "description_ko": "부드러운 회오리 오믈렛과 수제 크림 소스, 메콤한 카레의 만남 거기에 제주산 생등심 카츠!",
+      "description_en": "Soft swirl omelette, homemade cream sauce, spicy curry, and Jeju fresh pork loin katsu.",
+      "description_ja": "ふわふわ巻きオムレツ＋自家製クリームソース＋辛口カレー＋済州産生ロースとんかつ"
+    },
+    {
+      "menu_id": "naver:1157398737:menu:dom_10",
+      "description_ko": "진~하고 칼칼한 김치나베 위에 수제 생등심카츠와 신선한 국내산 계란이 올라가 든든한 메뉴",
+      "description_en": "Rich, pungent kimchi nabe topped with handmade fresh pork loin katsu and fresh domestic eggs.",
+      "description_ja": "コク深くピリ辛のキムチ鍋に手作り生ロースとんかつと新鮮な国産卵をトッピング"
+    },
+    {
+      "menu_id": "naver:1157398737:menu:dom_12",
+      "description_ko": "제주산 생등심카츠에 토마토와 와인이 들어간 수제 데미그라스 소스가 함께!",
+      "description_en": "Jeju fresh pork loin katsu with homemade demi-glace sauce infused with tomato and wine.",
+      "description_ja": "トマトとワインを加えた自家製デミグラスソース付き済州産生ロースとんかつ"
+    },
+    {
+      "menu_id": "naver:1157398737:menu:dom_13",
+      "description_ko": "제주산 생등심 카츠에 진한 수제 카레를 곁들인 메뉴",
+      "description_en": "Jeju fresh pork loin katsu served with rich homemade curry.",
+      "description_ja": "濃厚な自家製カレー付き済州産生ロースとんかつ"
+    },
+    {
+      "menu_id": "naver:1157398737:menu:dom_17",
+      "description_ko": "제주산 생등심카츠에 쫄깃~한 생모밀면과 특제육수 냉모밀이 함께 있는 세트메뉴!",
+      "description_en": "Set meal: Jeju fresh pork loin katsu with chilled fresh buckwheat noodles and special broth.",
+      "description_ja": "済州産生ロースとんかつ＋こしのある生そば＋特製つゆの冷やしそば定食"
+    },
+    {
+      "menu_id": "naver:1157398737:menu:dom_18",
+      "description_ko": "제주산 생등심카츠에 따끈한 특제우동이 함께 있는 세트메뉴!",
+      "description_en": "Set meal: Jeju fresh pork loin katsu with hot special udon.",
+      "description_ja": "済州産生ロースとんかつ＋温かい特製うどん定食"
+    },
+    {
+      "menu_id": "naver:1402516922:menu:dom_13",
+      "description_ko": "하루동안 정성을 들여 만든 수제간장의 연어장으로 표현한 퓨전식 세비체",
+      "description_en": "Fusion-style ceviche made with house-made soy-marinated salmon, carefully prepared over a day.",
+      "description_ja": "1日かけて丁寧に仕込んだ自家製醤油漬けサーモンを使ったフュージョン風セビチェ。"
+    },
+    {
+      "menu_id": "naver:2096733482:menu:dom_13",
+      "description_ko": "안주와 식사 두가지가 가능한 얼큰,구수한 된장 술밥!",
+      "description_en": "Halmae doenjang sulbap: spicy, savory soybean-paste soup with rice, suitable as either a meal or a dish to share with drinks.",
+      "description_ja": "ハルメ味噌スルパプ：辛みとコクのある味噌スープにご飯を合わせた一品。おつまみにも食事にも。"
+    },
+    {
+      "menu_id": "naver:2098069129:menu:dom_23",
+      "description_ko": "세트 구성은 본품 1개+토닉워터 1개+레몬 슬라이스로 제공됩니다.",
+      "description_en": "Hwayo set: one Hwayo item, one tonic water, and a lemon slice.",
+      "description_ja": "ファヨセット：ファヨ本品1点＋トニックウォーター1本＋レモンスライス。"
+    },
+    {
+      "menu_id": "naver:1188500976:menu:dom_15",
+      "description_ko": "우동(택1)+돈카츠+미니샐러드",
+      "description_en": "Udon (choose 1 type) + tonkatsu + mini salad.",
+      "description_ja": "うどん（1種類選択）＋とんかつ＋ミニサラダ。"
+    },
+    {
+      "menu_id": "naver:2001389336:menu:dom_8",
+      "description_ko": "🌶️ 쫄깃쫄깃 매콤한 무뼈닭발! 술안주로 딱 좋은 중독성 있는 맛!",
+      "description_en": "🌶️ Chewy, spicy boneless chicken feet skewers, perfect as a snack with drinks.",
+      "description_ja": "🌶️歯ごたえのある辛口骨なし鶏足串。お酒のお供にぴったりの一品。"
+    }
+  ]
+}

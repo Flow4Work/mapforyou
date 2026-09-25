@@ -8,7 +8,11 @@
 - 기존 마포구 전역 데이터 160곳은 DB에서 삭제하지 않고 유지합니다. 이 중 90곳은 현재 홍대 지도 범위 밖이며, 기존 데이터 전부 영문/일문 상호명이 누락되어 공개 홍대 목록에서는 제외합니다. 기존 매장 상세 링크는 유지하면서 오래된 미검수 자료임을 표시합니다.
 - 성수: 게시된 110곳
 - 확장 시점의 이름, 네이버 장소 ID, 메뉴/이미지 수: `data/hongdae-2026-09-25.json`
-- 새 음식점 40곳의 영문/일문 상호명과 핵심 메뉴 118개의 번역을 별도로 검수했습니다. 변경 기록: `data/hongdae-2026-09-25-name-curation.json`, `data/hongdae-2026-09-25-menu-curation.json`. 나머지 메뉴 번역은 자동 번역 기반이므로 전체 전문가 검수를 의미하지 않습니다.
+- 새 음식점 40곳의 영문/일문 상호명과 핵심 메뉴명 118개를 별도 검수했습니다. 초기 기록: `data/hongdae-2026-09-25-name-curation.json`, `data/hongdae-2026-09-25-menu-curation.json`.
+- 나머지 메뉴명 1,336개를 AI 보조 재검토해 1,173개를 변경했고, 식재료 및 메뉴 종류 등 위험 항목 38개를 추가 교정했습니다. 기록: `data/hongdae-2026-09-25-ai-name-review.json`, `data/hongdae-2026-09-25-editorial-names.json`.
+- 실제 원본 설명 1,035개를 AI 보조 재검토하여 변경 대상 955개의 영문/일문을 DB에 반영했습니다. 원본 대조에 따른 별도 교정은 45개이며, 검토 후 번역을 유지한 설명은 80개입니다. 기록: `data/hongdae-2026-09-25-ai-description-review.json`, `data/hongdae-2026-09-25-editorial-descriptions.json`. 전체 전문가 수동 검수를 완료했다는 뜻은 아닙니다.
+- 원본 설명이 없는 메뉴 419개는 자동 생성 설명을 UI에서 숨깁니다. 메뉴 이미지 1,412개는 검증 완료, 정확한 사진이 확인되지 않은 42개(12개 매장)는 `not_available`로 유지하고 검사 시점을 갱신했습니다. 임의 사진은 대체하지 않습니다.
+- 번역 검수 기록은 저장소에 함께 보존합니다. `node scripts/publish-hongdae-reviewed-descriptions.mjs`로 955개 설명의 현재 DB 반영 여부를 읽기 전용으로 확인하고, `--apply`는 검수 기록과 원본이 정확히 일치할 때만 미반영분을 게시합니다. 과거의 무시된 임시 작업 폴더는 필요하지 않습니다.
 - 최신 수치는 Supabase `public_data_restaurants`와 `public_data_menus`에서 확인합니다. 데이터는 이후 변경될 수 있습니다.
 
 ## 주요 화면과 API
