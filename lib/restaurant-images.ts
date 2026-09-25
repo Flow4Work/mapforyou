@@ -83,7 +83,13 @@ export function restaurantPhotoCandidates(store: DiscoveryRestaurant, limit = 12
 }
 export function representativeMenu(store: DiscoveryRestaurant): DiscoveryMenu | undefined {
   const menus = store.menus.filter((menu) => Boolean(menu.nameKo || menu.nameEn || menu.nameJa));
-  return [...menus].sort((a, b) => {
+  const currentlyAvailable = menus.filter((menu) => !/(시즌아웃|판매종료|시즌종료|품절|단종)/.test(menu.nameKo));
+  const isCafe = /(카페|커피|디저트|베이커리|제과)/i.test(store.category);
+  const food = isCafe ? currentlyAvailable : currentlyAvailable.filter((menu) =>
+    !/(막걸리|소주|맥주|하이볼|칵테일|위스키|사케|와인|콜라|사이다|에이드)/i.test(menu.nameKo),
+  );
+  const candidates = food.length ? food : currentlyAvailable.length ? currentlyAvailable : menus;
+  return [...candidates].sort((a, b) => {
     const specialty = Number(b.isSpecialty) - Number(a.isSpecialty);
     if (specialty) return specialty;
     const verifiedImage = Number(b.imageStatus === "verified" && isHttpImage(b.imageUrl) && !isSuspiciousImage(b.imageUrl)) - Number(a.imageStatus === "verified" && isHttpImage(a.imageUrl) && !isSuspiciousImage(a.imageUrl));

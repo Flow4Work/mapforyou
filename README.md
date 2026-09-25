@@ -8,6 +8,7 @@
 - 이번 홍대 확장: 실제 음식점 40곳, 메뉴 1,454개, 연결된 메뉴 이미지 1,412개
 - 성수: 게시된 110곳
 - 확장 시점의 이름, 네이버 장소 ID, 메뉴/이미지 수: `data/hongdae-2026-09-25.json`
+- 새 음식점 40곳의 영문/일문 상호명과 핵심 메뉴 118개의 번역을 별도로 검수했습니다. 변경 기록: `data/hongdae-2026-09-25-name-curation.json`, `data/hongdae-2026-09-25-menu-curation.json`. 나머지 메뉴 번역은 자동 번역 기반이므로 전체 전문가 검수를 의미하지 않습니다.
 - 최신 수치는 Supabase `public_data_restaurants`와 `public_data_menus`에서 확인합니다. 데이터는 이후 변경될 수 있습니다.
 
 ## 주요 화면과 API

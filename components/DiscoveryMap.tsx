@@ -94,51 +94,36 @@ function mapLanguage(language: PublicLanguage): NaverLanguage {
   return language === "ja" ? "ja" : "en";
 }
 
-let loadedNaverLanguage: NaverLanguage | null = null;
-let naverMapsPromise: { language: NaverLanguage; promise: Promise<NaverMapsNamespace> } | null = null;
+// NAVER Maps registers global async callbacks. Reloading the SDK while a
+// language toggle is in flight invalidates those callbacks and crashes maps.
+let naverMapsPromise: Promise<NaverMapsNamespace> | null = null;
 
 function loadNaverMaps(language: NaverLanguage): Promise<NaverMapsNamespace> {
-  const existingScript = document.getElementById(NAVER_SCRIPT_ID) as HTMLScriptElement | null;
-  const existingLanguage = existingScript?.dataset.language as NaverLanguage | undefined;
-  if (window.naver?.maps && (loadedNaverLanguage === language || existingLanguage === language)) {
-    loadedNaverLanguage = language;
-    return Promise.resolve(window.naver.maps);
-  }
-  if (naverMapsPromise) {
-    if (naverMapsPromise.language === language) return naverMapsPromise.promise;
-    return naverMapsPromise.promise
-      .catch(() => undefined)
-      .then(() => loadNaverMaps(language));
-  }
+  if (window.naver?.maps) return Promise.resolve(window.naver.maps);
+  if (naverMapsPromise) return naverMapsPromise;
 
-  existingScript?.remove();
-  window.naver = undefined;
-  loadedNaverLanguage = null;
-
-  const promise = new Promise<NaverMapsNamespace>((resolve, reject) => {
+  document.getElementById(NAVER_SCRIPT_ID)?.remove();
+  naverMapsPromise = new Promise<NaverMapsNamespace>((resolve, reject) => {
     const script = document.createElement("script");
     script.id = NAVER_SCRIPT_ID;
     script.dataset.language = language;
     script.async = true;
     script.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${encodeURIComponent(NAVER_MAP_CLIENT_ID)}&language=${language}`;
     script.onload = () => {
-      if (window.naver?.maps) {
-        loadedNaverLanguage = language;
-        naverMapsPromise = null;
-        resolve(window.naver.maps);
-      } else {
+      if (window.naver?.maps) resolve(window.naver.maps);
+      else {
         naverMapsPromise = null;
         reject(new Error("NAVER Maps SDK was loaded without a map namespace."));
       }
     };
     script.onerror = () => {
       naverMapsPromise = null;
+      script.remove();
       reject(new Error("NAVER Maps SDK failed to load."));
     };
     document.head.appendChild(script);
   });
-  naverMapsPromise = { language, promise };
-  return promise;
+  return naverMapsPromise;
 }
 function clusterBucketSize(zoom: number) {
   if (zoom <= 11) return 0.04;

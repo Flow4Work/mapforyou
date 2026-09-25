@@ -1,0 +1,715 @@
+{
+  "date": "2026-09-25",
+  "region": "hongdae",
+  "scope": "Hand-reviewed featured menus plus additional clear machine mistranslations",
+  "patches": [
+    {
+      "menu_id": "naver:1113429489:menu:dom_1",
+      "name_ko": "매운꿀감자전(NEW⭐)",
+      "name_en": "Spicy honey potato jeon (Korean pancake)",
+      "name_ja": "辛口ハニーじゃがいもチヂミ"
+    },
+    {
+      "menu_id": "naver:1113429489:menu:dom_2",
+      "name_ko": "미숫가루 막걸리",
+      "name_en": "Misutgaru (roasted grain) makgeolli",
+      "name_ja": "ミスカル（穀物粉）マッコリ"
+    },
+    {
+      "menu_id": "naver:1121324125:menu:dom_0",
+      "name_ko": "고추냉이 궁채참치콤비",
+      "name_en": "Wasabi, celtuce stem & tuna combo",
+      "name_ja": "わさび・茎レタス・ツナのコンビ"
+    },
+    {
+      "menu_id": "naver:1121324125:menu:dom_1",
+      "name_ko": "궁채참치콤비",
+      "name_en": "Celtuce stem & tuna combo",
+      "name_ja": "茎レタスとツナのコンビ"
+    },
+    {
+      "menu_id": "naver:1121324125:menu:dom_2",
+      "name_ko": "고추냉이 궁채참치김밥",
+      "name_en": "Wasabi, celtuce stem & tuna gimbap",
+      "name_ja": "わさび・茎レタス・ツナのキンパ"
+    },
+    {
+      "menu_id": "naver:1126882398:menu:dom_0",
+      "name_ko": "[한정판]스파이시푸실리피자",
+      "name_en": "[Limited] Spicy Fusilli Pizza",
+      "name_ja": "【限定】スパイシーフジッリピザ"
+    },
+    {
+      "menu_id": "naver:1126882398:menu:dom_1",
+      "name_ko": "[한정판]아메리칸불벅피자",
+      "name_en": "[Limited] American Bulbuck Pizza",
+      "name_ja": "【限定】アメリカン・ブルバックピザ"
+    },
+    {
+      "menu_id": "naver:1126882398:menu:dom_2",
+      "name_ko": "[NEW][시즌한정]덤플링커리피자",
+      "name_en": "[New, Seasonal] Dumpling Curry Pizza",
+      "name_ja": "【新作・季節限定】ダンプリングカレーピザ"
+    },
+    {
+      "menu_id": "naver:1157398737:menu:dom_0",
+      "name_ko": "맵크반반카츠",
+      "name_en": "Mapkeu half-and-half katsu",
+      "name_ja": "マプク・ハーフ＆ハーフカツ"
+    },
+    {
+      "menu_id": "naver:1157398737:menu:dom_1",
+      "name_ko": "등심 돈카츠",
+      "name_en": "Pork loin tonkatsu",
+      "name_ja": "ロースとんかつ"
+    },
+    {
+      "menu_id": "naver:1157398737:menu:dom_2",
+      "name_ko": "안심카츠",
+      "name_en": "Pork tenderloin katsu",
+      "name_ja": "ヒレカツ"
+    },
+    {
+      "menu_id": "naver:1188500976:menu:dom_0",
+      "name_ko": "연어 벤또",
+      "name_en": "Salmon bento",
+      "name_ja": "サーモン弁当"
+    },
+    {
+      "menu_id": "naver:1188500976:menu:dom_1",
+      "name_ko": "스테이크 벤또",
+      "name_en": "Steak bento",
+      "name_ja": "ステーキ弁当"
+    },
+    {
+      "menu_id": "naver:1188500976:menu:dom_2",
+      "name_ko": "연어텐동",
+      "name_en": "Salmon tendon (tempura rice bowl)",
+      "name_ja": "サーモン天丼"
+    },
+    {
+      "menu_id": "naver:1229825670:menu:dom_1",
+      "name_ko": "차돌중화크림파스타",
+      "name_en": "Beef brisket Chinese-style cream pasta",
+      "name_ja": "牛バラ肉入り中華風クリームパスタ"
+    },
+    {
+      "menu_id": "naver:1229825670:menu:dom_2",
+      "name_ko": "부채살크림파스타",
+      "name_en": "Flat iron steak cream pasta",
+      "name_ja": "牛ミスジのクリームパスタ"
+    },
+    {
+      "menu_id": "naver:1229825670:menu:dom_8",
+      "name_ko": "안심가츠정식",
+      "name_en": "Pork tenderloin katsu set",
+      "name_ja": "ヒレカツ定食"
+    },
+    {
+      "menu_id": "naver:1246697901:menu:dom_0",
+      "name_ko": "냉삼",
+      "name_en": "Frozen thin-sliced pork belly (Naengsam)",
+      "name_ja": "冷凍サムギョプサル（ネンサム）"
+    },
+    {
+      "menu_id": "naver:1246697901:menu:dom_1",
+      "name_ko": "삼겹살",
+      "name_en": "Pork belly (Samgyeopsal)",
+      "name_ja": "サムギョプサル"
+    },
+    {
+      "menu_id": "naver:1246697901:menu:dom_2",
+      "name_ko": "목살",
+      "name_en": "Pork neck (Moksal)",
+      "name_ja": "豚肩ロース（モクサル）"
+    },
+    {
+      "menu_id": "naver:1255960333:menu:dom_0",
+      "name_ko": "통양삼겹살구이(500g)",
+      "name_en": "Whole-cut grilled lamb belly (500g)",
+      "name_ja": "羊バラ肉の塊焼き（500g）"
+    },
+    {
+      "menu_id": "naver:1255960333:menu:dom_1",
+      "name_ko": "운남마라탕(공기밥 별도) 麻辣烫",
+      "name_en": "Yunnan malatang (rice sold separately)",
+      "name_ja": "雲南マーラータン（ご飯別売り）"
+    },
+    {
+      "menu_id": "naver:1255960333:menu:dom_2",
+      "name_ko": "향라갈비 香辣小排",
+      "name_en": "Spicy fragrant ribs (Xiangla ribs)",
+      "name_ja": "香辣スペアリブ"
+    },
+    {
+      "menu_id": "naver:1258564823:menu:dom_0",
+      "name_ko": "전복버섯솥밥정식",
+      "name_en": "Abalone & mushroom stone-pot rice set",
+      "name_ja": "アワビとキノコの釜飯定食"
+    },
+    {
+      "menu_id": "naver:1258564823:menu:dom_1",
+      "name_ko": "팔계집 커플차림(점심할인)",
+      "name_en": "Palgyejip couple's set (lunch discount)",
+      "name_ja": "パルゲジプのカップルセット（ランチ割引）"
+    },
+    {
+      "menu_id": "naver:1258564823:menu:dom_2",
+      "name_ko": "팔계집모듬차림 하나",
+      "name_en": "Palgyejip assorted set (one set)",
+      "name_ja": "パルゲジプ盛り合わせセット（1セット）"
+    },
+    {
+      "menu_id": "naver:1271463480:menu:dom_0",
+      "name_ko": "싱가포르 칠리크랩 (2-3인 M)",
+      "name_en": "Singapore chili crab (medium, 2–3 people)",
+      "name_ja": "シンガポール・チリクラブ（M・2〜3人前）"
+    },
+    {
+      "menu_id": "naver:1271463480:menu:dom_1",
+      "name_ko": "칠리 머드크랩 (손질후 100g)",
+      "name_en": "Chili mud crab (per 100g after cleaning)",
+      "name_ja": "チリマッドクラブ（下処理後100gあたり）"
+    },
+    {
+      "menu_id": "naver:1271463480:menu:dom_2",
+      "name_ko": "싱가포르 칠리크랩 (3-4인 L)",
+      "name_en": "Singapore chili crab (large, 3–4 people)",
+      "name_ja": "シンガポール・チリクラブ（L・3〜4人前）"
+    },
+    {
+      "menu_id": "naver:1348526323:menu:dom_0",
+      "name_ko": "돼지한근세트",
+      "name_en": "Pork set (one geun, approx. 600g)",
+      "name_ja": "豚肉1斤セット（約600g）"
+    },
+    {
+      "menu_id": "naver:1348526323:menu:dom_1",
+      "name_ko": "갈비본삼겹 200g",
+      "name_en": "Bone-in pork belly (200g)",
+      "name_ja": "骨付きサムギョプサル（200g）"
+    },
+    {
+      "menu_id": "naver:1348526323:menu:dom_2",
+      "name_ko": "한우 눈꽃살 130g",
+      "name_en": "Marbled Korean beef (130g)",
+      "name_ja": "霜降り韓牛（130g）"
+    },
+    {
+      "menu_id": "naver:1348526323:menu:dom_7",
+      "name_ko": "양념갈비(목살) 180g",
+      "name_en": "Marinated pork neck (180g)",
+      "name_ja": "味付け豚肩ロース（180g）"
+    },
+    {
+      "menu_id": "naver:1402516922:menu:dom_1",
+      "name_ko": "새우버터 레몬크림 감자뇨끼",
+      "name_en": "Shrimp, butter & lemon-cream potato gnocchi",
+      "name_ja": "エビとバターのレモンクリーム・ポテトニョッキ"
+    },
+    {
+      "menu_id": "naver:1402516922:menu:dom_2",
+      "name_ko": "콘크림 감자뇨끼",
+      "name_en": "Corn-cream potato gnocchi",
+      "name_ja": "コーンクリームのポテトニョッキ"
+    },
+    {
+      "menu_id": "naver:1402516922:menu:dom_3",
+      "name_ko": "베이컨 양파크림 감자뇨끼",
+      "name_en": "Bacon & onion-cream potato gnocchi",
+      "name_ja": "ベーコンと玉ねぎのクリーム・ポテトニョッキ"
+    },
+    {
+      "menu_id": "naver:1414264972:menu:dom_0",
+      "name_ko": "시즌아웃/연들소(연어 들기름 소바)",
+      "name_en": "[Out of season] Salmon & perilla-oil soba",
+      "name_ja": "【シーズン終了】サーモンとエゴマ油のそば"
+    },
+    {
+      "menu_id": "naver:1414264972:menu:dom_1",
+      "name_ko": "시즌아웃/연어 냉소바",
+      "name_en": "[Out of season] Cold salmon soba",
+      "name_ja": "【シーズン終了】サーモン冷やしそば"
+    },
+    {
+      "menu_id": "naver:1414264972:menu:dom_2",
+      "name_ko": "함박 오므라이스 정식",
+      "name_en": "Hamburg steak omurice set",
+      "name_ja": "ハンバーグオムライス定食"
+    },
+    {
+      "menu_id": "naver:1429106063:menu:dom_0",
+      "name_ko": "[NEW⭐]우베바나나 막걸리",
+      "name_en": "[New] Ube (purple yam) & banana makgeolli",
+      "name_ja": "【新作】ウベ（紫芋）バナナマッコリ"
+    },
+    {
+      "menu_id": "naver:1429106063:menu:dom_1",
+      "name_ko": "[NEW⭐]매콤 갑오징어 볶음",
+      "name_en": "[New] Spicy stir-fried cuttlefish",
+      "name_ja": "【新作】ピリ辛コウイカ炒め"
+    },
+    {
+      "menu_id": "naver:1429106063:menu:dom_2",
+      "name_ko": "[NEW⭐]명태회 보쌈+서비스 해장국",
+      "name_en": "[New] Pollock sashimi bossam + complimentary haejangguk",
+      "name_ja": "【新作】スケトウダラの和え刺身ボッサム＋サービスのヘジャンクク"
+    },
+    {
+      "menu_id": "naver:1547261740:menu:dom_0",
+      "name_ko": "한우/한돈2인SET(600g)",
+      "name_en": "Korean beef & pork set for 2 (600g)",
+      "name_ja": "韓牛・韓国産豚肉 2人前セット（600g）"
+    },
+    {
+      "menu_id": "naver:1547261740:menu:dom_1",
+      "name_ko": "한돈2인SET(600g)",
+      "name_en": "Korean pork set for 2 (600g)",
+      "name_ja": "韓国産豚肉 2人前セット（600g）"
+    },
+    {
+      "menu_id": "naver:1547261740:menu:dom_2",
+      "name_ko": "한우 2인 SET(400g)",
+      "name_en": "Korean beef set for 2 (400g)",
+      "name_ja": "韓牛 2人前セット（400g）"
+    },
+    {
+      "menu_id": "naver:1636096003:menu:dom_0",
+      "name_ko": "로스카츠(등심)",
+      "name_en": "Pork loin katsu (Rosukatsu)",
+      "name_ja": "ロースカツ（豚ロース）"
+    },
+    {
+      "menu_id": "naver:1636096003:menu:dom_1",
+      "name_ko": "히레카츠(안심)",
+      "name_en": "Pork tenderloin katsu (Hirekatsu)",
+      "name_ja": "ヒレカツ（豚ヒレ）"
+    },
+    {
+      "menu_id": "naver:1636096003:menu:dom_2",
+      "name_ko": "상로스카츠(가브리살)",
+      "name_en": "Premium pork loin katsu (Gabrisal)",
+      "name_ja": "上ロースカツ（ガブリサル）"
+    },
+    {
+      "menu_id": "naver:1636096003:menu:dom_4",
+      "name_ko": "모듬카츠(등심+안심)",
+      "name_en": "Assorted katsu (loin & tenderloin)",
+      "name_ja": "盛り合わせカツ（ロース＋ヒレ）"
+    },
+    {
+      "menu_id": "naver:1636096003:menu:dom_6",
+      "name_ko": "믹스카츠B(안심+치즈)",
+      "name_en": "Mixed katsu B (tenderloin & cheese)",
+      "name_ja": "ミックスカツB（ヒレ＋チーズ）"
+    },
+    {
+      "menu_id": "naver:1636096003:menu:dom_7",
+      "name_ko": "트리플카츠(등심+안심+치즈)",
+      "name_en": "Triple katsu (loin, tenderloin & cheese)",
+      "name_ja": "トリプルカツ（ロース＋ヒレ＋チーズ）"
+    },
+    {
+      "menu_id": "naver:1680391092:menu:dom_0",
+      "name_ko": "1++ No.9 한우 세트",
+      "name_en": "1++ No. 9 Korean beef set",
+      "name_ja": "1++ No.9 韓牛セット"
+    },
+    {
+      "menu_id": "naver:1680391092:menu:dom_1",
+      "name_ko": "한돈 세트",
+      "name_en": "Korean pork set",
+      "name_ja": "韓国産豚肉セット"
+    },
+    {
+      "menu_id": "naver:1680391092:menu:dom_16",
+      "name_ko": "목살",
+      "name_en": "Pork neck (Moksal)",
+      "name_ja": "豚肩ロース（モクサル）"
+    },
+    {
+      "menu_id": "naver:1680391092:menu:dom_2",
+      "name_ko": "한돈 특수부위 세트",
+      "name_en": "Special cuts of Korean pork set",
+      "name_ja": "韓国産豚肉の希少部位セット"
+    },
+    {
+      "menu_id": "naver:1825043711:menu:dom_0",
+      "name_ko": "한 접시에 모듬회(소(1~2인))",
+      "name_en": "Assorted sashimi platter (small, 1–2 people)",
+      "name_ja": "刺身盛り合わせ（小・1〜2人前）"
+    },
+    {
+      "menu_id": "naver:1825043711:menu:dom_1",
+      "name_ko": "한 접시에 모듬회(중(2인))",
+      "name_en": "Assorted sashimi platter (medium, 2 people)",
+      "name_ja": "刺身盛り合わせ（中・2人前）"
+    },
+    {
+      "menu_id": "naver:1825043711:menu:dom_2",
+      "name_ko": "한 접시에 모듬회(대(3인))",
+      "name_en": "Assorted sashimi platter (large, 3 people)",
+      "name_ja": "刺身盛り合わせ（大・3人前）"
+    },
+    {
+      "menu_id": "naver:1929517117:menu:dom_0",
+      "name_ko": "[점심특선] 쌈밥백반",
+      "name_en": "[Lunch] Ssambap set (rice with vegetable wraps)",
+      "name_ja": "【ランチ】サムパプ定食（野菜包みご飯）"
+    },
+    {
+      "menu_id": "naver:1929517117:menu:dom_1",
+      "name_ko": "[점심특선] 우삼겹백반",
+      "name_en": "[Lunch] Thin-sliced beef belly set meal",
+      "name_ja": "【ランチ】牛バラ肉定食"
+    },
+    {
+      "menu_id": "naver:1929517117:menu:dom_2",
+      "name_ko": "[점심특선] 고추장불고기",
+      "name_en": "[Lunch] Gochujang bulgogi",
+      "name_ja": "【ランチ】コチュジャンプルコギ"
+    },
+    {
+      "menu_id": "naver:1929517117:menu:dom_7",
+      "name_ko": "냉삼",
+      "name_en": "Frozen thin-sliced pork belly",
+      "name_ja": "冷凍サムギョプサル"
+    },
+    {
+      "menu_id": "naver:1953053720:menu:dom_0",
+      "name_ko": "순대 항정수육 정식",
+      "name_en": "Sundae (Korean blood sausage) & boiled pork jowl set",
+      "name_ja": "スンデと豚トロの茹で肉定食"
+    },
+    {
+      "menu_id": "naver:1953053720:menu:dom_1",
+      "name_ko": "1인 스페셜 정식",
+      "name_en": "Special set meal for one",
+      "name_ja": "お一人様スペシャル定食"
+    },
+    {
+      "menu_id": "naver:1953053720:menu:dom_2",
+      "name_ko": "순대국밥",
+      "name_en": "Sundae gukbap (blood sausage soup with rice)",
+      "name_ja": "スンデクッパ"
+    },
+    {
+      "menu_id": "naver:2001389336:menu:dom_0",
+      "name_ko": "연탄 반반꼬치(닭발,닭다리 살)",
+      "name_en": "Briquette-grilled chicken feet & thigh skewers (half-and-half)",
+      "name_ja": "練炭焼きハーフ＆ハーフ串（鶏足・鶏もも肉）"
+    },
+    {
+      "menu_id": "naver:2001389336:menu:dom_1",
+      "name_ko": "연탄 삼색 통오징어한판",
+      "name_en": "Briquette-grilled three-color whole squid platter",
+      "name_ja": "練炭焼き丸ごとイカの三色盛り"
+    },
+    {
+      "menu_id": "naver:2001389336:menu:dom_2",
+      "name_ko": "연탄 제철 활꽃게 구이",
+      "name_en": "Briquette-grilled seasonal live crab",
+      "name_ja": "旬の活ワタリガニの練炭焼き"
+    },
+    {
+      "menu_id": "naver:20139601:menu:dom_1",
+      "name_ko": "고사리 살사도우 샌드위치",
+      "name_en": "Bracken fern salsa-dough sandwich",
+      "name_ja": "ワラビ入りサルサ生地サンドイッチ"
+    },
+    {
+      "menu_id": "naver:20139601:menu:dom_2",
+      "name_ko": "루꼴라 버섯도우 샌드위치(*락토)",
+      "name_en": "Arugula & mushroom dough sandwich (lacto-vegetarian)",
+      "name_ja": "ルッコラとキノコの生地サンドイッチ（ラクトベジタリアン）"
+    },
+    {
+      "menu_id": "naver:20139601:menu:dom_4",
+      "name_ko": "땅콩크림 파스타",
+      "name_en": "Peanut cream pasta",
+      "name_ja": "ピーナッツクリームパスタ"
+    },
+    {
+      "menu_id": "naver:2028793825:menu:dom_0",
+      "name_ko": "연남 야장 미나리 오겹살 (150g)",
+      "name_en": "Yeonnam outdoor dining: minari pork belly (150g)",
+      "name_ja": "延南の屋外席・セリ入りオギョプサル（150g）"
+    },
+    {
+      "menu_id": "naver:2028793825:menu:dom_1",
+      "name_ko": "홍대 야장 미나리 목살 (150g)",
+      "name_en": "Hongdae outdoor dining: minari pork neck (150g)",
+      "name_ja": "弘大の屋外席・セリ入り豚肩ロース（150g）"
+    },
+    {
+      "menu_id": "naver:2028793825:menu:dom_2",
+      "name_ko": "야장 한돈모둠(500g)+고추장찌개",
+      "name_en": "Outdoor dining Korean pork platter (500g) + gochujang stew",
+      "name_ja": "屋外席・韓国産豚肉盛り合わせ（500g）＋コチュジャンチゲ"
+    },
+    {
+      "menu_id": "naver:2051676381:menu:dom_0",
+      "name_ko": "국보감 돼지국밥",
+      "name_en": "Gukbogam pork gukbap (pork soup with rice)",
+      "name_ja": "クッポガムの豚クッパ"
+    },
+    {
+      "menu_id": "naver:2051676381:menu:dom_1",
+      "name_ko": "국보감 얼큰돼지국밥",
+      "name_en": "Gukbogam spicy pork gukbap",
+      "name_ja": "クッポガムのピリ辛豚クッパ"
+    },
+    {
+      "menu_id": "naver:2051676381:menu:dom_2",
+      "name_ko": "애호박 한우국밥",
+      "name_en": "Korean beef and zucchini gukbap",
+      "name_ja": "ズッキーニ入り韓牛クッパ"
+    },
+    {
+      "menu_id": "naver:2053367153:menu:dom_0",
+      "name_ko": "돼지한판(가브리,항정,갈매기,꼬들살)",
+      "name_en": "Pork platter (gabrisal, jowl, skirt & kkodeulsal)",
+      "name_ja": "豚肉盛り合わせ（ガブリサル・豚トロ・ハラミ・コドゥルサル）"
+    },
+    {
+      "menu_id": "naver:2053367153:menu:dom_1",
+      "name_ko": "꼬들살",
+      "name_en": "Chewy-cut pork (Kkodeulsal)",
+      "name_ja": "コドゥルサル（歯ごたえのある豚肉）"
+    },
+    {
+      "menu_id": "naver:2053367153:menu:dom_2",
+      "name_ko": "소한판(치마,안창,갈비살)",
+      "name_en": "Beef platter (chimasal, hanger steak & short ribs)",
+      "name_ja": "牛肉盛り合わせ（チマサル・ハラミ・カルビ）"
+    },
+    {
+      "menu_id": "naver:2056833208:menu:dom_0",
+      "name_ko": "72시간 매드 족발(소)",
+      "name_en": "72-hour Mad Jokbal (braised pork trotters, small)",
+      "name_ja": "72時間マッドチョッパル（豚足・小）"
+    },
+    {
+      "menu_id": "naver:2056833208:menu:dom_1",
+      "name_ko": "72시간 매드 족발(중)",
+      "name_en": "72-hour Mad Jokbal (braised pork trotters, medium)",
+      "name_ja": "72時間マッドチョッパル（豚足・中）"
+    },
+    {
+      "menu_id": "naver:2056833208:menu:dom_12",
+      "name_ko": "매드 족발 + 직화 불족발(소)",
+      "name_en": "Mad Jokbal + flame-grilled spicy jokbal (small)",
+      "name_ja": "マッドチョッパル＋直火焼き辛口チョッパル（小）"
+    },
+    {
+      "menu_id": "naver:2056833208:menu:dom_13",
+      "name_ko": "매드 족발 + 직화 불족발(중)",
+      "name_en": "Mad Jokbal + flame-grilled spicy jokbal (medium)",
+      "name_ja": "マッドチョッパル＋直火焼き辛口チョッパル（中）"
+    },
+    {
+      "menu_id": "naver:2056833208:menu:dom_14",
+      "name_ko": "매드 족발 + 직화 불족발(대)",
+      "name_en": "Mad Jokbal + flame-grilled spicy jokbal (large)",
+      "name_ja": "マッドチョッパル＋直火焼き辛口チョッパル（大）"
+    },
+    {
+      "menu_id": "naver:2056833208:menu:dom_15",
+      "name_ko": "바베큐 족발 + 보쌈(소)",
+      "name_en": "BBQ jokbal + bossam (small)",
+      "name_ja": "バーベキューチョッパル＋ボッサム（小）"
+    },
+    {
+      "menu_id": "naver:2056833208:menu:dom_2",
+      "name_ko": "72시간 매드 족발(대)",
+      "name_en": "72-hour Mad Jokbal (braised pork trotters, large)",
+      "name_ja": "72時間マッドチョッパル（豚足・大）"
+    },
+    {
+      "menu_id": "naver:2056833208:menu:dom_20",
+      "name_ko": "매드족발+흑돼지보쌈(대)",
+      "name_en": "Mad Jokbal + black pork bossam (large)",
+      "name_ja": "マッドチョッパル＋黒豚ボッサム（大）"
+    },
+    {
+      "menu_id": "naver:2056833208:menu:dom_21",
+      "name_ko": "매드족발+바베큐족발(소)",
+      "name_en": "Mad Jokbal + BBQ jokbal (small)",
+      "name_ja": "マッドチョッパル＋バーベキューチョッパル（小）"
+    },
+    {
+      "menu_id": "naver:2060110285:menu:dom_0",
+      "name_ko": "야들야들 매운돼지갈비찜(2인분)",
+      "name_en": "Tender spicy braised pork ribs (2 servings)",
+      "name_ja": "やわらかピリ辛豚カルビ煮込み（2人前）"
+    },
+    {
+      "menu_id": "naver:2060110285:menu:dom_1",
+      "name_ko": "야들야들 매운돼지갈비찜(3인분)",
+      "name_en": "Tender spicy braised pork ribs (3 servings)",
+      "name_ja": "やわらかピリ辛豚カルビ煮込み（3人前）"
+    },
+    {
+      "menu_id": "naver:2060110285:menu:dom_2",
+      "name_ko": "밥도둑 묵은지갈비찜(2인분)",
+      "name_en": "Braised pork ribs with aged kimchi (2 servings)",
+      "name_ja": "熟成キムチと豚カルビの煮込み（2人前）"
+    },
+    {
+      "menu_id": "naver:2066786830:menu:dom_0",
+      "name_ko": "명란보쌈(소)+칼국수or막국수",
+      "name_en": "Pollock roe bossam (small) + kalguksu or makguksu",
+      "name_ja": "明太子ボッサム（小）＋カルグクスまたはマッククス"
+    },
+    {
+      "menu_id": "naver:2066786830:menu:dom_1",
+      "name_ko": "낙지볶음",
+      "name_en": "Stir-fried octopus",
+      "name_ja": "ナクチ炒め（テナガダコ）"
+    },
+    {
+      "menu_id": "naver:2066786830:menu:dom_2",
+      "name_ko": "가브리살 보쌈(소)+칼국수or막국수",
+      "name_en": "Gabrisal bossam (small) + kalguksu or makguksu",
+      "name_ja": "ガブリサルのボッサム（小）＋カルグクスまたはマッククス"
+    },
+    {
+      "menu_id": "naver:2066786830:menu:dom_3",
+      "name_ko": "반반보쌈(소)+칼국수or막국수",
+      "name_en": "Half-and-half bossam (small) + kalguksu or makguksu",
+      "name_ja": "ハーフ＆ハーフボッサム（小）＋カルグクスまたはマッククス"
+    },
+    {
+      "menu_id": "naver:2072437309:menu:dom_0",
+      "name_ko": "[모둠한판]한우곱창(2인.550g)",
+      "name_en": "[Assorted plate] Korean beef tripe for 2 (550g)",
+      "name_ja": "【盛り合わせ】韓牛コプチャン（2人前・550g）"
+    },
+    {
+      "menu_id": "naver:2072437309:menu:dom_1",
+      "name_ko": "[모둠한판]소팔곱창(2인.550g)",
+      "name_en": "[Assorted plate] Sopal beef tripe for 2 (550g)",
+      "name_ja": "【盛り合わせ】ソパルコプチャン（2人前・550g）"
+    },
+    {
+      "menu_id": "naver:2072437309:menu:dom_2",
+      "name_ko": "[모둠한판]마늘곱창(2인.550g)",
+      "name_en": "[Assorted plate] Garlic beef tripe for 2 (550g)",
+      "name_ja": "【盛り合わせ】ニンニク牛ホルモン（2人前・550g）"
+    },
+    {
+      "menu_id": "naver:2081914656:menu:dom_0",
+      "name_ko": "[시그니처 꾸픽1] 방콕치킨",
+      "name_en": "[Signature Kku Pick 1] Bangkok Chicken",
+      "name_ja": "【シグネチャー クピック1】バンコクチキン"
+    },
+    {
+      "menu_id": "naver:2081914656:menu:dom_1",
+      "name_ko": "[시그니처 꾸픽2] 에그칠리베이컨",
+      "name_en": "[Signature Kku Pick 2] Egg Chili Bacon",
+      "name_ja": "【シグネチャー クピック2】エッグチリベーコン"
+    },
+    {
+      "menu_id": "naver:2081914656:menu:dom_2",
+      "name_ko": "[시그니처 꾸픽3] 맥앤파이어",
+      "name_en": "[Signature Kku Pick 3] Mac & Fire",
+      "name_ja": "【シグネチャー クピック3】マック＆ファイア"
+    },
+    {
+      "menu_id": "naver:2086743678:menu:dom_0",
+      "name_ko": "1.6인분 응큼떡볶이(1.6인분)",
+      "name_en": "Eungkeum Tteokbokki (1.6 servings)",
+      "name_ja": "ウンクムトッポッキ（1.6人前）"
+    },
+    {
+      "menu_id": "naver:2086743678:menu:dom_1",
+      "name_ko": "응큼 로제떡볶이(강남언니들이선정한1위로제)",
+      "name_en": "Eungkeum Rose Tteokbokki (signature rose sauce)",
+      "name_ja": "ウンクム・ロゼトッポッキ（特製ロゼソース）"
+    },
+    {
+      "menu_id": "naver:2086743678:menu:dom_2",
+      "name_ko": "응큼 우량아통통치즈 떡볶이(프리미엄 시그니처 메뉴)",
+      "name_en": "Eungkeum extra-cheesy tteokbokki (premium signature)",
+      "name_ja": "ウンクム・たっぷりチーズのトッポッキ（プレミアム）"
+    },
+    {
+      "menu_id": "naver:2091395246:menu:dom_0",
+      "name_ko": "게두부",
+      "name_en": "Crab tofu",
+      "name_ja": "カニ豆腐"
+    },
+    {
+      "menu_id": "naver:2091395246:menu:dom_1",
+      "name_ko": "시센 조개찜",
+      "name_en": "Sisen steamed clams",
+      "name_ja": "シセンの蒸し貝"
+    },
+    {
+      "menu_id": "naver:2091395246:menu:dom_2",
+      "name_ko": "가지튀김",
+      "name_en": "Fried eggplant",
+      "name_ja": "ナスの揚げ物"
+    },
+    {
+      "menu_id": "naver:2096733482:menu:dom_1",
+      "name_ko": "\"여름 별미\" 열무김치말이국수",
+      "name_en": "[Summer Special] Radish-leaf kimchi cold noodles",
+      "name_ja": "【夏のおすすめ】ヨルムキムチ入り冷やし麺"
+    },
+    {
+      "menu_id": "naver:2096733482:menu:dom_2",
+      "name_ko": "간 장 쪽 갈 비(300g)",
+      "name_en": "Soy-marinated pork back ribs (300g)",
+      "name_ja": "醤油味の豚バックリブ（300g）"
+    },
+    {
+      "menu_id": "naver:2096733482:menu:dom_3",
+      "name_ko": "양 념 쪽 갈 비(300g)",
+      "name_en": "Seasoned pork back ribs (300g)",
+      "name_ja": "ヤンニョム豚バックリブ（300g）"
+    },
+    {
+      "menu_id": "naver:2097330967:menu:dom_0",
+      "name_ko": "으뜸스시 도시락(13p)",
+      "name_en": "Utteum Sushi bento (13 pieces)",
+      "name_ja": "ウットゥム寿司弁当（13ピース）"
+    },
+    {
+      "menu_id": "naver:2097330967:menu:dom_1",
+      "name_ko": "[ 둘이먹기 좋은 메뉴 ] TOP 10",
+      "name_en": "[Great for two] Top 10 set",
+      "name_ja": "【2人におすすめ】TOP 10セット"
+    },
+    {
+      "menu_id": "naver:2098069129:menu:dom_0",
+      "name_ko": "민물장어 2.3미 1마리",
+      "name_en": "Freshwater eel (2.3-mi size, 1 whole eel)",
+      "name_ja": "淡水ウナギ（2.3ミ規格・1尾）"
+    },
+    {
+      "menu_id": "naver:2098069129:menu:dom_1",
+      "name_ko": "만로 유린장어",
+      "name_en": "Manro-style Yurin eel",
+      "name_ja": "マンロ特製ユーリンウナギ"
+    },
+    {
+      "menu_id": "naver:2098069129:menu:dom_2",
+      "name_ko": "파김치 통장어전골",
+      "name_en": "Whole eel hot pot with green-onion kimchi",
+      "name_ja": "ネギキムチと丸ごとウナギの鍋"
+    },
+    {
+      "menu_id": "naver:292131610:menu:dom_1",
+      "name_ko": "프리미엄 와규 고메 규카츠(130g)",
+      "name_en": "Premium Wagyu gyukatsu (130g)",
+      "name_ja": "プレミアム和牛の牛カツ（130g）"
+    },
+    {
+      "menu_id": "naver:292131610:menu:dom_2",
+      "name_ko": "프리미엄 와규 고메 규카츠(160g)",
+      "name_en": "Premium Wagyu gyukatsu (160g)",
+      "name_ja": "プレミアム和牛の牛カツ（160g）"
+    }
+  ]
+}

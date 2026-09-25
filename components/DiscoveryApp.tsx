@@ -756,7 +756,10 @@ export default function DiscoveryApp({
                   const menuKey = `${selectedStore.id}:${menu.id}:${index}`;
                   const revealed = revealedMenuId === menuKey;
                   const localizedName = localizedMenuName(menu, language);
-                  const description = language === "ja"
+                  // Empty source descriptions are imported as synthetic placeholders.
+                  // Do not show their awkward machine translations as editorial copy.
+                  const syntheticDescription = menu.descriptionKo.trim() === `${menu.nameKo.trim()} 메뉴입니다.`;
+                  const description = syntheticDescription ? "" : language === "ja"
                     ? menu.descriptionJa || menu.descriptionKo
                     : menu.descriptionEn || menu.descriptionKo;
                   const hasVerifiedImage = menu.imageStatus === "verified" && /^https?:\/\//i.test(menu.imageUrl);

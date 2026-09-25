@@ -1,0 +1,246 @@
+{
+  "date": "2026-09-25",
+  "scope": "Romanized new Hongdae business names for EN/JA display; original Korean names remain canonical",
+  "names": [
+    {
+      "source_id": "naver:2056833208",
+      "name": "매드족발 홍대본점",
+      "name_en": "Mad Jokbal Hongdae Main Store",
+      "name_ja": "マッドチョッパル 弘大本店"
+    },
+    {
+      "source_id": "naver:1188500976",
+      "name": "테즈쿠리 홍대본점",
+      "name_en": "Tezukuri Hongdae Main Store",
+      "name_ja": "テヅクリ 弘大本店"
+    },
+    {
+      "source_id": "naver:2081914656",
+      "name": "꾸감",
+      "name_en": "Kkugam",
+      "name_ja": "クガム"
+    },
+    {
+      "source_id": "naver:1680391092",
+      "name": "정육도",
+      "name_en": "Jeongyukdo",
+      "name_ja": "チョンユクド"
+    },
+    {
+      "source_id": "naver:2000197165",
+      "name": "오르노 합정점",
+      "name_en": "Orno Hapjeong",
+      "name_ja": "オルノ 合井店"
+    },
+    {
+      "source_id": "naver:1929517117",
+      "name": "봉림대패 홍대점",
+      "name_en": "Bonglim Daepae Hongdae",
+      "name_ja": "ボンリム・テペ 弘大店"
+    },
+    {
+      "source_id": "naver:1246697901",
+      "name": "쟁반집8292 홍대점",
+      "name_en": "Jaengbanjip 8292 Hongdae",
+      "name_ja": "チェンバンチプ8292 弘大店"
+    },
+    {
+      "source_id": "naver:1255960333",
+      "name": "운남양꼬치 홍대본점",
+      "name_en": "Yunnan Lamb Skewers Hongdae Main Store",
+      "name_ja": "雲南羊串 弘大本店"
+    },
+    {
+      "source_id": "naver:1126882398",
+      "name": "레이몬드 홍대점",
+      "name_en": "Raymond Hongdae",
+      "name_ja": "レイモンド 弘大店"
+    },
+    {
+      "source_id": "naver:1429106063",
+      "name": "해정집",
+      "name_en": "Haejeongjip",
+      "name_ja": "ヘジョンチプ"
+    },
+    {
+      "source_id": "naver:1121324125",
+      "name": "닭장수김밥 홍대점",
+      "name_en": "Dakjangsu Gimbap Hongdae",
+      "name_ja": "タクチャンス・キンパ 弘大店"
+    },
+    {
+      "source_id": "naver:292131610",
+      "name": "비츠비츠 홍대점",
+      "name_en": "Bitsbits Hongdae",
+      "name_ja": "ビッツビッツ 弘大店"
+    },
+    {
+      "source_id": "naver:1547261740",
+      "name": "고기꾼김춘배 홍대숲길점",
+      "name_en": "Gogikkun Kim Chunbae, Hongdae Supgil",
+      "name_ja": "コギックン・キムチュンベ 弘大スプキル店"
+    },
+    {
+      "source_id": "naver:1258564823",
+      "name": "팔계집",
+      "name_en": "Palgyejip",
+      "name_ja": "パルゲチプ"
+    },
+    {
+      "source_id": "naver:1636096003",
+      "name": "카츠몬스터 연남본점",
+      "name_en": "Katsu Monster Yeonnam Main Store",
+      "name_ja": "カツモンスター 延南本店"
+    },
+    {
+      "source_id": "naver:1271463480",
+      "name": "크레파스",
+      "name_en": "Crepas",
+      "name_ja": "クレパス"
+    },
+    {
+      "source_id": "naver:1229825670",
+      "name": "연남토마 본점",
+      "name_en": "Yeonnam Toma Main Store",
+      "name_ja": "ヨンナムトマ 本店"
+    },
+    {
+      "source_id": "naver:1402516922",
+      "name": "음무아 뇨끼라보",
+      "name_en": "Eummua Gnocchi Lab",
+      "name_ja": "ウムア・ニョッキラボ"
+    },
+    {
+      "source_id": "naver:1157398737",
+      "name": "카츠업 홍대점",
+      "name_en": "Katsu Up Hongdae",
+      "name_ja": "カツアップ 弘大店"
+    },
+    {
+      "source_id": "naver:2098069129",
+      "name": "만로 합정점",
+      "name_en": "Manro Hapjeong",
+      "name_ja": "マンロ 合井店"
+    },
+    {
+      "source_id": "naver:1113429489",
+      "name": "더기와 합정점",
+      "name_en": "Deogiwa Hapjeong",
+      "name_ja": "トギワ 合井店"
+    },
+    {
+      "source_id": "naver:1348526323",
+      "name": "금성회관 합정본점",
+      "name_en": "Geumseong Hoegwan Hapjeong Main Store",
+      "name_ja": "クムソン会館 合井本店"
+    },
+    {
+      "source_id": "naver:2097330967",
+      "name": "으뜸스시 신촌점",
+      "name_en": "Eutteum Sushi Sinchon",
+      "name_ja": "ウットゥム寿司 新村店"
+    },
+    {
+      "source_id": "naver:2051676381",
+      "name": "국보감 홍대본점",
+      "name_en": "Gukbogam Hongdae Main Store",
+      "name_ja": "クッポガム 弘大本店"
+    },
+    {
+      "source_id": "naver:2086743678",
+      "name": "응큼떡볶이 연남점",
+      "name_en": "Eungkeum Tteokbokki Yeonnam",
+      "name_ja": "ウンクムトッポッキ 延南店"
+    },
+    {
+      "source_id": "naver:1189264617",
+      "name": "해옫 연남",
+      "name_en": "Haeot Yeonnam",
+      "name_ja": "ヘオッ 延南店"
+    },
+    {
+      "source_id": "naver:2091395246",
+      "name": "시센",
+      "name_en": "Sisen",
+      "name_ja": "シセン"
+    },
+    {
+      "source_id": "naver:1825043711",
+      "name": "어사출또 홍대점",
+      "name_en": "Eosa Chulto Hongdae",
+      "name_ja": "オサチュルト 弘大店"
+    },
+    {
+      "source_id": "naver:2028793825",
+      "name": "연남달빛 고기집&술집 홍대본점",
+      "name_en": "Yeonnam Dalbit Korean BBQ & Pub Hongdae",
+      "name_ja": "ヨンナム・タルピッ 焼肉＆酒場 弘大本店"
+    },
+    {
+      "source_id": "naver:2081150287",
+      "name": "코다인",
+      "name_en": "Kodain",
+      "name_ja": "コダイン"
+    },
+    {
+      "source_id": "naver:1953053720",
+      "name": "보승회관 서울신촌점",
+      "name_en": "Boseung Hoegwan Sinchon",
+      "name_ja": "ポスン会館 新村店"
+    },
+    {
+      "source_id": "naver:2060110285",
+      "name": "봉마루집 합정점",
+      "name_en": "Bongmarujip Hapjeong",
+      "name_ja": "ボンマルチプ 合井店"
+    },
+    {
+      "source_id": "naver:2072437309",
+      "name": "소팔소곱창 서교본점",
+      "name_en": "Sopalso Gopchang Seogyo Main Store",
+      "name_ja": "ソパルソコプチャン 西橋本店"
+    },
+    {
+      "source_id": "naver:1414264972",
+      "name": "쿠로코식당 연남점",
+      "name_en": "Kuroko Shokudo Yeonnam",
+      "name_ja": "クロコ食堂 延南店"
+    },
+    {
+      "source_id": "naver:2001389336",
+      "name": "오꼬로",
+      "name_en": "Okkoro",
+      "name_ja": "オッコロ"
+    },
+    {
+      "source_id": "naver:1863875951",
+      "name": "써니스피자마켓",
+      "name_en": "Sunny's Pizza Market",
+      "name_ja": "サニーズピザマーケット"
+    },
+    {
+      "source_id": "naver:20139601",
+      "name": "슬런치 팩토리 홍대점",
+      "name_en": "Slunch Factory Hongdae",
+      "name_ja": "スランチファクトリー 弘大店"
+    },
+    {
+      "source_id": "naver:2053367153",
+      "name": "형제특수부위 연남점",
+      "name_en": "Hyeongje Special Cuts Yeonnam",
+      "name_ja": "ヒョンジェ希少部位 延南店"
+    },
+    {
+      "source_id": "naver:2066786830",
+      "name": "조개우물보쌈&칼국수",
+      "name_en": "Jogae Umul Bossam & Kalguksu",
+      "name_ja": "チョゲウムル ボッサム＆カルグクス"
+    },
+    {
+      "source_id": "naver:2096733482",
+      "name": "참뽀뽀쪽갈비 합정점",
+      "name_en": "Champopo Pork Ribs Hapjeong",
+      "name_ja": "チャムポポ・チョッカルビ 合井店"
+    }
+  ]
+}

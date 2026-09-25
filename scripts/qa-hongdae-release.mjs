@@ -4,6 +4,7 @@ import puppeteer from "puppeteer-core";
 const url = (process.argv[2] || "http://127.0.0.1:3020").replace(/\/$/, "");
 const withBrowser = process.argv.includes("--browser");
 const requireMap = process.argv.includes("--require-map");
+if (requireMap && !withBrowser) throw new Error("--require-map requires --browser");
 const manifest = JSON.parse(fs.readFileSync("data/hongdae-2026-09-25.json", "utf8"));
 const fetchPage = async (offset) => {
   const res = await fetch(url + "/api/discovery?perRegion=150&offset=" + offset, {signal:AbortSignal.timeout(60000)});
@@ -31,6 +32,16 @@ if (missing.length || changed.length) throw new Error(JSON.stringify({missing,ch
 const badTranslations = manifest.restaurants.flatMap(r => ids.get(r.source_id).menus).filter(m=> !m.nameEn || !m.nameJa || !m.descriptionEn || !m.descriptionJa || /[가-힣]/.test([m.nameEn,m.nameJa,m.descriptionEn,m.descriptionJa].join(" ")));
 const api = {endpoint:url,pages,total:ids.size,hongdae:hongdae.length,releaseStores:manifest.restaurants.length,releaseMenus:manifest.restaurants.reduce((n,r)=>n+r.menus,0),badTranslations:badTranslations.length};
 if (badTranslations.length || hongdae.length < 200) throw new Error(JSON.stringify(api));
+const storeCuration=JSON.parse(fs.readFileSync("data/hongdae-2026-09-25-name-curation.json","utf8")).names;
+const menuCuration=JSON.parse(fs.readFileSync("data/hongdae-2026-09-25-menu-curation.json","utf8")).patches;
+const menuById=new Map(manifest.restaurants.flatMap(r=>(ids.get(r.source_id)?.menus||[]).map(m=>[m.id,m])));
+const wrongStores=storeCuration.filter(p=>ids.get(p.source_id)?.nameEn!==p.name_en||ids.get(p.source_id)?.nameJa!==p.name_ja);
+const wrongMenus=menuCuration.filter(p=>menuById.get(p.menu_id)?.nameEn!==p.name_en||menuById.get(p.menu_id)?.nameJa!==p.name_ja);
+api.curatedStoreNames=storeCuration.length;
+api.curatedMenuNames=menuCuration.length;
+api.curationMismatches=wrongStores.length+wrongMenus.length;
+if(storeCuration.length!==40||menuCuration.length!==118||api.curationMismatches)throw Error("Bilingual curation QA failed: "+JSON.stringify({wrongStores,wrongMenus}));
+const sample = ids.get(manifest.restaurants[0].source_id);
 let browserQa = null;
 if (withBrowser) {
   const browser=await puppeteer.launch({executablePath:process.env.BROWSER_PATH || "C:/Program Files/BraveSoftware/Brave-Browser/Application/brave.exe",headless:true});
@@ -51,14 +62,30 @@ if (withBrowser) {
       const filtered=await page.evaluate(()=>document.querySelectorAll(".discovery-card").length);
       await page.evaluate(()=>[...document.querySelectorAll(".public-language-toggle button")].find(x=>x.textContent?.includes("日本語"))?.click());
       await page.waitForFunction(()=>document.querySelectorAll(".discovery-card").length===200,{timeout:20000});
+      if(width>=1200) {
+        try {
+          await page.waitForFunction(()=>!!document.querySelector(".naver-map-status.error") || (
+            !!document.querySelector("#naver-map-sdk")
+            && !document.querySelector(".naver-map-status")
+            && document.querySelectorAll(".naver-map-marker").length>0
+          ),{timeout:25000});
+        } catch { /* report the actual map state below */ }
+      }
       const map=await page.evaluate(()=>({status:document.querySelector(".naver-map-status")?.textContent?.trim()||"ready",markers:document.querySelectorAll(".naver-map-marker").length}));
-      checks.push({width,all,filtered,map,errors});
+      const chosen=await page.evaluate(name=>{
+        const card=[...document.querySelectorAll(".discovery-card")].find(x=>x.querySelector(".restaurant-card-name")?.textContent?.trim()===name);
+        card?.click(); return Boolean(card);
+      },sample.nameJa);
+      if(!chosen)throw new Error("The newly added restaurant cannot be selected: "+sample.nameJa);
+      await page.waitForFunction(name=>document.querySelector(".restaurant-detail-panel h1")?.textContent?.includes(name),{timeout:20000},sample.nameJa);
+      const detail=await page.evaluate(()=>({menus:document.querySelectorAll(".restaurant-detail-panel .inline-menu-card").length,firstMenu:document.querySelector(".inline-menu-card h2")?.textContent?.trim()||""}));
+      checks.push({width,all,filtered,map,detail,errors});
       await page.close();
     }
   } finally {await browser.close()}
   browserQa=checks;
-  if(checks.some(c=>c.all.cards<310||c.all.overflow>1||c.filtered!==200||c.errors.length))throw new Error("Browser QA failed: "+JSON.stringify(checks));
-  if(requireMap&&checks.some(c=>c.width===1440&&c.map.status!=="ready"))throw new Error("NAVER Maps did not load: "+JSON.stringify(checks));
+  if(checks.some(c=>c.all.cards<310||c.all.overflow>1||c.filtered!==200||c.detail.menus!==sample.menus.length||!c.detail.firstMenu||c.errors.length))throw new Error("Browser QA failed: "+JSON.stringify(checks));
+  if(requireMap&&checks.some(c=>c.width===1440&&(c.map.status!=="ready"||c.map.markers<1)))throw new Error("NAVER Maps did not load: "+JSON.stringify(checks));
 }
 const report={checkedAt:new Date().toISOString(),api,browserQa};
 const reportDir=path.resolve(".expansion-runs","qa-release");
