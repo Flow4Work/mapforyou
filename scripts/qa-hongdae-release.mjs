@@ -48,6 +48,7 @@ const legacy = await fetch(url + "/place/425739", {signal:AbortSignal.timeout(60
 if (!legacy.ok || !(await legacy.text()).includes("Archived restaurant listing")) throw new Error("Existing Mapo detail link was lost or lacks its legacy-data warning");
 const sample = ids.get(manifest.restaurants[0].source_id);
 let browserQa = null;
+let standaloneQa = null;
 if (withBrowser) {
   const browser=await puppeteer.launch({executablePath:process.env.BROWSER_PATH || "C:/Program Files/BraveSoftware/Brave-Browser/Application/brave.exe",headless:true});
   const checks=[];
@@ -87,12 +88,29 @@ if (withBrowser) {
       checks.push({width,all,filtered,map,detail,errors});
       await page.close();
     }
+    const synthetic = ids.get("naver:1113429489")?.menus.find(m => m.descriptionKo.trim() === `${m.nameKo.trim()} 메뉴입니다.`);
+    if (!synthetic) throw new Error("Missing standalone placeholder-description regression fixture");
+    const standalone = await browser.newPage();
+    try {
+      await standalone.goto(url + "/place/naver%3A1113429489", {waitUntil:"domcontentloaded", timeout:60000});
+      await standalone.waitForSelector(".detail-menu-card", {timeout:20000});
+      const noPlaceholderFor = async (name) => standalone.evaluate(label => {
+        const card = [...document.querySelectorAll(".detail-menu-card")].find(x => x.querySelector("h3")?.textContent?.trim() === label);
+        return Boolean(card) && !card.querySelector(".detail-menu-description");
+      }, name);
+      const hiddenInEn = await noPlaceholderFor(synthetic.nameEn);
+      await standalone.evaluate(()=>[...document.querySelectorAll(".public-language-toggle button")].find(x => x.textContent?.includes("日本語"))?.click());
+      await standalone.waitForFunction(name => [...document.querySelectorAll(".detail-menu-card h3")].some(x => x.textContent?.trim() === name), {timeout:10000}, synthetic.nameJa);
+      const hiddenInJa = await noPlaceholderFor(synthetic.nameJa);
+      standaloneQa = {menu:synthetic.nameKo, hiddenInEn, hiddenInJa};
+      if (!hiddenInEn || !hiddenInJa) throw new Error("Synthetic descriptions leaked on the standalone page: " + JSON.stringify(standaloneQa));
+    } finally {await standalone.close()}
   } finally {await browser.close()}
   browserQa=checks;
   if(checks.some(c=>c.all.cards<150||c.all.overflow>1||c.filtered!==40||c.detail.menus!==sample.menus.length||!c.detail.firstMenu||c.errors.length))throw new Error("Browser QA failed: "+JSON.stringify(checks));
   if(requireMap&&checks.some(c=>c.width===1440&&(c.map.status!=="ready"||c.map.markers<1)))throw new Error("NAVER Maps did not load: "+JSON.stringify(checks));
 }
-const report={checkedAt:new Date().toISOString(),api,browserQa};
+const report={checkedAt:new Date().toISOString(),api,browserQa,standaloneQa};
 const reportDir=path.resolve(".expansion-runs","qa-release");
 fs.mkdirSync(reportDir,{recursive:true});
 fs.writeFileSync(path.join(reportDir,"latest.json"),JSON.stringify(report,null,2),"utf8");

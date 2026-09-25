@@ -160,7 +160,9 @@ export default function RestaurantDetail({ store }: { store: DiscoveryRestaurant
             {menus.map((menu) => {
               const revealed = revealedMenuId === menu.id;
               const localizedName = localizedMenuName(menu, language);
-              const description = language === "ja"
+              // Suppress placeholder prose generated for menus with no source description.
+              const syntheticDescription = menu.descriptionKo.trim() === `${menu.nameKo.trim()} 메뉴입니다.`;
+              const description = syntheticDescription ? "" : language === "ja"
                 ? menu.descriptionJa || menu.descriptionKo
                 : menu.descriptionEn || menu.descriptionKo;
               const hasVerifiedImage = menu.imageStatus === "verified" && /^https?:\/\//i.test(menu.imageUrl);
