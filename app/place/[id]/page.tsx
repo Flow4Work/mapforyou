@@ -11,7 +11,9 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   if (!store) return { title: "Restaurant not found | MapForYou" };
   return {
     title: `${store.name} Menu | MapForYou`,
-    description: `Translated English and Japanese menu for ${store.name} in Seoul.`,
+    description: store.regionKey === "hongdae" && store.searchKeyword === "전체"
+      ? `Archived Mapo-area restaurant data for ${store.name}. Menu translations and listing details may be incomplete.`
+      : `Translated English and Japanese menu for ${store.name} in Seoul.`,
   };
 }
 

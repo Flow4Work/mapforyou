@@ -392,6 +392,16 @@
   height: 100%;
   object-fit: cover;
 }
+.detail-hero-copy .legacy-listing-notice {
+  padding: 11px 13px;
+  border: 1px solid #e8d1a1;
+  border-radius: 10px;
+  background: #fff9e9;
+  color: #694f22;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
 .discovery-card-thumb-fallback {
   position: absolute;
   inset: 0;

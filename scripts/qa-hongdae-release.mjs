@@ -30,8 +30,11 @@ const changed = manifest.restaurants.filter(r => {
 });
 if (missing.length || changed.length) throw new Error(JSON.stringify({missing,changed}));
 const badTranslations = manifest.restaurants.flatMap(r => ids.get(r.source_id).menus).filter(m=> !m.nameEn || !m.nameJa || !m.descriptionEn || !m.descriptionJa || /[가-힣]/.test([m.nameEn,m.nameJa,m.descriptionEn,m.descriptionJa].join(" ")));
-const api = {endpoint:url,pages,total:ids.size,hongdae:hongdae.length,releaseStores:manifest.restaurants.length,releaseMenus:manifest.restaurants.reduce((n,r)=>n+r.menus,0),badTranslations:badTranslations.length};
-if (badTranslations.length || hongdae.length < 200) throw new Error(JSON.stringify(api));
+const outside = hongdae.filter(s => s.latitude == null || s.longitude == null || s.latitude < 37.548 || s.latitude > 37.5665 || s.longitude < 126.91 || s.longitude > 126.936);
+const unverified = hongdae.filter(s => !s.nameEn || !s.nameJa || !s.roadAddressEn || !s.roadAddressJa || !s.introductionEn || !s.introductionJa || !s.imageUrl);
+const uniqueLocations = new Set(hongdae.map(s => s.name.replace(/[^가-힣a-z0-9]/gi,"").toLowerCase()+"|"+s.roadAddress.replace(/[^가-힣a-z0-9]/gi,"").toLowerCase()));
+const api = {endpoint:url,pages,total:ids.size,hongdae:hongdae.length,releaseStores:manifest.restaurants.length,releaseMenus:manifest.restaurants.reduce((n,r)=>n+r.menus,0),badTranslations:badTranslations.length,outside:outside.length,unverified:unverified.length,duplicateLocations:hongdae.length-uniqueLocations.size};
+if (badTranslations.length || hongdae.length !== manifest.restaurants.length || api.outside || api.unverified || api.duplicateLocations) throw new Error(JSON.stringify(api));
 const storeCuration=JSON.parse(fs.readFileSync("data/hongdae-2026-09-25-name-curation.json","utf8")).names;
 const menuCuration=JSON.parse(fs.readFileSync("data/hongdae-2026-09-25-menu-curation.json","utf8")).patches;
 const menuById=new Map(manifest.restaurants.flatMap(r=>(ids.get(r.source_id)?.menus||[]).map(m=>[m.id,m])));
@@ -41,6 +44,8 @@ api.curatedStoreNames=storeCuration.length;
 api.curatedMenuNames=menuCuration.length;
 api.curationMismatches=wrongStores.length+wrongMenus.length;
 if(storeCuration.length!==40||menuCuration.length!==118||api.curationMismatches)throw Error("Bilingual curation QA failed: "+JSON.stringify({wrongStores,wrongMenus}));
+const legacy = await fetch(url + "/place/425739", {signal:AbortSignal.timeout(60000)});
+if (!legacy.ok || !(await legacy.text()).includes("Archived restaurant listing")) throw new Error("Existing Mapo detail link was lost or lacks its legacy-data warning");
 const sample = ids.get(manifest.restaurants[0].source_id);
 let browserQa = null;
 if (withBrowser) {
@@ -58,10 +63,10 @@ if (withBrowser) {
         if(b)b.click();return Boolean(b);
       });
       if(!clicked)throw new Error("Hongdae filter button missing");
-      await page.waitForFunction(()=>document.querySelectorAll(".discovery-card").length===200,{timeout:20000});
+      await page.waitForFunction(()=>document.querySelectorAll(".discovery-card").length===40,{timeout:20000});
       const filtered=await page.evaluate(()=>document.querySelectorAll(".discovery-card").length);
       await page.evaluate(()=>[...document.querySelectorAll(".public-language-toggle button")].find(x=>x.textContent?.includes("日本語"))?.click());
-      await page.waitForFunction(()=>document.querySelectorAll(".discovery-card").length===200,{timeout:20000});
+      await page.waitForFunction(()=>document.querySelectorAll(".discovery-card").length===40,{timeout:20000});
       if(width>=1200) {
         try {
           await page.waitForFunction(()=>!!document.querySelector(".naver-map-status.error") || (
@@ -84,7 +89,7 @@ if (withBrowser) {
     }
   } finally {await browser.close()}
   browserQa=checks;
-  if(checks.some(c=>c.all.cards<310||c.all.overflow>1||c.filtered!==200||c.detail.menus!==sample.menus.length||!c.detail.firstMenu||c.errors.length))throw new Error("Browser QA failed: "+JSON.stringify(checks));
+  if(checks.some(c=>c.all.cards<150||c.all.overflow>1||c.filtered!==40||c.detail.menus!==sample.menus.length||!c.detail.firstMenu||c.errors.length))throw new Error("Browser QA failed: "+JSON.stringify(checks));
   if(requireMap&&checks.some(c=>c.width===1440&&(c.map.status!=="ready"||c.map.markers<1)))throw new Error("NAVER Maps did not load: "+JSON.stringify(checks));
 }
 const report={checkedAt:new Date().toISOString(),api,browserQa};

@@ -1,8 +1,10 @@
 import "server-only";
 
 import { getSupabaseServerClient } from "@/lib/supabase";
+import { REGION_PRESETS } from "@/lib/config";
 
 const ACTIVE_REGIONS = ["seongsu", "hongdae", "geondae", "jongno"] as const;
+const DISCOVERY_REGIONS = ["seongsu", "hongdae"] as const;
 const DEFAULT_PER_REGION = 20;
 const MAX_PER_REGION = 150;
 
@@ -107,6 +109,26 @@ type MenuRow = {
 
 const RESTAURANT_COLUMNS = "source_id,name,name_en,name_ja,road_address,road_address_en,road_address_ja,address,latitude,longitude,phone,category,license_type,introduction,introduction_en,introduction_ja,region_key,search_keyword,image_url,image_gallery_urls,image_source,image_attribution,image_source_url,instagram_url,instagram_username,updated_at";
 const MENU_COLUMNS = "menu_id,restaurant_id,name_ko,name_en,name_ja,price,is_specialty,sort_order,description_ko,description_en,description_ja,image_url,image_source,image_source_url,image_attribution,image_status";
+
+// Keep the original Mapo-wide legacy records and their direct links intact.
+// Only geographically accurate, translated and photographed Hongdae records
+// belong in the public discovery list. Filter before pagination, not afterward.
+function discoveryRegionQuery(supabase: NonNullable<ReturnType<typeof getSupabaseServerClient>>, regionKey: string) {
+  let query = supabase.from("public_data_restaurants")
+    .select(RESTAURANT_COLUMNS)
+    .eq("region_key", regionKey)
+    .eq("publish_status", "published");
+
+  if (regionKey === "hongdae") {
+    const { south, north, west, east } = REGION_PRESETS.hongdae.bounds;
+    query = query.gte("latitude", south).lte("latitude", north)
+      .gte("longitude", west).lte("longitude", east);
+    for (const column of ["name", "name_en", "name_ja", "road_address_en", "road_address_ja", "introduction_en", "introduction_ja", "image_url"]) {
+      query = query.not(column, "is", null).neq(column, "");
+    }
+  }
+  return query;
+}
 
 function optionalNumber(value: number | string | null) {
   if (value === null || value === "") return null;
@@ -233,12 +255,8 @@ export async function loadDiscoveryRestaurantPage({
   const safeOffset = Math.max(0, Math.floor(offset));
   const safePerRegion = Math.min(MAX_PER_REGION, Math.max(1, Math.floor(perRegion)));
 
-  const regionPages = await Promise.all(ACTIVE_REGIONS.map(async (regionKey) => {
-    const { data, error } = await supabase
-      .from("public_data_restaurants")
-      .select(RESTAURANT_COLUMNS)
-      .eq("region_key", regionKey)
-      .eq("publish_status", "published")
+  const regionPages = await Promise.all(DISCOVERY_REGIONS.map(async (regionKey) => {
+    const { data, error } = await discoveryRegionQuery(supabase, regionKey)
       .order("updated_at", { ascending: false })
       .range(safeOffset, safeOffset + safePerRegion);
 
@@ -269,17 +287,17 @@ export async function loadDiscoveryRestaurants(limit = 1000): Promise<DiscoveryR
   if (!supabase) return [];
 
   const safeLimit = Math.min(1000, Math.max(1, Math.floor(limit)));
-  const { data: restaurantData, error: restaurantError } = await supabase
-    .from("public_data_restaurants")
-    .select(RESTAURANT_COLUMNS)
-    .in("region_key", [...ACTIVE_REGIONS])
-    .eq("publish_status", "published")
-    .order("updated_at", { ascending: false })
-    .limit(safeLimit);
+  const rowsByRegion = await Promise.all(DISCOVERY_REGIONS.map(async (regionKey) => {
+    const { data, error } = await discoveryRegionQuery(supabase, regionKey)
+      .order("updated_at", { ascending: false })
+      .limit(safeLimit);
+    if (error) throw new Error(`공개 식당 조회 실패 (${regionKey}): ${error.message}`);
+    return (data ?? []) as unknown as RestaurantRow[];
+  }));
 
-  if (restaurantError) throw new Error(`공개 식당 조회 실패: ${restaurantError.message}`);
-
-  const restaurants = ((restaurantData ?? []) as unknown as RestaurantRow[]).filter(hasUsableCoreData);
+  const restaurants = rowsByRegion.flat().filter(hasUsableCoreData)
+    .sort((a, b) => Date.parse(b.updated_at) - Date.parse(a.updated_at))
+    .slice(0, safeLimit);
   const ids = restaurants.map((row) => String(row.source_id));
   const menusByRestaurant = await loadMenusByRestaurant(ids);
   return attachMenus(restaurants, menusByRestaurant);

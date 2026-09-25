@@ -47,6 +47,7 @@ export default function RestaurantDetail({ store }: { store: DiscoveryRestaurant
   const [menuViewMode, setMenuViewMode] = useState<"photo" | "compact">("photo");
   const [menuImageViewer, setMenuImageViewer] = useState<{ src: string; alt: string } | null>(null);
   const category = broadCategory(store);
+  const legacyMapo = store.regionKey === "hongdae" && store.searchKeyword === "전체";
   const menus = useMemo(
     () => [...store.menus].sort((a, b) => Number(b.isSpecialty) - Number(a.isSpecialty)),
     [store.menus],
@@ -111,9 +112,12 @@ export default function RestaurantDetail({ store }: { store: DiscoveryRestaurant
       <section className="detail-hero-grid">
         <RestaurantCover store={store} language={language} />
         <div className="detail-hero-copy">
-          <div className="detail-kicker">{regionLabel(store.regionKey, language)} · {categoryLabel(category, language)}</div>
+          <div className="detail-kicker">{legacyMapo ? (language === "ja" ? "麻浦・旧掲載" : "Mapo · archive") : regionLabel(store.regionKey, language)} · {categoryLabel(category, language)}</div>
           <h1>{localizedRestaurantName(store, language)}</h1>
-          <p>{copy.translated}</p>
+          <p>{legacyMapo ? (language === "ja" ? "旧店舗情報" : "Archived restaurant listing") : copy.translated}</p>
+          {legacyMapo && <p className="legacy-listing-notice" role="note">{language === "ja"
+            ? "麻浦エリアの過去の資料です。弘大エリアの掲載基準を満たすことは確認されていません。翻訳・写真・価格・営業状況は来店前に店舗でご確認ください。"
+            : "Older Mapo-area data. This listing has not been verified for Hongdae discovery. Please confirm translations, photos, prices and opening status with the restaurant before visiting."}</p> }
           <div className="detail-quick-stats">
             <div><strong>{store.menus.length}</strong><span>{language === "ja" ? "翻訳メニュー" : "translated menus"}</span></div>
             <div><strong>{store.menus.filter((menu) => menu.isSpecialty).length}</strong><span>{language === "ja" ? "おすすめ" : "featured"}</span></div>
