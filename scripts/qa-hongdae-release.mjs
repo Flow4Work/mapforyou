@@ -94,12 +94,17 @@ if (withBrowser) {
     try {
       await standalone.goto(url + "/place/naver%3A1113429489", {waitUntil:"domcontentloaded", timeout:60000});
       await standalone.waitForSelector(".detail-menu-card", {timeout:20000});
+      // The server-rendered menu appears before React attaches click handlers.
+      await standalone.waitForFunction(() => {
+        const button = document.querySelector(".public-language-toggle button:nth-child(2)");
+        return button && Object.keys(button).some(key => key.startsWith("__reactProps$"));
+      }, {timeout:20000});
       const noPlaceholderFor = async (name) => standalone.evaluate(label => {
         const card = [...document.querySelectorAll(".detail-menu-card")].find(x => x.querySelector("h3")?.textContent?.trim() === label);
         return Boolean(card) && !card.querySelector(".detail-menu-description");
       }, name);
       const hiddenInEn = await noPlaceholderFor(synthetic.nameEn);
-      await standalone.evaluate(()=>[...document.querySelectorAll(".public-language-toggle button")].find(x => x.textContent?.includes("日本語"))?.click());
+      await standalone.click(".public-language-toggle button:nth-child(2)");
       await standalone.waitForFunction(name => [...document.querySelectorAll(".detail-menu-card h3")].some(x => x.textContent?.trim() === name), {timeout:10000}, synthetic.nameJa);
       const hiddenInJa = await noPlaceholderFor(synthetic.nameJa);
       standaloneQa = {menu:synthetic.nameKo, hiddenInEn, hiddenInJa};
