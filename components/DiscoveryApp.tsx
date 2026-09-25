@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ImageViewer from "@/components/ImageViewer";
 import DetailActionIcon from "@/components/DetailActionIcon";
 import RestaurantCover from "@/components/RestaurantCover";
@@ -86,6 +86,61 @@ function defaultRecommendationCompare(a: DiscoveryRestaurant, b: DiscoveryRestau
   return recommendationScore(b) - recommendationScore(a) || a.id.localeCompare(b.id);
 }
 
+function compactThumbnailUrl(value: string) {
+  try {
+    const url = new URL(value);
+    if (url.hostname === "search.pstatic.net") {
+      url.searchParams.set("type", "f200_200");
+      url.searchParams.set("quality", "85");
+      return url.toString();
+    }
+  } catch {
+    return value;
+  }
+  return value;
+}
+
+function DiscoveryListThumb({
+  store,
+  language,
+}: {
+  store: DiscoveryRestaurant;
+  language: PublicLanguage;
+}) {
+  const category = broadCategory(store);
+  const primaryImage = store.imageUrl || store.imageGalleryUrls[0] || "";
+  const fallbackImage = store.imageGalleryUrls.find((url) => url && url !== primaryImage) || "";
+  const thumbnailImage = compactThumbnailUrl(primaryImage);
+
+  return (
+    <span className={`discovery-card-thumb cover-${category}`} aria-hidden="true">
+      {primaryImage ? (
+        <img
+          src={thumbnailImage}
+          alt=""
+          width={92}
+          height={103}
+          loading="lazy"
+          decoding="async"
+          fetchPriority="low"
+          onError={(event) => {
+            const image = event.currentTarget;
+            if (fallbackImage && image.dataset.fallback !== "used") {
+              image.dataset.fallback = "used";
+              image.src = fallbackImage;
+            } else {
+              image.style.display = "none";
+            }
+          }}
+        />
+      ) : (
+        <span className="discovery-card-thumb-fallback">{categoryIcon(category)}</span>
+      )}
+      <span className="discovery-card-thumb-label">{categoryLabel(category, language)}</span>
+    </span>
+  );
+}
+
 const DiscoveryListCard = memo(function DiscoveryListCard({
   store,
   selected,
@@ -125,7 +180,7 @@ const DiscoveryListCard = memo(function DiscoveryListCard({
       type="button"
       onClick={() => onSelect(store.id)}
     >
-      <RestaurantCover store={store} language={language} compact />
+      <DiscoveryListThumb store={store} language={language} />
       <span className="discovery-card-body">
         <span className="discovery-card-topline">
           <span>
@@ -170,6 +225,8 @@ export default function DiscoveryApp({
   const [menuViewMode, setMenuViewMode] = useState<"photo" | "compact">("photo");
   const [menuImageViewer, setMenuImageViewer] = useState<{ src: string; alt: string } | null>(null);
   const [mobilePanel, setMobilePanel] = useState<"places" | "menu">("places");
+  const foodScrollRef = useRef<HTMLDivElement | null>(null);
+  const [foodScrollState, setFoodScrollState] = useState({ overflow: false, canLeft: false, canRight: false });
 
   const copy =
     language === "ja"
@@ -282,6 +339,50 @@ export default function DiscoveryApp({
     const available = new Set(stores.map(broadCategory));
     return CATEGORY_ORDER.filter((item) => available.has(item));
   }, [stores]);
+
+  const updateFoodScrollState = useCallback(() => {
+    const element = foodScrollRef.current;
+    if (!element) return;
+    const maxScroll = Math.max(0, element.scrollWidth - element.clientWidth);
+    const overflow = maxScroll > 2;
+    const next = {
+      overflow,
+      canLeft: overflow && element.scrollLeft > 2,
+      canRight: overflow && element.scrollLeft < maxScroll - 2,
+    };
+    setFoodScrollState((current) =>
+      current.overflow === next.overflow &&
+      current.canLeft === next.canLeft &&
+      current.canRight === next.canRight
+        ? current
+        : next,
+    );
+  }, []);
+
+  const scrollFoodFilters = useCallback((direction: -1 | 1) => {
+    const element = foodScrollRef.current;
+    if (!element) return;
+    const distance = Math.max(180, Math.round(element.clientWidth * 0.78));
+    element.scrollBy({ left: direction * distance, behavior: "smooth" });
+    window.setTimeout(updateFoodScrollState, 250);
+  }, [updateFoodScrollState]);
+
+  useEffect(() => {
+    const element = foodScrollRef.current;
+    if (!element) return;
+    updateFoodScrollState();
+    const frame = requestAnimationFrame(updateFoodScrollState);
+    const timeout = window.setTimeout(updateFoodScrollState, 120);
+    const observer = new ResizeObserver(updateFoodScrollState);
+    observer.observe(element);
+    window.addEventListener("resize", updateFoodScrollState);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.clearTimeout(timeout);
+      observer.disconnect();
+      window.removeEventListener("resize", updateFoodScrollState);
+    };
+  }, [categories.length, language, updateFoodScrollState]);
 
   const filteredStores = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -452,22 +553,46 @@ export default function DiscoveryApp({
 
             <div className="filter-block">
               <span>{copy.food}</span>
-              <div className="filter-scroll category-filter">
+              <div className={`food-filter-shell ${foodScrollState.overflow ? "has-overflow" : ""}`}>
                 <button
-                  className={category === "all" ? "active" : ""}
-                  onClick={() => setCategory("all")}
+                  className={`food-filter-nav food-filter-nav-left ${foodScrollState.canLeft ? "" : "hidden-direction"}`}
+                  type="button"
+                  aria-label={language === "ja" ? "料理フィルターを左へ" : "Scroll food filters left"}
+                  tabIndex={foodScrollState.canLeft ? 0 : -1}
+                  onClick={() => scrollFoodFilters(-1)}
                 >
-                  {copy.allFood}
+                  ‹
                 </button>
-                {categories.map((item) => (
+                <div
+                  ref={foodScrollRef}
+                  className="filter-scroll category-filter"
+                  onScroll={updateFoodScrollState}
+                >
                   <button
-                    className={category === item ? "active" : ""}
-                    key={item}
-                    onClick={() => setCategory(item)}
+                    className={category === "all" ? "active" : ""}
+                    onClick={() => setCategory("all")}
                   >
-                    {categoryIcon(item)} {categoryLabel(item, language)}
+                    {copy.allFood}
                   </button>
-                ))}
+                  {categories.map((item) => (
+                    <button
+                      className={category === item ? "active" : ""}
+                      key={item}
+                      onClick={() => setCategory(item)}
+                    >
+                      {categoryIcon(item)} {categoryLabel(item, language)}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  className={`food-filter-nav food-filter-nav-right ${foodScrollState.canRight ? "" : "hidden-direction"}`}
+                  type="button"
+                  aria-label={language === "ja" ? "料理フィルターを右へ" : "Scroll food filters right"}
+                  tabIndex={foodScrollState.canRight ? 0 : -1}
+                  onClick={() => scrollFoodFilters(1)}
+                >
+                  ›
+                </button>
               </div>
             </div>
           </div>
@@ -507,6 +632,7 @@ export default function DiscoveryApp({
             stores={filteredStores}
             selectedId={selectedStore?.id ?? ""}
             language={language}
+            viewportRegion={region === "all" && regions.length === 1 ? regions[0] : region}
             onSelect={handleSelect}
           />
         </section>

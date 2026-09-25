@@ -4,7 +4,7 @@ import { getSupabaseServerClient } from "@/lib/supabase";
 
 const ACTIVE_REGIONS = ["seongsu", "hongdae", "geondae", "jongno"] as const;
 const DEFAULT_PER_REGION = 20;
-const MAX_PER_REGION = 100;
+const MAX_PER_REGION = 150;
 
 export type DiscoveryMenu = {
   id: string;
@@ -109,6 +109,7 @@ const RESTAURANT_COLUMNS = "source_id,name,name_en,name_ja,road_address,road_add
 const MENU_COLUMNS = "menu_id,restaurant_id,name_ko,name_en,name_ja,price,is_specialty,sort_order,description_ko,description_en,description_ja,image_url,image_source,image_source_url,image_attribution,image_status";
 
 function optionalNumber(value: number | string | null) {
+  if (value === null || value === "") return null;
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : null;
 }

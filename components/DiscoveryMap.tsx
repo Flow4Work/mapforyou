@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { DiscoveryRestaurant } from "@/lib/discovery";
+import { MAP_VIEWPORTS } from "@/lib/config";
 import {
   broadCategory,
   localizedMenuName,
@@ -88,14 +89,6 @@ type MarkerEntry = {
 
 type MarkerCategory = "cafe" | "korean" | "grill" | "global";
 
-const SEOUL_CENTER = { latitude: 37.5666103, longitude: 126.9783882 };
-const SEOUL_BOUNDS = {
-  south: 37.42829747263545,
-  west: 126.76620435615891,
-  north: 37.7010174173061,
-  east: 127.18379493229875,
-};
-const SEOUL_MIN_ZOOM = 11;
 
 function mapLanguage(language: PublicLanguage): NaverLanguage {
   return language === "ja" ? "ja" : "en";
@@ -206,7 +199,7 @@ function markerSvg(category: MarkerCategory) {
     case "korean":
       return `<svg ${common}><path fill="currentColor" d="M5 11h14c-.5 4.2-3.2 7-7 7s-6.5-2.8-7-7Zm2.2-1.5C8 7.4 9.6 6.3 12 6.3s4 1.1 4.8 3.2H7.2ZM7 19h10v2H7z"/><path d="M16.3 4 14.4 10M19 4.8 16.8 10.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>`;
     case "grill":
-      return `<svg ${common}><path d="M5 10h14M6.2 10a5.8 5.8 0 0 0 11.6 0M8.2 13.8 6.5 20M15.8 13.8 17.5 20M8 7.2h8M8.2 10v2.3M12 10v3.1M15.8 10v2.3" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+      return `<svg ${common}><path d="M4.7 19.3 19.3 4.7" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><rect x="5.7" y="12.2" width="5.3" height="4.8" rx="1.3" fill="currentColor" transform="rotate(-45 8.35 14.6)"/><rect x="9.5" y="8.4" width="5.3" height="4.8" rx="1.3" fill="currentColor" transform="rotate(-45 12.15 10.8)"/><rect x="13.3" y="4.6" width="5.3" height="4.8" rx="1.3" fill="currentColor" transform="rotate(-45 15.95 7)"/></svg>`;
     default:
       return `<svg ${common}><path fill="currentColor" d="M5 3h2v7h1V3h2v7a4 4 0 0 1-2 3.5V21H6v-7.5A4 4 0 0 1 4 10V3h1Zm10 0h2v8h2V3h2v18h-2v-8h-4V3Z"/></svg>`;
   }
@@ -236,11 +229,13 @@ export default function DiscoveryMap({
   stores,
   selectedId,
   language,
+  viewportRegion,
   onSelect,
 }: {
   stores: DiscoveryRestaurant[];
   selectedId: string;
   language: PublicLanguage;
+  viewportRegion: string;
   onSelect: (id: string) => void;
 }) {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -249,9 +244,11 @@ export default function DiscoveryMap({
   const markersRef = useRef<Map<string, MarkerEntry>>(new Map());
   const zoomListenerRef = useRef<NaverListener | null>(null);
   const lastStoreKeyRef = useRef("");
-  const preservedViewRef = useRef<{ center: { lat: number; lng: number }; zoom: number } | null>(null);
+  const preservedViewRef = useRef<{ center: { lat: number; lng: number }; zoom: number; viewportKey: string } | null>(null);
   const drawMarkersRef = useRef<() => void>(() => undefined);
   const [mapState, setMapState] = useState<"loading" | "ready" | "error">("loading");
+  const viewportKey = MAP_VIEWPORTS[viewportRegion] ? viewportRegion : "seoul";
+  const viewport = MAP_VIEWPORTS[viewportKey];
 
   const selectedStore = useMemo(
     () => stores.find((store) => store.id === selectedId) ?? null,
@@ -339,10 +336,11 @@ export default function DiscoveryMap({
         const bounds = new maps.LatLngBounds();
         for (const store of validStores) bounds.extend(new maps.LatLng(store.latitude!, store.longitude!));
         map.fitBounds(bounds);
+        if (map.getZoom() < viewport.minZoom) map.setZoom(viewport.minZoom);
       }
       lastStoreKeyRef.current = storeKey;
     }
-  }, [clearMarkers, onSelect, selectedId, stores]);
+  }, [clearMarkers, onSelect, selectedId, stores, viewport.minZoom]);
 
   drawMarkersRef.current = drawMarkers;
 
@@ -361,19 +359,21 @@ export default function DiscoveryMap({
       .then((maps) => {
         if (!active || !containerRef.current) return;
         mapsRef.current = maps;
-        const seoulBounds = new maps.LatLngBounds(
-          new maps.LatLng(SEOUL_BOUNDS.south, SEOUL_BOUNDS.west),
-          new maps.LatLng(SEOUL_BOUNDS.north, SEOUL_BOUNDS.east),
+        const maxBounds = new maps.LatLngBounds(
+          new maps.LatLng(viewport.maxBounds.south, viewport.maxBounds.west),
+          new maps.LatLng(viewport.maxBounds.north, viewport.maxBounds.east),
         );
-        const preservedView = preservedViewRef.current;
+        const preservedView = preservedViewRef.current?.viewportKey === viewportKey
+          ? preservedViewRef.current
+          : null;
         const map = new maps.Map(containerRef.current, {
           center: preservedView
             ? new maps.LatLng(preservedView.center.lat, preservedView.center.lng)
-            : new maps.LatLng(SEOUL_CENTER.latitude, SEOUL_CENTER.longitude),
-          zoom: preservedView?.zoom ?? 12,
-          minZoom: SEOUL_MIN_ZOOM,
+            : new maps.LatLng(viewport.center.latitude, viewport.center.longitude),
+          zoom: preservedView ? Math.max(preservedView.zoom, viewport.minZoom) : viewport.initialZoom,
+          minZoom: viewport.minZoom,
           maxZoom: 19,
-          maxBounds: seoulBounds,
+          maxBounds,
           mapTypeId: maps.MapTypeId.NORMAL,
           zoomControl: true,
           zoomControlOptions: { position: maps.Position.RIGHT_BOTTOM },
@@ -404,6 +404,7 @@ export default function DiscoveryMap({
         preservedViewRef.current = {
           center: { lat: center.lat(), lng: center.lng() },
           zoom: mapRef.current.getZoom(),
+          viewportKey,
         };
       }
       clearMarkers();
@@ -415,7 +416,7 @@ export default function DiscoveryMap({
       mapRef.current = null;
       mapsRef.current = null;
     };
-  }, [clearMarkers, language]);
+  }, [clearMarkers, language, viewportKey, viewport]);
 
   useEffect(() => {
     if (mapState === "ready") drawMarkers();

@@ -1,48 +1,50 @@
 # MapForYou
 
-하나의 Next.js 프로젝트 안에 두 화면을 둔 MVP입니다.
+서울 음식점과 메뉴를 영어/일본어로 탐색하는 Next.js 서비스입니다. 공개 첫 화면은 성수와 홍대를 지원하며, 별도 관리자 화면에서 장소와 메뉴를 조사합니다.
 
-- `/admin` — A: 내부 매장·메뉴 조사 앱
-- `/store/[slug]` — B: 영어·일본어 공개 메뉴판
-- `/store/standard-bread-seongsu` — 기본 샘플
+## 공개 데이터 기준 (2026-09-25)
 
-## 현재 가능한 것
+- 홍대: 게시된 200곳, 연결 메뉴 5,133개
+- 이번 홍대 확장: 실제 음식점 40곳, 메뉴 1,454개, 연결된 메뉴 이미지 1,412개
+- 성수: 게시된 110곳
+- 확장 시점의 이름, 네이버 장소 ID, 메뉴/이미지 수: `data/hongdae-2026-09-25.json`
+- 최신 수치는 Supabase `public_data_restaurants`와 `public_data_menus`에서 확인합니다. 데이터는 이후 변경될 수 있습니다.
 
-1. Admin 화면에 카카오 REST API 키 직접 입력
-2. 성수·홍대·건대/자양에서 치킨·카페·삼겹살 등 후보 검색
-3. 검사 이력이 있는 장소 ID를 제외하고 다음 목록 수집
-4. 카카오 장소 상세페이지에서 메뉴 존재 여부를 best-effort 검사
-5. 메뉴 직접 추가·수정, 영어·일본어 번역 입력
-6. 공개 후 같은 브라우저에서 B 화면 확인
-7. Supabase 연결 시 공용 DB에 저장하고 외부 사용자에게 공개
+## 주요 화면과 API
 
-> 카카오 공식 Local API는 메뉴 데이터를 제공하지 않습니다. 메뉴 검사는 공개 상세페이지 구조를 분석하는 보조 기능이므로 카카오 페이지 변경이나 차단에 따라 일부 매장은 수동 검수가 필요합니다.
+- `/`: 영어/일본어 음식점 탐색, 홍대/성수 선택, 메뉴와 사진, 지도
+- `/admin`: 내부 장소 및 메뉴 조사
+- `/api/discovery?perRegion=150&offset=0`: 페이지네이션된 공개 장소와 메뉴
 
-## Vercel 배포
-
-GitHub 저장소를 Vercel에서 Import하면 Next.js로 자동 인식됩니다. Kakao 키는 환경변수가 아니라 `/admin` 화면에 직접 입력합니다.
-
-## Supabase 연결
-
-1. Supabase에서 프로젝트 생성
-2. SQL Editor에서 `supabase/schema.sql` 실행
-3. Vercel 환경변수에 아래 3개 추가
-
-```env
-NEXT_PUBLIC_SUPABASE_URL=...
-NEXT_PUBLIC_SUPABASE_ANON_KEY=...
-SUPABASE_SERVICE_ROLE_KEY=...
-```
-
-4. Vercel에서 Redeploy
-
-`SUPABASE_SERVICE_ROLE_KEY`는 GitHub나 브라우저에 절대 노출하지 않습니다.
-
-## 로컬 실행
+## 로컬 실행과 기본 검증
 
 ```bash
 npm install
 npm run dev
+npm run lint
+npm run build
 ```
 
-<!-- redeploy-trigger: 2026-07-16T02:55:11+09:00 -->
+프로덕션 빌드로 확인하려면 `npm run start -- -p 3020`을 실행합니다. 다른 터미널에서 아래 명령으로 DB 조회, 지역 필터, 모바일/데스크톱 렌더링, 일본어 전환을 검사합니다.
+
+```bash
+npm run qa:hongdae -- http://127.0.0.1:3020 --browser
+```
+
+현재 로컬 환경에 NAVER Maps 인증키가 없다면 지도 SDK는 로드되지 않습니다. 지도까지 검증할 때는 등록된 도메인과 유효한 키를 설정한 실제 환경에서 `--require-map`을 함께 사용합니다.
+
+## 환경변수
+
+`.env.local`에 `NEXT_PUBLIC_SUPABASE_URL`, 서버 전용 `SUPABASE_SERVICE_ROLE_KEY`, `NEXT_PUBLIC_NAVER_MAP_CLIENT_ID`를 설정합니다. NAVER Maps에서 실제 서비스 도메인을 허용해야 지도가 로드됩니다. 개인용 비밀키를 `NEXT_PUBLIC_` 변수에 저장하거나 Git에 커밋하지 않습니다.
+
+데이터를 추가하거나 갱신하는 작업에는 공개용 Supabase 키가 아닌 서버용 관리자 키를 사용합니다. 공개용 키로 신규 매장을 검색하면 비공개 초안과의 중복을 놓칠 수 있으며, 확장 스크립트는 관리자 키가 없는 게시 작업을 차단합니다.
+
+## 홍대 확장 및 재현 가능한 QA
+
+```bash
+npm run expand:region -- --region hongdae --restaurants 40 --cafes 0
+npm run expand:region -- --region hongdae --restaurants 40 --cafes 0 --candidate-run .expansion-runs/<previous-run>
+node scripts/verify-expansion-images.mjs .expansion-runs/<run-id> 3
+```
+
+검색, 후보 검증, 번역 및 사전 검사를 통과한 작업물은 무시된 `.expansion-runs/`에 저장됩니다. 게시하려면 이미 존재하는 장소 ID와 정규화된 이름/주소를 다시 확인한 뒤 관리자 키로 `--publish-run <run-id>`을 사용합니다. 이미지가 없으면 `not_available`로 표시하며 임의 이미지나 추측한 가격을 채우지 않습니다. 기존 작업 파일과 수집 증빙은 별도 보존합니다.

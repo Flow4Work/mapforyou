@@ -277,7 +277,7 @@ export default function RestaurantDetail({ store }: { store: DiscoveryRestaurant
           </section>
 
           <section className="detail-mini-map">
-            <DiscoveryMap stores={[store]} selectedId={store.id} language={language} onSelect={() => undefined} />
+            <DiscoveryMap stores={[store]} selectedId={store.id} language={language} viewportRegion={store.regionKey || "seoul"} onSelect={() => undefined} />
           </section>
 
           <div className="detail-data-note">✓ {copy.checked}</div>

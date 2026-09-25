@@ -6,6 +6,7 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 function integerParam(value: string | null, fallback: number) {
+  if (value === null || value.trim() === "") return fallback;
   const parsed = Number(value);
   return Number.isInteger(parsed) && parsed >= 0 ? parsed : fallback;
 }
@@ -17,11 +18,10 @@ export async function GET(request: Request) {
     const perRegion = integerParam(url.searchParams.get("perRegion"), 20);
     const page = await loadDiscoveryRestaurantPage({ offset, perRegion });
     const stores = page.stores.filter(
-      (store) => store.regionKey === "seongsu",
+      (store) => store.regionKey === "seongsu" || store.regionKey === "hongdae",
     );
-
     return NextResponse.json(
-      { stores, nextOffset: null },
+      { stores, nextOffset: page.nextOffset },
       {
         headers: {
           "Cache-Control": "no-store, max-age=0",

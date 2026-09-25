@@ -8,7 +8,7 @@ export const revalidate = 0;
 
 export default async function HomePage() {
   const stores = (await loadDiscoveryRestaurants(1000)).filter(
-    (store) => store.regionKey === "seongsu",
+    (store) => store.regionKey === "seongsu" || store.regionKey === "hongdae",
   );
 
   return (

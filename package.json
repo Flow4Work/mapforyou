@@ -8,7 +8,9 @@
     "prebuild": "node scripts/ensure-jongno-region.mjs",
     "build": "next build",
     "start": "next start",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "expand:region": "node scripts/expand-region.mjs",
+    "qa:hongdae": "node scripts/qa-hongdae-release.mjs"
   },
   "dependencies": {
     "@sparticuz/chromium": "149.0.0",
