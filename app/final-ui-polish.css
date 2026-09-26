@@ -509,3 +509,67 @@
   .map-meat-legend { top: 9px; left: 9px; padding: 5px 7px; gap: 4px 8px; }
   .map-meat-legend-item { font-size: 9px; }
 }
+
+/* Mobile: an actual map view, not a permanently hidden desktop panel. */
+@media (max-width: 900px) {
+  .mobile-panel-tabs {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 7px;
+    background: #fffaf6;
+  }
+  .mobile-panel-tabs button {
+    min-width: 0;
+    border: 1px solid #f0e2d7;
+    background: #fff;
+    color: #695043;
+    transition: background .15s ease, border-color .15s ease;
+  }
+  .mobile-panel-tabs button.active {
+    border-color: #c34730;
+    background: #c34730;
+    color: #fff;
+    box-shadow: 0 2px 7px rgba(143, 46, 29, .18);
+  }
+  .discovery-map-panel {
+    display: block;
+    grid-row: 1;
+    height: 100%;
+    min-height: 0;
+    min-width: 0;
+    border-right: 0;
+  }
+  .discovery-map-panel.mobile-panel-hidden { display: none !important; }
+  .map-selected-card {
+    max-width: min(310px, calc(100% - 85px));
+    bottom: 14px;
+    left: 12px;
+    padding: 11px 12px;
+    border: 1px solid #ead9ca;
+    box-shadow: 0 7px 20px rgba(76, 40, 25, .18);
+  }
+  .map-meat-legend {
+    top: 9px;
+    left: 9px;
+    gap: 5px 9px;
+    max-width: calc(100% - 18px);
+  }
+}
+@media (max-width: 560px) {
+  .discovery-workspace { height: calc(100dvh - 104px); }
+  .mobile-panel-tabs { height: 46px; padding: 5px 10px; }
+  .mobile-panel-tabs button { height: 36px; font-size: 12px; }
+  .map-selected-card strong { font-size: 13px; }
+  .map-selected-card small { font-size: 10px; }
+}
+
+/* Standalone restaurant detail previously hid its map at every mobile width. */
+@media (max-width: 900px) {
+  .detail-page .detail-mini-map {
+    display: block;
+    height: min(280px, 39dvh);
+    min-height: 205px;
+    margin-top: 14px;
+    border-radius: 15px;
+  }
+  .detail-page .detail-mini-map .map-meat-legend { display: none; }
+}

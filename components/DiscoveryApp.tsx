@@ -224,7 +224,7 @@ export default function DiscoveryApp({
   const [revealedMenuId, setRevealedMenuId] = useState("");
   const [menuViewMode, setMenuViewMode] = useState<"photo" | "compact">("photo");
   const [menuImageViewer, setMenuImageViewer] = useState<{ src: string; alt: string } | null>(null);
-  const [mobilePanel, setMobilePanel] = useState<"places" | "menu">("places");
+  const [mobilePanel, setMobilePanel] = useState<"places" | "map" | "menu">("places");
   const foodScrollRef = useRef<HTMLDivElement | null>(null);
   const [foodScrollState, setFoodScrollState] = useState({ overflow: false, canLeft: false, canRight: false });
 
@@ -265,6 +265,7 @@ export default function DiscoveryApp({
             "公開データを整理した参考情報です。価格・営業情報は店舗で変更される場合があります。",
           exchangeNotice: "参考為替",
           listTab: "お店",
+          mapTab: "地図",
           menuTab: "メニュー",
         }
       : {
@@ -302,6 +303,7 @@ export default function DiscoveryApp({
             "This is reference information organized from public data. Prices and operating details may change at the restaurant.",
           exchangeNotice: "Reference rate",
           listTab: "Places",
+          mapTab: "Map",
           menuTab: "Menu",
         };
 
@@ -509,6 +511,13 @@ export default function DiscoveryApp({
           {copy.listTab}
         </button>
         <button
+          className={mobilePanel === "map" ? "active" : ""}
+          aria-pressed={mobilePanel === "map"}
+          onClick={() => setMobilePanel("map")}
+        >
+          {copy.mapTab}
+        </button>
+        <button
           className={mobilePanel === "menu" ? "active" : ""}
           onClick={() => setMobilePanel("menu")}
         >
@@ -627,7 +636,7 @@ export default function DiscoveryApp({
           )}
         </aside>
 
-        <section className="discovery-map-panel">
+        <section className={`discovery-map-panel ${mobilePanel !== "map" ? "mobile-panel-hidden" : ""}`} aria-label={language === "ja" ? "お店の地図" : "Restaurant map"}>
           <DiscoveryMap
             stores={filteredStores}
             selectedId={selectedStore?.id ?? ""}
