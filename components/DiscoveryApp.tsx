@@ -225,6 +225,14 @@ export default function DiscoveryApp({
   const [menuViewMode, setMenuViewMode] = useState<"photo" | "compact">("photo");
   const [menuImageViewer, setMenuImageViewer] = useState<{ src: string; alt: string } | null>(null);
   const [mobilePanel, setMobilePanel] = useState<"places" | "map" | "menu">("places");
+  const [isNarrowScreen, setIsNarrowScreen] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 900px)");
+    const update = () => setIsNarrowScreen(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
   const foodScrollRef = useRef<HTMLDivElement | null>(null);
   const [foodScrollState, setFoodScrollState] = useState({ overflow: false, canLeft: false, canRight: false });
 
@@ -637,13 +645,13 @@ export default function DiscoveryApp({
         </aside>
 
         <section className={`discovery-map-panel ${mobilePanel !== "map" ? "mobile-panel-hidden" : ""}`} aria-label={language === "ja" ? "お店の地図" : "Restaurant map"}>
-          <DiscoveryMap
+          {(!isNarrowScreen || mobilePanel === "map") && <DiscoveryMap
             stores={filteredStores}
             selectedId={selectedStore?.id ?? ""}
             language={language}
             viewportRegion={region === "all" && regions.length === 1 ? regions[0] : region}
             onSelect={handleSelect}
-          />
+          />}
         </section>
 
         <aside
