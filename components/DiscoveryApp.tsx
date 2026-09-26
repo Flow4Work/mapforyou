@@ -215,6 +215,8 @@ export default function DiscoveryApp({
   const [language, setLanguage] = useState<PublicLanguage>("en");
   const [search, setSearch] = useState("");
   const [region, setRegion] = useState("all");
+  const [mobileFullMap, setMobileFullMap] = useState(false);
+  const initialMobileRegionSet = useRef(false);
   const [category, setCategory] = useState<"all" | BroadCategory>("all");
   const [selectedId, setSelectedId] = useState(
     () => [...initialStores].sort(defaultRecommendationCompare)[0]?.id ?? "",
@@ -229,6 +231,8 @@ export default function DiscoveryApp({
   const [isNarrowScreen, setIsNarrowScreen] = useState(false);
   const [viewportReady, setViewportReady] = useState(false);
   const [sheetExpanded, setSheetExpanded] = useState(false);
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [mobileVisibleCount, setMobileVisibleCount] = useState(24);
   const [sheetContent, setSheetContent] = useState<"browse" | "selected">("browse");
   const [mapActiveId, setMapActiveId] = useState("");
   const sheetTouchStart = useRef<number | null>(null);
@@ -237,6 +241,10 @@ export default function DiscoveryApp({
     const mq = window.matchMedia("(max-width: 900px)");
     const update = () => {
       setIsNarrowScreen(mq.matches);
+      if (mq.matches && !initialMobileRegionSet.current) {
+        initialMobileRegionSet.current = true;
+        if (initialStores.some((store) => store.regionKey === "seongsu")) setRegion("seongsu");
+      }
       setViewportReady(true);
     };
     update();
@@ -446,6 +454,7 @@ export default function DiscoveryApp({
   useEffect(() => {
     setMapActiveId("");
     setSheetContent("browse");
+    setMobileVisibleCount(24);
   }, [region, category, search]);
 
   useEffect(() => {
@@ -465,6 +474,13 @@ export default function DiscoveryApp({
     setSheetContent("selected");
     setSheetExpanded(false);
     setMobilePanel("map");
+  }, []);
+
+  const openMobileDetail = useCallback((id: string) => {
+    setMobileFullMap(false);
+    setSheetExpanded(false);
+    setSelectedId(id);
+    setMobilePanel("menu");
   }, []);
 
   const showAllMobilePlaces = useCallback(() => {
@@ -487,6 +503,7 @@ export default function DiscoveryApp({
     setSearch("");
     setRegion("all");
     setCategory("all");
+    setMobileFiltersOpen(false);
   }
 
   function formatPrice(price: number) {
@@ -504,7 +521,7 @@ export default function DiscoveryApp({
       : `${copy.exchangeNotice} (${rates.date}): $1 ≈ ₩${Math.round(1 / rates.usdPerKrw).toLocaleString("en-US")}. The final card or cash rate may differ by provider and time.`;
 
   return (
-    <main className={`discovery-page ${isNarrowScreen ? "mobile-map-home" : ""} ${mobilePanel === "menu" ? "mobile-details-open" : ""} ${sheetExpanded ? "mobile-sheet-expanded" : "mobile-sheet-peek"} ${sheetContent === "selected" ? "mobile-sheet-selected" : ""}`}>
+    <main className={`discovery-page ${isNarrowScreen ? "mobile-map-home" : ""} ${mobilePanel === "menu" ? "mobile-details-open" : ""} ${sheetExpanded ? "mobile-sheet-expanded" : "mobile-sheet-peek"} ${sheetContent === "selected" ? "mobile-sheet-selected" : ""} ${mobileFullMap ? "mobile-full-map" : ""}`}>
       <header className="discovery-header">
         <div className="discovery-brand">
           <span className="brand-mark">M</span>
@@ -558,6 +575,14 @@ export default function DiscoveryApp({
         <aside
           className={`discovery-list-panel ${mobilePanel === "menu" ? "mobile-panel-hidden" : ""}`}
         >
+          <div className="mobile-list-categories" role="group" aria-label={copy.food}>
+            <button className={category === "all" ? "active" : ""} onClick={() => setCategory("all")} type="button">{copy.allFood}</button>
+            {categories.map((item) => (
+              <button className={category === item ? "active" : ""} key={item} onClick={() => setCategory(item)} type="button">
+                {categoryIcon(item)} {categoryLabel(item, language)}
+              </button>
+            ))}
+          </div>
           <div className="mobile-sheet-toolbar">
             <button
               className="mobile-sheet-grip"
@@ -628,14 +653,14 @@ export default function DiscoveryApp({
             filteredStores.length > 0 ? (
               <div className="mobile-recommendation-rail">
                 {filteredStores.slice(0, 3).map((store) => (
-                  <button className="mobile-recommendation-tile" type="button" key={store.id} onClick={() => handleMapSelect(store.id)}>
+                  <button className="mobile-recommendation-tile" type="button" key={store.id} onClick={() => openMobileDetail(store.id)}>
                     {store.imageUrl ? (
                       <img src={compactThumbnailUrl(store.imageUrl)} alt="" loading="lazy" onError={(event) => { event.currentTarget.style.display = "none"; }} />
                     ) : <span className="mobile-recommendation-fallback">{categoryIcon(broadCategory(store))}</span>}
                     <span>
                       <small>{regionLabel(store.regionKey, language)}</small>
                       <strong>{localizedRestaurantName(store, language)}</strong>
-                      <em>{language === "ja" ? "地図で確認 →" : "View on map →"}</em>
+                      <em>{language === "ja" ? "メニュー・詳細を見る →" : "Menus & details →"}</em>
                     </span>
                   </button>
                 ))}
@@ -737,7 +762,7 @@ export default function DiscoveryApp({
             </div>
           ) : (
             <div className="discovery-list" id="mobile-places-list">
-              {(isNarrowScreen && !sheetExpanded ? [] : filteredStores).map((store) => (
+              {(isNarrowScreen ? filteredStores.slice(0, mobileVisibleCount) : filteredStores).map((store) => (
                 <DiscoveryListCard
                   key={store.id}
                   store={store}
@@ -746,10 +771,15 @@ export default function DiscoveryApp({
                   menusLabel={copy.menus}
                   showConvertedPrice={showConvertedPrice}
                   rates={showConvertedPrice ? rates : FALLBACK_RATES}
-                  onSelect={isNarrowScreen ? handleMapSelect : handleSelect}
+                  onSelect={isNarrowScreen ? openMobileDetail : handleSelect}
                 />
               ))}
             </div>
+          )}
+          {isNarrowScreen && filteredStores.length > mobileVisibleCount && (
+            <button type="button" className="mobile-load-more" onClick={() => setMobileVisibleCount((n) => n + 24)}>
+              {language === "ja" ? "もっと見る ↓" : "Show more ↓"}
+            </button>
           )}
         </aside>
 
@@ -761,7 +791,7 @@ export default function DiscoveryApp({
                 type="search"
                 value={search}
                 placeholder={copy.search}
-                onFocus={() => { setSheetContent("browse"); setSheetExpanded(true); }}
+                onFocus={() => { setSheetContent("browse"); }}
                 onChange={(event) => {
                   setSearch(event.target.value);
                   setSheetContent("browse");
@@ -786,6 +816,9 @@ export default function DiscoveryApp({
               ))}
             </div>
           </div>
+          <button type="button" className="mobile-map-expand" aria-label={mobileFullMap ? (language === "ja" ? "地図を閉じる" : "Close full map") : (language === "ja" ? "地図を全画面表示" : "Expand map")} onClick={() => setMobileFullMap((value) => !value)}>
+            {mobileFullMap ? (language === "ja" ? "一覧に戻る ↓" : "Show list ↓") : (language === "ja" ? "地図を拡大 ↗" : "Full map ↗")}
+          </button>
           {viewportReady && <DiscoveryMap
             stores={filteredStores}
             selectedId={isNarrowScreen ? mapActiveId : (selectedStore?.id ?? "")}
@@ -793,13 +826,24 @@ export default function DiscoveryApp({
             viewportRegion={region === "all" && regions.length === 1 ? regions[0] : region}
             onSelect={isNarrowScreen ? handleMapSelect : handleSelect}
           />}
+          {isNarrowScreen && mapPreviewStore && (
+            <div className="mobile-map-selection">
+              <span>{regionLabel(mapPreviewStore.regionKey, language)}</span>
+              <strong>{localizedRestaurantName(mapPreviewStore, language)}</strong>
+              <small>{representativeMenu(mapPreviewStore) ? localizedMenuName(representativeMenu(mapPreviewStore)!, language) : localizedAddress(mapPreviewStore, language)}</small>
+              <div>
+                <button type="button" onClick={() => openMobileDetail(mapPreviewStore.id)}>{language === "ja" ? "メニュー・詳細" : "Menu & details"}</button>
+                <a href={bookingPlaceUrl(mapPreviewStore, language)} target="_blank" rel="noreferrer">{language === "ja" ? "予約 ↗" : "Book ↗"}</a>
+              </div>
+            </div>
+          )}
         </section>
 
         <aside
           className={`restaurant-detail-panel ${mobilePanel !== "menu" ? "mobile-panel-hidden" : ""}`}
         >
           <button className="mobile-detail-back" type="button" onClick={() => setMobilePanel("map")}>
-            <span aria-hidden="true">←</span> {language === "ja" ? "地図に戻る" : "Back to map"}
+            <span aria-hidden="true">←</span> {language === "ja" ? "一覧に戻る" : "Back to places"}
           </button>
           {selectedStore ? (
             <div className="restaurant-detail-scroll">

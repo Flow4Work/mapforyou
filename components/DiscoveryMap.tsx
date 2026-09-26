@@ -41,6 +41,7 @@ type NaverMap = {
   panTo: (coordinate: NaverLatLng) => void;
   setCenter: (coordinate: NaverLatLng) => void;
   setSize: (size: NaverSize) => void;
+  setOptions: (options: Record<string, unknown>) => void;
   setZoom: (zoom: number, effect?: boolean) => void;
 };
 
@@ -235,6 +236,7 @@ export default function DiscoveryMap({
   const idleListenerRef = useRef<NaverListener | null>(null);
   const tilesListenerRef = useRef<NaverListener | null>(null);
   const lastStoreKeyRef = useRef("");
+  const lastAppliedViewportRef = useRef(viewportRegion);
   const preservedViewRef = useRef<{ center: { lat: number; lng: number }; zoom: number; viewportKey: string } | null>(null);
   const drawMarkersRef = useRef<() => void>(() => undefined);
   const [mapState, setMapState] = useState<"loading" | "ready" | "error">("loading");
@@ -319,20 +321,15 @@ export default function DiscoveryMap({
       .sort()
       .join("|");
 
-    if (storeKey && storeKey !== lastStoreKeyRef.current) {
+    if (storeKey && storeKey !== lastStoreKeyRef.current && stores.length === 1) {
       const validStores = stores.filter((store) => store.latitude != null && store.longitude != null);
       if (validStores.length === 1) {
         map.setCenter(new maps.LatLng(validStores[0].latitude!, validStores[0].longitude!));
         map.setZoom(16);
-      } else if (validStores.length > 1) {
-        const bounds = new maps.LatLngBounds();
-        for (const store of validStores) bounds.extend(new maps.LatLng(store.latitude!, store.longitude!));
-        map.fitBounds(bounds);
-        if (map.getZoom() < viewport.minZoom) map.setZoom(viewport.minZoom);
       }
       lastStoreKeyRef.current = storeKey;
     }
-  }, [clearMarkers, language, onSelect, selectedId, stores, viewport.minZoom]);
+  }, [clearMarkers, language, onSelect, selectedId, stores]);
 
   drawMarkersRef.current = drawMarkers;
 
@@ -388,10 +385,15 @@ export default function DiscoveryMap({
         idleListenerRef.current = maps.Event.addListener(map, "idle", () => drawMarkersRef.current());
         observer = new ResizeObserver(() => {
           if (!containerRef.current || !mapRef.current || !mapsRef.current) return;
-          const rect = containerRef.current.getBoundingClientRect();
-          mapRef.current.setSize(new mapsRef.current.Size(rect.width, rect.height));
+          // NAVER writes an inline pixel height to the map element. Observe its
+          // CSS-sized parent instead so full-map transitions actually resize tiles.
+          const host = containerRef.current.parentElement ?? containerRef.current;
+          const rect = host.getBoundingClientRect();
+          if (rect.width > 0 && rect.height > 0) {
+            mapRef.current.setSize(new mapsRef.current.Size(rect.width, rect.height));
+          }
         });
-        observer.observe(containerRef.current);
+        observer.observe(containerRef.current.parentElement ?? containerRef.current);
         readyTimeout = window.setTimeout(() => {
           if (!active || tilesReady) return;
           const loaded = [...(containerRef.current?.querySelectorAll("img") ?? [])]
@@ -438,11 +440,26 @@ export default function DiscoveryMap({
       mapRef.current = null;
       mapsRef.current = null;
     };
-  }, [clearMarkers, language, reloadToken, viewportKey, viewport]);
+  }, [clearMarkers, language, reloadToken]);
 
   useEffect(() => {
     if (mapState === "ready") drawMarkers();
   }, [drawMarkers, mapState]);
+
+  useEffect(() => {
+    if (mapState !== "ready" || !mapRef.current || !mapsRef.current) return;
+    if (lastAppliedViewportRef.current === viewportKey) return;
+    lastAppliedViewportRef.current = viewportKey;
+    const map = mapRef.current;
+    const maps = mapsRef.current;
+    const bounds = new maps.LatLngBounds(
+      new maps.LatLng(viewport.maxBounds.south, viewport.maxBounds.west),
+      new maps.LatLng(viewport.maxBounds.north, viewport.maxBounds.east),
+    );
+    map.setOptions({ minZoom: viewport.minZoom, maxBounds: bounds });
+    map.setCenter(new maps.LatLng(viewport.center.latitude, viewport.center.longitude));
+    map.setZoom(viewport.initialZoom, false);
+  }, [viewportKey, viewport, mapState]);
 
   useEffect(() => {
     const map = mapRef.current;
