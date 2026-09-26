@@ -624,3 +624,12 @@
   .public-language-toggle button:first-child { width: 36px; }
   .public-language-toggle button:last-child { width: 52px; }
 }
+
+/* Narrow-phone booking CTA stays readable instead of a contextless arrow. */
+.booking-compact-label { display: none; }
+@media (max-width: 359px) {
+  .booking-header-cta { flex-basis: 55px; width: 55px; min-width: 55px; max-width: 55px; }
+  .booking-header-cta strong { display: flex; justify-content: center; gap: 1px; width: 49px; min-width: 49px; height: 30px; }
+  .booking-header-cta strong .booking-compact-label { display: inline; font-size: 10px; }
+  .booking-header-cta strong > span:last-child { font-size: 11px; }
+}

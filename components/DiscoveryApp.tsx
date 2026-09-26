@@ -224,11 +224,21 @@ export default function DiscoveryApp({
   const [revealedMenuId, setRevealedMenuId] = useState("");
   const [menuViewMode, setMenuViewMode] = useState<"photo" | "compact">("photo");
   const [menuImageViewer, setMenuImageViewer] = useState<{ src: string; alt: string } | null>(null);
-  const [mobilePanel, setMobilePanel] = useState<"places" | "map" | "menu">("places");
+  // Desktop remains a three-column workspace; mobile is a persistent map with a sheet.
+  const [mobilePanel, setMobilePanel] = useState<"map" | "menu">("map");
   const [isNarrowScreen, setIsNarrowScreen] = useState(false);
+  const [viewportReady, setViewportReady] = useState(false);
+  const [sheetExpanded, setSheetExpanded] = useState(false);
+  const [sheetContent, setSheetContent] = useState<"browse" | "selected">("browse");
+  const [mapActiveId, setMapActiveId] = useState("");
+  const sheetTouchStart = useRef<number | null>(null);
+  const handledDrag = useRef(false);
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 900px)");
-    const update = () => setIsNarrowScreen(mq.matches);
+    const update = () => {
+      setIsNarrowScreen(mq.matches);
+      setViewportReady(true);
+    };
     update();
     mq.addEventListener("change", update);
     return () => mq.removeEventListener("change", update);
@@ -428,6 +438,15 @@ export default function DiscoveryApp({
       null,
     [filteredStores, selectedId],
   );
+  const mapPreviewStore = useMemo(
+    () => filteredStores.find((store) => store.id === mapActiveId) ?? null,
+    [filteredStores, mapActiveId],
+  );
+
+  useEffect(() => {
+    setMapActiveId("");
+    setSheetContent("browse");
+  }, [region, category, search]);
 
   useEffect(() => {
     setRevealedMenuId("");
@@ -439,6 +458,30 @@ export default function DiscoveryApp({
     setRevealedMenuId("");
     setMobilePanel("menu");
   }, []);
+
+  const handleMapSelect = useCallback((id: string) => {
+    setSelectedId(id);
+    setMapActiveId(id);
+    setSheetContent("selected");
+    setSheetExpanded(false);
+    setMobilePanel("map");
+  }, []);
+
+  const showAllMobilePlaces = useCallback(() => {
+    setSheetContent("browse");
+    setSheetExpanded(true);
+  }, []);
+
+  // Only the grip handles swipe gestures, so scrolling the restaurant list remains natural.
+  const endSheetSwipe = useCallback((endY: number) => {
+    if (sheetTouchStart.current === null) return;
+    const distance = endY - sheetTouchStart.current;
+    sheetTouchStart.current = null;
+    if (Math.abs(distance) < 45) return;
+    handledDrag.current = true;
+    if (distance < 0) showAllMobilePlaces();
+    else setSheetExpanded(false);
+  }, [showAllMobilePlaces]);
 
   function resetFilters() {
     setSearch("");
@@ -461,7 +504,7 @@ export default function DiscoveryApp({
       : `${copy.exchangeNotice} (${rates.date}): $1 ≈ ₩${Math.round(1 / rates.usdPerKrw).toLocaleString("en-US")}. The final card or cash rate may differ by provider and time.`;
 
   return (
-    <main className="discovery-page">
+    <main className={`discovery-page ${isNarrowScreen ? "mobile-map-home" : ""} ${mobilePanel === "menu" ? "mobile-details-open" : ""} ${sheetExpanded ? "mobile-sheet-expanded" : "mobile-sheet-peek"} ${sheetContent === "selected" ? "mobile-sheet-selected" : ""}`}>
       <header className="discovery-header">
         <div className="discovery-brand">
           <span className="brand-mark">M</span>
@@ -482,7 +525,7 @@ export default function DiscoveryApp({
               <span aria-hidden="true">{copy.bookingTicker}</span>
             </span>
           </span>
-          <strong>{copy.bookingHeader}<span aria-hidden="true"> ↗</span></strong>
+          <strong>{copy.bookingHeader}<span className="booking-compact-label">{language === "ja" ? "予約" : "Book"}</span><span aria-hidden="true"> ↗</span></strong>
         </a>
         <div className="header-actions">
           <button
@@ -511,32 +554,98 @@ export default function DiscoveryApp({
         </div>
       </header>
 
-      <nav className="mobile-panel-tabs" aria-label="Mobile panels">
-        <button
-          className={mobilePanel === "places" ? "active" : ""}
-          onClick={() => setMobilePanel("places")}
-        >
-          {copy.listTab}
-        </button>
-        <button
-          className={mobilePanel === "map" ? "active" : ""}
-          aria-pressed={mobilePanel === "map"}
-          onClick={() => setMobilePanel("map")}
-        >
-          {copy.mapTab}
-        </button>
-        <button
-          className={mobilePanel === "menu" ? "active" : ""}
-          onClick={() => setMobilePanel("menu")}
-        >
-          {copy.menuTab}
-        </button>
-      </nav>
-
       <section className="discovery-workspace">
         <aside
-          className={`discovery-list-panel ${mobilePanel !== "places" ? "mobile-panel-hidden" : ""}`}
+          className={`discovery-list-panel ${mobilePanel === "menu" ? "mobile-panel-hidden" : ""}`}
         >
+          <div className="mobile-sheet-toolbar">
+            <button
+              className="mobile-sheet-grip"
+              type="button"
+              aria-label={language === "ja" ? "お店リストを開閉" : "Expand or collapse restaurant list"}
+              aria-expanded={sheetExpanded}
+              aria-controls="mobile-places-list"
+              onTouchStart={(event) => {
+                sheetTouchStart.current = event.touches[0]?.clientY ?? null;
+                handledDrag.current = false;
+              }}
+              onTouchEnd={(event) => endSheetSwipe(event.changedTouches[0]?.clientY ?? 0)}
+              onTouchCancel={() => { sheetTouchStart.current = null; }}
+              onClick={() => {
+                if (handledDrag.current) { handledDrag.current = false; return; }
+                if (sheetExpanded) setSheetExpanded(false);
+                else showAllMobilePlaces();
+              }}
+            >
+              <span aria-hidden="true" />
+            </button>
+            <div className="mobile-sheet-title">
+              <div>
+                <strong>{sheetContent === "selected" && mapPreviewStore
+                  ? localizedRestaurantName(mapPreviewStore, language)
+                  : copy.recommendations}</strong>
+                <small>{filteredStores.length} {copy.places}</small>
+              </div>
+              <button
+                className="mobile-sheet-toggle"
+                type="button"
+                onClick={() => {
+                  if (sheetExpanded) setSheetExpanded(false);
+                  else showAllMobilePlaces();
+                }}
+              >
+                {sheetExpanded
+                  ? (language === "ja" ? "地図を見る ↓" : "Show map ↓")
+                  : (language === "ja" ? "一覧を見る ↑" : "See all ↑")}
+              </button>
+            </div>
+          </div>
+          {!sheetExpanded && sheetContent === "selected" && mapPreviewStore && (
+            <div className="mobile-selected-preview">
+              <div className="mobile-selected-summary">
+                {mapPreviewStore.imageUrl && (
+                  <img src={compactThumbnailUrl(mapPreviewStore.imageUrl)} alt="" loading="lazy" onError={(event) => { event.currentTarget.style.display = "none"; }} />
+                )}
+                <div>
+                  <span>{regionLabel(mapPreviewStore.regionKey, language)} · {categoryLabel(broadCategory(mapPreviewStore), language)}</span>
+                  <strong>{localizedRestaurantName(mapPreviewStore, language)}</strong>
+                  <small>{representativeMenu(mapPreviewStore)
+                    ? localizedMenuName(representativeMenu(mapPreviewStore)!, language)
+                    : (language === "ja" ? "メニューを見る" : "Explore the menu")}</small>
+                </div>
+              </div>
+              <div className="mobile-selected-actions">
+                <button type="button" className="mobile-detail-cta" onClick={() => setMobilePanel("menu")}>
+                  {language === "ja" ? "メニュー・店舗情報" : "Menus & details"} <span aria-hidden="true">↗</span>
+                </button>
+                <button type="button" className="mobile-selected-list-back" onClick={showAllMobilePlaces}>
+                  {language === "ja" ? "お店一覧" : "All places"}
+                </button>
+              </div>
+            </div>
+          )}
+          {!sheetExpanded && sheetContent === "browse" && (
+            filteredStores.length > 0 ? (
+              <div className="mobile-recommendation-rail">
+                {filteredStores.slice(0, 3).map((store) => (
+                  <button className="mobile-recommendation-tile" type="button" key={store.id} onClick={() => handleMapSelect(store.id)}>
+                    {store.imageUrl ? (
+                      <img src={compactThumbnailUrl(store.imageUrl)} alt="" loading="lazy" onError={(event) => { event.currentTarget.style.display = "none"; }} />
+                    ) : <span className="mobile-recommendation-fallback">{categoryIcon(broadCategory(store))}</span>}
+                    <span>
+                      <small>{regionLabel(store.regionKey, language)}</small>
+                      <strong>{localizedRestaurantName(store, language)}</strong>
+                      <em>{language === "ja" ? "地図で確認 →" : "View on map →"}</em>
+                    </span>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="mobile-sheet-no-results">{copy.noResults}
+                <button type="button" onClick={resetFilters}>{copy.reset}</button>
+              </div>
+            )
+          )}
           <div className="list-controls">
             <label className="discovery-search">
               <span>⌕</span>
@@ -627,8 +736,8 @@ export default function DiscoveryApp({
               <button onClick={resetFilters}>{copy.reset}</button>
             </div>
           ) : (
-            <div className="discovery-list">
-              {filteredStores.map((store) => (
+            <div className="discovery-list" id="mobile-places-list">
+              {(isNarrowScreen && !sheetExpanded ? [] : filteredStores).map((store) => (
                 <DiscoveryListCard
                   key={store.id}
                   store={store}
@@ -637,26 +746,61 @@ export default function DiscoveryApp({
                   menusLabel={copy.menus}
                   showConvertedPrice={showConvertedPrice}
                   rates={showConvertedPrice ? rates : FALLBACK_RATES}
-                  onSelect={handleSelect}
+                  onSelect={isNarrowScreen ? handleMapSelect : handleSelect}
                 />
               ))}
             </div>
           )}
         </aside>
 
-        <section className={`discovery-map-panel ${mobilePanel !== "map" ? "mobile-panel-hidden" : ""}`} aria-label={language === "ja" ? "お店の地図" : "Restaurant map"}>
-          {(!isNarrowScreen || mobilePanel === "map") && <DiscoveryMap
+        <section className="discovery-map-panel" aria-label={language === "ja" ? "お店の地図" : "Restaurant map"}>
+          <div className="mobile-map-tools" role="search" aria-label={language === "ja" ? "お店を検索・絞り込み" : "Find restaurants"}>
+            <label className="mobile-map-search">
+              <span aria-hidden="true">⌕</span>
+              <input
+                type="search"
+                value={search}
+                placeholder={copy.search}
+                onFocus={() => { setSheetContent("browse"); setSheetExpanded(true); }}
+                onChange={(event) => {
+                  setSearch(event.target.value);
+                  setSheetContent("browse");
+                  setSheetExpanded(Boolean(event.target.value.trim()));
+                }}
+              />
+            </label>
+            <div className="mobile-map-chip-row" role="group" aria-label={copy.areas}>
+              <button className={region === "all" ? "active" : ""} onClick={() => setRegion("all")} type="button">{copy.allAreas}</button>
+              {regions.map((item) => (
+                <button className={region === item ? "active" : ""} key={item} onClick={() => setRegion(item)} type="button">
+                  {regionLabel(item, language)}
+                </button>
+              ))}
+            </div>
+            <div className="mobile-map-chip-row mobile-map-food-row" role="group" aria-label={copy.food}>
+              <button className={category === "all" ? "active" : ""} onClick={() => setCategory("all")} type="button">{copy.allFood}</button>
+              {categories.map((item) => (
+                <button className={category === item ? "active" : ""} key={item} onClick={() => setCategory(item)} type="button">
+                  {categoryIcon(item)} {categoryLabel(item, language)}
+                </button>
+              ))}
+            </div>
+          </div>
+          {viewportReady && <DiscoveryMap
             stores={filteredStores}
-            selectedId={selectedStore?.id ?? ""}
+            selectedId={isNarrowScreen ? mapActiveId : (selectedStore?.id ?? "")}
             language={language}
             viewportRegion={region === "all" && regions.length === 1 ? regions[0] : region}
-            onSelect={handleSelect}
+            onSelect={isNarrowScreen ? handleMapSelect : handleSelect}
           />}
         </section>
 
         <aside
           className={`restaurant-detail-panel ${mobilePanel !== "menu" ? "mobile-panel-hidden" : ""}`}
         >
+          <button className="mobile-detail-back" type="button" onClick={() => setMobilePanel("map")}>
+            <span aria-hidden="true">←</span> {language === "ja" ? "地図に戻る" : "Back to map"}
+          </button>
           {selectedStore ? (
             <div className="restaurant-detail-scroll">
               <RestaurantCover store={selectedStore} language={language} />
