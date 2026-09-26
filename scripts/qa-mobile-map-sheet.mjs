@@ -33,7 +33,12 @@ let a=await stats();assert.equal(a.width,390);assert(a.mapRect.height>=700&&a.sh
 await page.click(".mobile-sheet-toggle");await page.waitForFunction(()=>document.querySelector(".discovery-page").classList.contains("mobile-sheet-expanded"));assert((await page.$$(".discovery-list .discovery-card")).length>40);records.push({stage:"expand",...await stats()});await page.screenshot({path:output+"/local-expanded.png"});
 await page.click(".mobile-sheet-toggle");await page.waitForFunction(()=>document.querySelector(".discovery-page").classList.contains("mobile-sheet-peek"));await page.click(".mobile-recommendation-tile");await page.waitForSelector(".mobile-selected-preview");assert((await page.$eval(".mobile-selected-preview .mobile-detail-cta",e=>e.textContent)).includes("Menus"));records.push({stage:"marker-preview",...await stats()});await page.screenshot({path:output+"/local-selected.png"});
 if(requireMap){
-  await page.waitForSelector(".naver-map-marker.selected",{timeout:30000});
+  await page.waitForFunction(()=>{
+    const el=document.querySelector(".naver-map-marker.selected");
+    const r=el?.getBoundingClientRect();
+    return !!r && r.width>=34 && r.top>=200 && r.top<570;
+  },{timeout:30000});
+  await new Promise(resolve=>setTimeout(resolve,450));
   await page.click(".mobile-selected-list-back");
   await page.waitForFunction(()=>document.querySelector(".discovery-page").classList.contains("mobile-sheet-expanded"));
   await page.click(".mobile-sheet-toggle");

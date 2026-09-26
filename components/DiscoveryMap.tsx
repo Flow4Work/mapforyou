@@ -132,6 +132,10 @@ function clusterBucketSize(zoom: number) {
   if (zoom === 12) return 0.025;
   if (zoom === 13) return 0.013;
   if (zoom === 14) return 0.006;
+  // Dense Seoul streets: keep pins legible at common mobile zoom levels.
+  if (zoom === 15) return 0.003;
+  if (zoom === 16) return 0.0016;
+  if (zoom === 17) return 0.0008;
   return 0;
 }
 

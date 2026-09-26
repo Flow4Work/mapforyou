@@ -83,7 +83,7 @@ if (withBrowser) {
         await page.goto(url,{waitUntil:"domcontentloaded",timeout:60000});
         await page.waitForSelector(".mobile-map-home .mobile-map-tools",{timeout:30000});
         await page.waitForFunction(()=>Object.keys(document.querySelector(".mobile-sheet-toggle")||{}).some(k=>k.startsWith("__reactProps$")),{timeout:25000});
-        const map=await page.evaluate(()=>({status:document.querySelector(".naver-map-status")?.textContent?.trim()||"ready",markers:document.querySelectorAll(".naver-map-marker").length}));
+        const map=await page.evaluate(()=>({status:document.querySelector(".naver-map-status")?.textContent?.trim()||"ready",markers:document.querySelectorAll(".naver-map-marker").length,represented:document.querySelectorAll(".naver-map-marker").length+[...document.querySelectorAll(".naver-map-cluster strong")].reduce((total,node)=>total+Number(node.textContent||0),0)}));
         await page.click(".mobile-sheet-toggle");
         await page.waitForFunction(()=>document.querySelectorAll(".discovery-list .discovery-card").length===150,{timeout:15000});
         const all=await page.evaluate(()=>({cards:document.querySelectorAll(".discovery-list .discovery-card").length,overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth}));
@@ -102,6 +102,12 @@ if (withBrowser) {
         },sample.nameJa);
         if(!chosen)throw Error("Mobile Hongdae sample card not found");
         await page.waitForSelector(".mobile-selected-preview",{timeout:15000});
+        await page.waitForFunction(()=>{
+          const sheet=document.querySelector(".discovery-list-panel");
+          const cta=document.querySelector(".mobile-detail-cta");
+          return document.querySelector(".discovery-page").classList.contains("mobile-sheet-peek")
+            && sheet?.getBoundingClientRect().height<280 && cta?.getBoundingClientRect().height>=35;
+        },{timeout:15000});
         await page.click(".mobile-detail-cta");
         await page.waitForFunction(name=>document.querySelector(".restaurant-detail-panel h1")?.textContent?.includes(name),{timeout:20000},sample.nameJa);
         const detail=await page.evaluate(()=>({menus:document.querySelectorAll(".restaurant-detail-panel .inline-menu-card").length,firstMenu:document.querySelector(".inline-menu-card h2")?.textContent?.trim()||""}));
@@ -143,7 +149,7 @@ if (withBrowser) {
           ),{timeout:25000});
         } catch { /* report the actual map state below */ }
       }
-      const map=await page.evaluate(()=>({status:document.querySelector(".naver-map-status")?.textContent?.trim()||"ready",markers:document.querySelectorAll(".naver-map-marker").length}));
+      const map=await page.evaluate(()=>({status:document.querySelector(".naver-map-status")?.textContent?.trim()||"ready",markers:document.querySelectorAll(".naver-map-marker").length,represented:document.querySelectorAll(".naver-map-marker").length+[...document.querySelectorAll(".naver-map-cluster strong")].reduce((total,node)=>total+Number(node.textContent||0),0)}));
       const chosen=await page.evaluate(name=>{
         const card=[...document.querySelectorAll(".discovery-card")].find(x=>x.querySelector(".restaurant-card-name")?.textContent?.trim()===name);
         card?.click(); return Boolean(card);
@@ -179,7 +185,7 @@ if (withBrowser) {
   } finally {await browser.close()}
   browserQa=checks;
   if(checks.some(c=>c.all.cards<150||c.all.overflow>1||c.filtered!==40||c.detail.menus!==sample.menus.length||!c.detail.firstMenu||c.errors.length))throw new Error("Browser QA failed: "+JSON.stringify(checks));
-  if(requireMap&&checks.some(c=>c.width===1440&&(c.map.status!=="ready"||c.map.markers!==40)))throw new Error("NAVER Maps must show exactly 40 Hongdae markers: "+JSON.stringify(checks));
+  if(requireMap&&checks.some(c=>c.width===1440&&(c.map.status!=="ready"||c.map.represented!==40)))throw new Error("NAVER Maps must show exactly 40 Hongdae markers: "+JSON.stringify(checks));
 }
 const report={checkedAt:new Date().toISOString(),api,browserQa,standaloneQa};
 const reportDir=path.resolve(".expansion-runs","qa-release");
