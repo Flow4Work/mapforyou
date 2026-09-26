@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { DiscoveryRestaurant } from "@/lib/discovery";
 import { MAP_VIEWPORTS } from "@/lib/config";
+import { markerCategory, MAP_MARKER_LABELS, type MapMarkerCategory } from "@/lib/marker-category";
 import {
   broadCategory,
   localizedMenuName,
@@ -87,7 +88,7 @@ type MarkerEntry = {
   selected: boolean;
 };
 
-type MarkerCategory = "cafe" | "korean" | "grill" | "global";
+type MarkerCategory = MapMarkerCategory;
 
 
 function mapLanguage(language: PublicLanguage): NaverLanguage {
@@ -167,18 +168,14 @@ function groupStores(stores: DiscoveryRestaurant[], zoom: number, selectedId: st
   return groups;
 }
 
-function markerCategory(store: DiscoveryRestaurant): MarkerCategory {
-  const category = broadCategory(store);
-  if (category === "cafe" || category === "dessert") return "cafe";
-  if (category === "meat") return "grill";
-  if (category === "korean") return "korean";
-  return "global";
-}
-
 function markerSvg(category: MarkerCategory) {
   const common = 'viewBox="0 0 24 24" aria-hidden="true"';
 
   switch (category) {
+    case "pork":
+      return `<svg ${common} fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round" stroke-linecap="round"><path d="M6.2 8 4.3 3.8c2.5.3 4.3 1.5 5 3M17.8 8l1.9-4.2c-2.5.3-4.3 1.5-5 3"/><path d="M4.7 12.6C4.7 8.4 7.6 6 12 6s7.3 2.4 7.3 6.6-3 7.7-7.3 7.7-7.3-3.5-7.3-7.7Z"/><path d="M9 12h.1m5.8 0h.1" stroke-width="2.5"/><ellipse cx="12" cy="15.8" rx="3.7" ry="2.6"/><path d="M10.8 15.3v1m2.4-1v1"/></svg>`;
+    case "beef":
+      return `<svg ${common} fill="none" stroke="currentColor" stroke-width="1.65" stroke-linejoin="round" stroke-linecap="round"><path d="M8 6.4c-2.1-.5-3.4-1.7-3.8-4 2.4.2 4.1 1.5 4.9 3.1m6.9.9c2.1-.5 3.4-1.7 3.8-4-2.4.2-4.1 1.5-4.9 3.1"/><path d="m6.6 8.5-3-1.6-.6 3 2.8 1.5m11.6-2.9 3-1.6.6 3-2.8 1.5"/><path d="M6.5 7.7a6.5 6.5 0 0 1 11 0l1.2 6.3a6.5 6.5 0 0 1-13.4 0l1.2-6.3Z"/><path d="M8.9 11.6h.1m6 0h.1" stroke-width="2.5"/><path d="M8.2 15.5c.6-1.2 1.9-1.8 3.8-1.8s3.2.6 3.8 1.8v2.2c-.8 1.3-2.1 2-3.8 2s-3-.7-3.8-2v-2.2Z"/><path d="M10.5 16.7v.8m3-.8v.8"/></svg>`;
     case "cafe":
       return `<svg ${common}><path fill="currentColor" d="M5 9h10v4.2a5 5 0 0 1-10 0V9Zm10 1h1.5a3 3 0 1 1 0 6H15v-2h1.5a1 1 0 1 0 0-2H15v-2ZM5 19h13v2H5z"/><path d="M8.2 6.7c0-1.1 1-1.2 1-2.4M12.2 6.7c0-1.1 1-1.2 1-2.4" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>`;
     case "korean":
@@ -191,11 +188,12 @@ function markerSvg(category: MarkerCategory) {
 }
 
 function markerIcon(maps: NaverMapsNamespace, store: DiscoveryRestaurant, selected: boolean): MarkerIcon {
-  const category = markerCategory(store);
-  const width = selected ? 42 : 34;
+  const category = markerCategory(store, broadCategory(store));
+  const width = category === "mixed" ? (selected ? 50 : 44) : (selected ? 42 : 34);
   const height = selected ? 46 : 38;
+  const symbol = category === "mixed" ? `${markerSvg("pork")}${markerSvg("beef")}` : markerSvg(category);
   return {
-    content: `<div class="naver-map-marker category-${category}${selected ? " selected" : ""}" aria-hidden="true"><span class="naver-map-marker-icon">${markerSvg(category)}</span></div>`,
+    content: `<div class="naver-map-marker category-${category}${selected ? " selected" : ""}" data-marker-kind="${category}" role="img" aria-label="${MAP_MARKER_LABELS[category].en}"><span class="naver-map-marker-icon">${symbol}</span></div>`,
     size: new maps.Size(width, height),
     anchor: new maps.Point(width / 2, height),
   };
@@ -284,7 +282,7 @@ export default function DiscoveryMap({
         icon: isCluster ? clusterIcon(maps, group.stores.length) : markerIcon(maps, store, selected),
         title: isCluster
           ? `${group.stores.length} places`
-          : store.nameEn || store.name || store.nameJa,
+          : `${localizedRestaurantName(store, language)} · ${MAP_MARKER_LABELS[markerCategory(store, broadCategory(store))][language]}`,
         zIndex: selected ? 500 : isCluster ? 200 : 100,
       });
       marker.setZIndex(selected ? 500 : isCluster ? 200 : 100);
@@ -325,7 +323,7 @@ export default function DiscoveryMap({
       }
       lastStoreKeyRef.current = storeKey;
     }
-  }, [clearMarkers, onSelect, selectedId, stores, viewport.minZoom]);
+  }, [clearMarkers, language, onSelect, selectedId, stores, viewport.minZoom]);
 
   drawMarkersRef.current = drawMarkers;
 
@@ -424,6 +422,20 @@ export default function DiscoveryMap({
     <div className="discovery-map-wrap">
       <div className="discovery-map" ref={containerRef} />
       {mapState !== "ready" && <div className={`naver-map-status ${mapState}`}>{statusText}</div>}
+      {mapState === "ready" && (
+        <div className="map-meat-legend" aria-label={language === "ja" ? "肉料理の地図記号" : "Meat map marker legend"}>
+          {(["pork", "beef", "mixed"] as const).map((kind) => (
+            <span className="map-meat-legend-item" key={kind}>
+              <span
+                className={`map-meat-legend-symbol category-${kind}`}
+                aria-hidden="true"
+                dangerouslySetInnerHTML={{ __html: kind === "mixed" ? markerSvg("pork") + markerSvg("beef") : markerSvg(kind) }}
+              />
+              <span>{MAP_MARKER_LABELS[kind][language]}</span>
+            </span>
+          ))}
+        </div>
+      )}
       {selectedStore && (
         <button className="map-selected-card" type="button" onClick={() => onSelect(selectedStore.id)}>
           <span>{regionLabel(selectedStore.regionKey, language)}</span>
