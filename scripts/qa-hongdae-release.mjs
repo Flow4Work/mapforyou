@@ -79,6 +79,38 @@ if (withBrowser) {
     for (const [width,height] of [[390,844],[1440,900]]) {
       const page=await browser.newPage();await page.setViewport({width,height,deviceScaleFactor:1});
       const errors=[];page.on("pageerror",e=>errors.push(e.message));
+      if (width < 900) {
+        await page.goto(url,{waitUntil:"domcontentloaded",timeout:60000});
+        await page.waitForSelector(".mobile-map-home .mobile-map-tools",{timeout:30000});
+        await page.waitForFunction(()=>Object.keys(document.querySelector(".mobile-sheet-toggle")||{}).some(k=>k.startsWith("__reactProps$")),{timeout:25000});
+        const map=await page.evaluate(()=>({status:document.querySelector(".naver-map-status")?.textContent?.trim()||"ready",markers:document.querySelectorAll(".naver-map-marker").length}));
+        await page.click(".mobile-sheet-toggle");
+        await page.waitForFunction(()=>document.querySelectorAll(".discovery-list .discovery-card").length===150,{timeout:15000});
+        const all=await page.evaluate(()=>({cards:document.querySelectorAll(".discovery-list .discovery-card").length,overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth}));
+        await page.evaluate(()=>[...document.querySelectorAll(".mobile-map-chip-row:first-of-type button, .mobile-map-chip-row button")].find(x=>x.textContent?.trim()==="Hongdae")?.click());
+        await page.waitForFunction(()=>document.querySelectorAll(".discovery-list .discovery-card").length===40,{timeout:15000});
+        const filtered=await page.evaluate(()=>document.querySelectorAll(".discovery-list .discovery-card").length);
+        const languageQa=[];
+        for(const [button,expected] of [[0,sample.nameEn],[1,sample.nameJa],[0,sample.nameEn],[1,sample.nameJa]]) {
+          await page.evaluate(i=>document.querySelectorAll(".public-language-toggle button")[i].click(),button);
+          await page.waitForFunction(name=>[...document.querySelectorAll(".discovery-card .restaurant-card-name")].some(x=>x.textContent?.trim()===name),{timeout:15000},expected);
+          languageQa.push(button===0?"en":"ja");
+        }
+        const chosen=await page.evaluate(name=>{
+          const card=[...document.querySelectorAll(".discovery-list .discovery-card")].find(x=>x.querySelector(".restaurant-card-name")?.textContent?.trim()===name);
+          card?.click();return Boolean(card);
+        },sample.nameJa);
+        if(!chosen)throw Error("Mobile Hongdae sample card not found");
+        await page.waitForSelector(".mobile-selected-preview",{timeout:15000});
+        await page.click(".mobile-detail-cta");
+        await page.waitForFunction(name=>document.querySelector(".restaurant-detail-panel h1")?.textContent?.includes(name),{timeout:20000},sample.nameJa);
+        const detail=await page.evaluate(()=>({menus:document.querySelectorAll(".restaurant-detail-panel .inline-menu-card").length,firstMenu:document.querySelector(".inline-menu-card h2")?.textContent?.trim()||""}));
+        await page.click(".mobile-detail-back");
+        await page.waitForFunction(()=>!document.querySelector(".mobile-details-open"),{timeout:10000});
+        checks.push({width,all,filtered,map,detail,languageQa,errors,mobileSheet:true});
+        await page.close();
+        continue;
+      }
       await page.goto(url,{waitUntil:"domcontentloaded",timeout:60000});
       await page.waitForSelector(".discovery-card",{timeout:60000});
       // SSR cards can appear before React attaches the filter/language click handlers.
