@@ -228,6 +228,7 @@ export default function DiscoveryMap({
   const mapsRef = useRef<NaverMapsNamespace | null>(null);
   const markersRef = useRef<Map<string, MarkerEntry>>(new Map());
   const zoomListenerRef = useRef<NaverListener | null>(null);
+  const idleListenerRef = useRef<NaverListener | null>(null);
   const tilesListenerRef = useRef<NaverListener | null>(null);
   const lastStoreKeyRef = useRef("");
   const preservedViewRef = useRef<{ center: { lat: number; lng: number }; zoom: number; viewportKey: string } | null>(null);
@@ -293,7 +294,7 @@ export default function DiscoveryMap({
       const listener = maps.Event.addListener(marker, "click", () => {
         if (isCluster) {
           map.setCenter(coordinate);
-          map.setZoom(Math.min(17, zoom + 2), true);
+          map.setZoom(Math.min(17, zoom + 2), false);
         } else {
           onSelect(store.id);
         }
@@ -380,6 +381,7 @@ export default function DiscoveryMap({
         };
         tilesListenerRef.current = maps.Event.addListener(map, "tilesloaded", revealLoadedMap);
         zoomListenerRef.current = maps.Event.addListener(map, "zoom_changed", () => drawMarkersRef.current());
+        idleListenerRef.current = maps.Event.addListener(map, "idle", () => drawMarkersRef.current());
         observer = new ResizeObserver(() => {
           if (!containerRef.current || !mapRef.current || !mapsRef.current) return;
           const rect = containerRef.current.getBoundingClientRect();
@@ -420,6 +422,10 @@ export default function DiscoveryMap({
         mapsRef.current.Event.removeListener(zoomListenerRef.current);
       }
       zoomListenerRef.current = null;
+      if (idleListenerRef.current && mapsRef.current) {
+        mapsRef.current.Event.removeListener(idleListenerRef.current);
+      }
+      idleListenerRef.current = null;
       if (tilesListenerRef.current && mapsRef.current) {
         mapsRef.current.Event.removeListener(tilesListenerRef.current);
       }
@@ -438,8 +444,16 @@ export default function DiscoveryMap({
     const map = mapRef.current;
     const maps = mapsRef.current;
     if (!map || !maps || !selectedStore || selectedStore.latitude == null || selectedStore.longitude == null) return;
-    map.panTo(new maps.LatLng(selectedStore.latitude, selectedStore.longitude));
-    if (map.getZoom() < 15) map.setZoom(15, true);
+    const coordinate = new maps.LatLng(selectedStore.latitude, selectedStore.longitude);
+    if (map.getZoom() < 15) {
+      // Zooming four levels with animated tiles stretches a low-resolution map
+      // and can leave the selected pin outside the visible viewport on phones.
+      map.setCenter(coordinate);
+      map.setZoom(15, false);
+    } else {
+      map.panTo(coordinate);
+    }
+    requestAnimationFrame(() => drawMarkersRef.current());
   }, [selectedStore]);
 
   const firstMenu = selectedStore?.menus[0];
