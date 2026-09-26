@@ -573,3 +573,54 @@
   }
   .detail-page .detail-mini-map .map-meat-legend { display: none; }
 }
+
+/* Keep incomplete NAVER tile rows behind a deliberate loading surface. */
+.naver-map-status.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 13px;
+  color: #76503e;
+  background: radial-gradient(circle at 50% 44%, #fffaf1 0%, #f7eee2 100%);
+}
+.naver-map-status.loading::before {
+  content: "";
+  width: 30px;
+  height: 30px;
+  border: 3px solid #edd3be;
+  border-top-color: #c34730;
+  border-radius: 50%;
+  animation: map-loader-spin .85s linear infinite;
+}
+@keyframes map-loader-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .naver-map-status.loading::before { animation: none; }
+}
+.naver-map-status.error { display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; }
+.naver-map-error-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.naver-map-error-actions button, .naver-map-error-actions a {
+  min-height: 44px;
+  display: inline-grid;
+  place-items: center;
+  padding: 0 13px;
+  border: 1px solid #cf8169;
+  border-radius: 10px;
+  color: #fff;
+  background: #b8442d;
+  font-size: 12px;
+  font-weight: 800;
+  text-decoration: none;
+}
+.naver-map-error-actions a { color: #9c382a; background: #fffaf6; }
+@media (max-width: 359px) {
+  .discovery-header { gap: 5px; padding-inline: 9px; }
+  .discovery-brand { flex: 0 1 auto; gap: 5px; font-size: 12px; }
+  .discovery-brand > span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .discovery-page .brand-mark { width: 28px; height: 28px; flex: 0 0 28px; font-size: 13px; }
+  .booking-header-cta { flex: 0 0 35px; width: 35px; min-width: 35px; max-width: 35px; margin: 0; padding: 2px; gap: 0; }
+  .booking-header-cta strong { display: grid; place-items: center; width: 29px; height: 30px; padding: 0; font-size: 0; }
+  .booking-header-cta strong span { font-size: 16px; }
+  .public-language-toggle button:first-child { width: 36px; }
+  .public-language-toggle button:last-child { width: 52px; }
+}

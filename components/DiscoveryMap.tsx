@@ -8,6 +8,7 @@ import {
   broadCategory,
   localizedMenuName,
   localizedRestaurantName,
+  naverMapUrl,
   priceLabel,
   regionLabel,
   type PublicLanguage,
@@ -227,10 +228,12 @@ export default function DiscoveryMap({
   const mapsRef = useRef<NaverMapsNamespace | null>(null);
   const markersRef = useRef<Map<string, MarkerEntry>>(new Map());
   const zoomListenerRef = useRef<NaverListener | null>(null);
+  const tilesListenerRef = useRef<NaverListener | null>(null);
   const lastStoreKeyRef = useRef("");
   const preservedViewRef = useRef<{ center: { lat: number; lng: number }; zoom: number; viewportKey: string } | null>(null);
   const drawMarkersRef = useRef<() => void>(() => undefined);
   const [mapState, setMapState] = useState<"loading" | "ready" | "error">("loading");
+  const [reloadToken, setReloadToken] = useState(0);
   const viewportKey = MAP_VIEWPORTS[viewportRegion] ? viewportRegion : "seoul";
   const viewport = MAP_VIEWPORTS[viewportKey];
 
@@ -331,6 +334,9 @@ export default function DiscoveryMap({
   useEffect(() => {
     let active = true;
     let observer: ResizeObserver | null = null;
+    let readyTimeout: number | null = null;
+    let hasDrawn = false;
+    let tilesReady = false;
     setMapState("loading");
 
     const host = window.location.hostname;
@@ -366,6 +372,13 @@ export default function DiscoveryMap({
           mapDataControl: true,
         });
         mapRef.current = map;
+        const revealLoadedMap = () => {
+          if (!active || tilesReady || !hasDrawn) return;
+          tilesReady = true;
+          if (readyTimeout !== null) window.clearTimeout(readyTimeout);
+          setMapState("ready");
+        };
+        tilesListenerRef.current = maps.Event.addListener(map, "tilesloaded", revealLoadedMap);
         zoomListenerRef.current = maps.Event.addListener(map, "zoom_changed", () => drawMarkersRef.current());
         observer = new ResizeObserver(() => {
           if (!containerRef.current || !mapRef.current || !mapsRef.current) return;
@@ -373,8 +386,18 @@ export default function DiscoveryMap({
           mapRef.current.setSize(new mapsRef.current.Size(rect.width, rect.height));
         });
         observer.observe(containerRef.current);
-        setMapState("ready");
-        requestAnimationFrame(() => drawMarkersRef.current());
+        readyTimeout = window.setTimeout(() => {
+          if (!active || tilesReady) return;
+          const loaded = [...(containerRef.current?.querySelectorAll("img") ?? [])]
+            .filter((image) => image.complete && image.naturalWidth >= 128).length;
+          if (loaded >= 2) revealLoadedMap();
+          else setMapState("error");
+        }, 10000);
+        requestAnimationFrame(() => {
+          if (!active) return;
+          hasDrawn = true;
+          drawMarkersRef.current();
+        });
       })
       .catch(() => {
         if (active) setMapState("error");
@@ -383,6 +406,7 @@ export default function DiscoveryMap({
     return () => {
       active = false;
       observer?.disconnect();
+      if (readyTimeout !== null) window.clearTimeout(readyTimeout);
       if (mapRef.current) {
         const center = mapRef.current.getCenter();
         preservedViewRef.current = {
@@ -396,11 +420,15 @@ export default function DiscoveryMap({
         mapsRef.current.Event.removeListener(zoomListenerRef.current);
       }
       zoomListenerRef.current = null;
+      if (tilesListenerRef.current && mapsRef.current) {
+        mapsRef.current.Event.removeListener(tilesListenerRef.current);
+      }
+      tilesListenerRef.current = null;
       mapRef.current?.destroy?.();
       mapRef.current = null;
       mapsRef.current = null;
     };
-  }, [clearMarkers, language, viewportKey, viewport]);
+  }, [clearMarkers, language, reloadToken, viewportKey, viewport]);
 
   useEffect(() => {
     if (mapState === "ready") drawMarkers();
@@ -422,7 +450,21 @@ export default function DiscoveryMap({
   return (
     <div className="discovery-map-wrap">
       <div className="discovery-map" ref={containerRef} />
-      {mapState !== "ready" && <div className={`naver-map-status ${mapState}`}>{statusText}</div>}
+      {mapState !== "ready" && (
+        <div className={`naver-map-status ${mapState}`} role="status" aria-live="polite">
+          <span>{statusText}</span>
+          {mapState === "error" && (
+            <div className="naver-map-error-actions">
+              <button type="button" onClick={() => setReloadToken((count) => count + 1)}>
+                {language === "ja" ? "再読み込み" : "Try again"}
+              </button>
+              {selectedStore && <a href={naverMapUrl(selectedStore)} target="_blank" rel="noreferrer">
+                {language === "ja" ? "NAVERマップで開く" : "Open NAVER Map"}
+              </a>}
+            </div>
+          )}
+        </div>
+      )}
       {mapState === "ready" && (
         <div className="map-meat-legend" aria-label={language === "ja" ? "肉料理の地図記号" : "Meat map marker legend"}>
           {(["pork", "beef", "mixed"] as const).map((kind) => (
