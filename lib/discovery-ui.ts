@@ -93,6 +93,9 @@ const KNOWN_ENGLISH_PLACES: Record<string, string> = {
   "서울숲": "Seoul Forest",
   "왕십리": "Wangsimni",
   "홍대": "Hongdae",
+  "이태원": "Itaewon",
+  "녹사평": "Noksapyeong",
+  "해방촌": "Haebangchon",
   "연남": "Yeonnam",
   "합정": "Hapjeong",
   "망원": "Mangwon",
@@ -350,6 +353,7 @@ export function regionLabel(regionKey: string, language: PublicLanguage) {
   const labels: Record<string, { en: string; ja: string }> = {
     seongsu: { en: "Seongsu", ja: "聖水" },
     hongdae: { en: "Hongdae", ja: "弘大" },
+    itaewon: { en: "Itaewon", ja: "梨泰院" },
     geondae: { en: "Konkuk Univ.", ja: "建大入口" },
   };
   return labels[regionKey]?.[language] ?? (regionKey || (language === "ja" ? "ソウル" : "Seoul"));

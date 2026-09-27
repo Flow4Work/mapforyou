@@ -12,6 +12,10 @@ const REGIONS = {
     bounds: { west: 126.91, south: 37.548, east: 126.936, north: 37.5665 },
     aliases: ["홍대", "연남동", "합정", "상수"],
   },
+  itaewon: {
+    bounds: { west: 126.975, south: 37.525, east: 127.011, north: 37.546 },
+    aliases: ["이태원", "녹사평", "경리단길", "해방촌"],
+  },
 };
 
 const RESTAURANT_TERMS = [
@@ -244,7 +248,7 @@ async function readCandidate(page, placeId) {
   return null;
 }
 
-async function inspectCandidates(ids, bounds, existingPlaceIds) {
+async function inspectCandidates(ids, bounds, existingPlaceIds, stopAfterRestaurants = Infinity) {
   const browser = await puppeteer.launch({
     executablePath: "C:/Program Files/BraveSoftware/Brave-Browser/Application/brave.exe",
     headless: true,
@@ -280,6 +284,7 @@ async function inspectCandidates(ids, bounds, existingPlaceIds) {
         "menus",
         store.menuCount,
       );
+      if (stores.filter((row) => row.valid && row.kind === "restaurant").length >= stopAfterRestaurants) break;
     }
   } finally {
     await browser.close();
@@ -608,7 +613,7 @@ async function main() {
     ));
   } else {
     search = await searchPlaceIds(region);
-    candidates = await inspectCandidates(search.ids, region.bounds, existingPlaceIds);
+    candidates = await inspectCandidates(search.ids, region.bounds, existingPlaceIds, cafeTarget === 0 ? restaurantTarget + 20 : Infinity);
   }
   fs.writeFileSync(path.join(runDir, "search.json"), JSON.stringify(search, null, 2), "utf8");
   fs.writeFileSync(path.join(runDir, "candidates.json"), JSON.stringify(candidates, null, 2), "utf8");

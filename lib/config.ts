@@ -9,6 +9,10 @@ export const REGION_PRESETS: Record<string, { name: string; bounds: Bounds }> = 
     name: "홍대",
     bounds: { west: 126.91, south: 37.548, east: 126.936, north: 37.5665 },
   },
+  itaewon: {
+    name: "이태원",
+    bounds: { west: 126.975, south: 37.525, east: 127.011, north: 37.546 },
+  },
   konkuk: {
     name: "건대·자양",
     bounds: { west: 127.061, south: 37.527, east: 127.091, north: 37.548 },
@@ -43,6 +47,12 @@ export const MAP_VIEWPORTS: Record<string, MapViewportConfig> = {
   hongdae: {
     center: { latitude: 37.5573, longitude: 126.9235 },
     maxBounds: REGION_PRESETS.hongdae.bounds,
+    minZoom: 14,
+    initialZoom: 15,
+  },
+  itaewon: {
+    center: { latitude: 37.5353, longitude: 126.9935 },
+    maxBounds: { west: 126.967, south: 37.517, east: 127.018, north: 37.552 },
     minZoom: 14,
     initialZoom: 15,
   },

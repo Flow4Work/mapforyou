@@ -1,0 +1,388 @@
+{
+  "releaseDate": "2026-09-27",
+  "source": "NAVER Place",
+  "hongdae": [
+    {
+      "id": "naver:1637809662",
+      "name": "23플래터",
+      "naverPlaceId": "1637809662",
+      "menuCount": 26
+    },
+    {
+      "id": "naver:1287775548",
+      "name": "홍대 육지",
+      "naverPlaceId": "1287775548",
+      "menuCount": 22
+    },
+    {
+      "id": "naver:1800955905",
+      "name": "서양면옥 연남",
+      "naverPlaceId": "1800955905",
+      "menuCount": 22
+    },
+    {
+      "id": "naver:2025744878",
+      "name": "사르르 연남",
+      "naverPlaceId": "2025744878",
+      "menuCount": 22
+    },
+    {
+      "id": "naver:36873920",
+      "name": "고기꾼김춘배 홍대본점",
+      "naverPlaceId": "36873920",
+      "menuCount": 33
+    },
+    {
+      "id": "naver:1728895666",
+      "name": "오이지 연남",
+      "naverPlaceId": "1728895666",
+      "menuCount": 22
+    },
+    {
+      "id": "naver:2077962073",
+      "name": "한우다움 홍대본점",
+      "naverPlaceId": "2077962073",
+      "menuCount": 43
+    },
+    {
+      "id": "naver:2053916309",
+      "name": "송경솥밥 연남점",
+      "naverPlaceId": "2053916309",
+      "menuCount": 21
+    },
+    {
+      "id": "naver:1135648893",
+      "name": "죠죠 연남점",
+      "naverPlaceId": "1135648893",
+      "menuCount": 21
+    },
+    {
+      "id": "naver:1623995485",
+      "name": "연주방 어페어",
+      "naverPlaceId": "1623995485",
+      "menuCount": 21
+    },
+    {
+      "id": "naver:2017595227",
+      "name": "스시사카바 이토",
+      "naverPlaceId": "2017595227",
+      "menuCount": 20
+    },
+    {
+      "id": "naver:1269767584",
+      "name": "샵샵 연남점",
+      "naverPlaceId": "1269767584",
+      "menuCount": 20
+    },
+    {
+      "id": "naver:38301272",
+      "name": "중화복춘",
+      "naverPlaceId": "38301272",
+      "menuCount": 20
+    },
+    {
+      "id": "naver:1970674029",
+      "name": "카츠업",
+      "naverPlaceId": "1970674029",
+      "menuCount": 20
+    },
+    {
+      "id": "naver:1275815754",
+      "name": "비스트로 오라",
+      "naverPlaceId": "1275815754",
+      "menuCount": 29
+    },
+    {
+      "id": "naver:1633696121",
+      "name": "클래식당",
+      "naverPlaceId": "1633696121",
+      "menuCount": 20
+    },
+    {
+      "id": "naver:2021917813",
+      "name": "회사원 활어수산",
+      "naverPlaceId": "2021917813",
+      "menuCount": 35
+    },
+    {
+      "id": "naver:1951314959",
+      "name": "연남동 베르데",
+      "naverPlaceId": "1951314959",
+      "menuCount": 44
+    },
+    {
+      "id": "naver:1170405623",
+      "name": "우동키노야 합정점",
+      "naverPlaceId": "1170405623",
+      "menuCount": 18
+    },
+    {
+      "id": "naver:1017474885",
+      "name": "로쏘 1924 나폴리 화덕피자 홍대점",
+      "naverPlaceId": "1017474885",
+      "menuCount": 22
+    }
+  ],
+  "itaewon": [
+    {
+      "id": "naver:36728206",
+      "name": "트로이카",
+      "naverPlaceId": "36728206",
+      "menuCount": 62
+    },
+    {
+      "id": "naver:1588492544",
+      "name": "이태원 농담",
+      "naverPlaceId": "1588492544",
+      "menuCount": 36
+    },
+    {
+      "id": "naver:1666730023",
+      "name": "핏제리아오 경리단길점",
+      "naverPlaceId": "1666730023",
+      "menuCount": 31
+    },
+    {
+      "id": "naver:37235781",
+      "name": "피자오",
+      "naverPlaceId": "37235781",
+      "menuCount": 28
+    },
+    {
+      "id": "naver:2074790822",
+      "name": "사와참숯화로",
+      "naverPlaceId": "2074790822",
+      "menuCount": 28
+    },
+    {
+      "id": "naver:1834702292",
+      "name": "피자브루클린 이태원",
+      "naverPlaceId": "1834702292",
+      "menuCount": 26
+    },
+    {
+      "id": "naver:1318516979",
+      "name": "춈",
+      "naverPlaceId": "1318516979",
+      "menuCount": 26
+    },
+    {
+      "id": "naver:1697426871",
+      "name": "백년손님",
+      "naverPlaceId": "1697426871",
+      "menuCount": 23
+    },
+    {
+      "id": "naver:1838952735",
+      "name": "해방식당",
+      "naverPlaceId": "1838952735",
+      "menuCount": 23
+    },
+    {
+      "id": "naver:1497299219",
+      "name": "빌라드블루 해방촌",
+      "naverPlaceId": "1497299219",
+      "menuCount": 22
+    },
+    {
+      "id": "naver:2005155061",
+      "name": "누리마을감자탕 이태원점",
+      "naverPlaceId": "2005155061",
+      "menuCount": 21
+    },
+    {
+      "id": "naver:626655374",
+      "name": "어반빈야드",
+      "naverPlaceId": "626655374",
+      "menuCount": 23
+    },
+    {
+      "id": "naver:1954714074",
+      "name": "가토스",
+      "naverPlaceId": "1954714074",
+      "menuCount": 19
+    },
+    {
+      "id": "naver:2038888511",
+      "name": "보광리광장",
+      "naverPlaceId": "2038888511",
+      "menuCount": 19
+    },
+    {
+      "id": "naver:1078793230",
+      "name": "산해장 이태원점",
+      "naverPlaceId": "1078793230",
+      "menuCount": 19
+    },
+    {
+      "id": "naver:1125647880",
+      "name": "uphill namsan",
+      "naverPlaceId": "1125647880",
+      "menuCount": 19
+    },
+    {
+      "id": "naver:1512958353",
+      "name": "데칼코마니",
+      "naverPlaceId": "1512958353",
+      "menuCount": 17
+    },
+    {
+      "id": "naver:2091545409",
+      "name": "차킴스 스토어",
+      "naverPlaceId": "2091545409",
+      "menuCount": 16
+    },
+    {
+      "id": "naver:1877426480",
+      "name": "코리아타운 플라자",
+      "naverPlaceId": "1877426480",
+      "menuCount": 19
+    },
+    {
+      "id": "naver:2040905165",
+      "name": "오늘도닭갈비 이태원점",
+      "naverPlaceId": "2040905165",
+      "menuCount": 15
+    },
+    {
+      "id": "naver:37611326",
+      "name": "남산와이너리",
+      "naverPlaceId": "37611326",
+      "menuCount": 15
+    },
+    {
+      "id": "naver:1937120968",
+      "name": "에그앤플라워",
+      "naverPlaceId": "1937120968",
+      "menuCount": 15
+    },
+    {
+      "id": "naver:35251613",
+      "name": "8PIECE PIZZA",
+      "naverPlaceId": "35251613",
+      "menuCount": 16
+    },
+    {
+      "id": "naver:2067027108",
+      "name": "라 보카야베",
+      "naverPlaceId": "2067027108",
+      "menuCount": 13
+    },
+    {
+      "id": "naver:1610810987",
+      "name": "남매국밥 이태원 본점",
+      "naverPlaceId": "1610810987",
+      "menuCount": 17
+    },
+    {
+      "id": "naver:1450415022",
+      "name": "방콕테이블",
+      "naverPlaceId": "1450415022",
+      "menuCount": 12
+    },
+    {
+      "id": "naver:37326507",
+      "name": "HOMER PIZZA",
+      "naverPlaceId": "37326507",
+      "menuCount": 16
+    },
+    {
+      "id": "naver:1708194445",
+      "name": "비스트로 조조",
+      "naverPlaceId": "1708194445",
+      "menuCount": 12
+    },
+    {
+      "id": "naver:1546261344",
+      "name": "더랑고스",
+      "naverPlaceId": "1546261344",
+      "menuCount": 18
+    },
+    {
+      "id": "naver:36285579",
+      "name": "쪽갈비제작소",
+      "naverPlaceId": "36285579",
+      "menuCount": 9
+    },
+    {
+      "id": "naver:2054071435",
+      "name": "한남동감자탕 한남동2호지점",
+      "naverPlaceId": "2054071435",
+      "menuCount": 9
+    },
+    {
+      "id": "naver:1440562831",
+      "name": "파인애플 익스프레스 이태원 경리단길",
+      "naverPlaceId": "1440562831",
+      "menuCount": 8
+    },
+    {
+      "id": "naver:1366939902",
+      "name": "NOOP",
+      "naverPlaceId": "1366939902",
+      "menuCount": 12
+    },
+    {
+      "id": "naver:2031414786",
+      "name": "신흥갈비",
+      "naverPlaceId": "2031414786",
+      "menuCount": 7
+    },
+    {
+      "id": "naver:2042145401",
+      "name": "머릿집",
+      "naverPlaceId": "2042145401",
+      "menuCount": 8
+    },
+    {
+      "id": "naver:2087200005",
+      "name": "키마이",
+      "naverPlaceId": "2087200005",
+      "menuCount": 15
+    },
+    {
+      "id": "naver:2074018578",
+      "name": "성수오뎅 이태원점",
+      "naverPlaceId": "2074018578",
+      "menuCount": 5
+    },
+    {
+      "id": "naver:1159837999",
+      "name": "미드나잇포레스트",
+      "naverPlaceId": "1159837999",
+      "menuCount": 7
+    },
+    {
+      "id": "naver:2046361140",
+      "name": "타말레",
+      "naverPlaceId": "2046361140",
+      "menuCount": 3
+    },
+    {
+      "id": "naver:2019503089",
+      "name": "석석 양꼬치",
+      "naverPlaceId": "2019503089",
+      "menuCount": 7
+    }
+  ],
+  "quality": {
+    "hongdae": {
+      "stores": 20,
+      "menus": 501,
+      "verifiedMenus": 404,
+      "unavailableImages": 97,
+      "imageUrlsChecked": 80,
+      "imageUrlsPassed": 80,
+      "translationIssues": 0
+    },
+    "itaewon": {
+      "stores": 40,
+      "menus": 716,
+      "verifiedMenus": 648,
+      "unavailableImages": 68,
+      "imageUrlsChecked": 159,
+      "imageUrlsPassed": 159,
+      "translationIssues": 0
+    }
+  }
+}

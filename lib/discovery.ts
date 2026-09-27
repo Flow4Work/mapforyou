@@ -3,8 +3,8 @@ import "server-only";
 import { getSupabaseServerClient } from "@/lib/supabase";
 import { REGION_PRESETS } from "@/lib/config";
 
-const ACTIVE_REGIONS = ["seongsu", "hongdae", "geondae", "jongno"] as const;
-const DISCOVERY_REGIONS = ["seongsu", "hongdae"] as const;
+const ACTIVE_REGIONS = ["seongsu", "hongdae", "itaewon", "geondae", "jongno"] as const;
+const DISCOVERY_REGIONS = ["seongsu", "hongdae", "itaewon"] as const;
 const DEFAULT_PER_REGION = 20;
 const MAX_PER_REGION = 150;
 
@@ -119,8 +119,8 @@ function discoveryRegionQuery(supabase: NonNullable<ReturnType<typeof getSupabas
     .eq("region_key", regionKey)
     .eq("publish_status", "published");
 
-  if (regionKey === "hongdae") {
-    const { south, north, west, east } = REGION_PRESETS.hongdae.bounds;
+  if (regionKey === "hongdae" || regionKey === "itaewon") {
+    const { south, north, west, east } = REGION_PRESETS[regionKey].bounds;
     query = query.gte("latitude", south).lte("latitude", north)
       .gte("longitude", west).lte("longitude", east);
     for (const column of ["name", "name_en", "name_ja", "road_address_en", "road_address_ja", "introduction_en", "introduction_ja", "image_url"]) {

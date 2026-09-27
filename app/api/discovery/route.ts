@@ -18,7 +18,7 @@ export async function GET(request: Request) {
     const perRegion = integerParam(url.searchParams.get("perRegion"), 20);
     const page = await loadDiscoveryRestaurantPage({ offset, perRegion });
     const stores = page.stores.filter(
-      (store) => store.regionKey === "seongsu" || store.regionKey === "hongdae",
+      (store) => store.regionKey === "seongsu" || store.regionKey === "hongdae" || store.regionKey === "itaewon",
     );
     return NextResponse.json(
       { stores, nextOffset: page.nextOffset },

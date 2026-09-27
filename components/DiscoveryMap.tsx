@@ -517,20 +517,6 @@ export default function DiscoveryMap({
           )}
         </div>
       )}
-      {mapState === "ready" && (
-        <div className="map-meat-legend" aria-label={language === "ja" ? "肉料理の地図記号" : "Meat map marker legend"}>
-          {(["pork", "beef", "mixed"] as const).map((kind) => (
-            <span className="map-meat-legend-item" key={kind}>
-              <span
-                className={`map-meat-legend-symbol category-${kind}`}
-                aria-hidden="true"
-                dangerouslySetInnerHTML={{ __html: kind === "mixed" ? markerSvg("pork") + markerSvg("beef") : markerSvg(kind) }}
-              />
-              <span>{MAP_MARKER_LABELS[kind][language]}</span>
-            </span>
-          ))}
-        </div>
-      )}
       {selectedStore && (
         <button className="map-selected-card" type="button" onClick={() => onSelect(selectedStore.id)}>
           <span>{regionLabel(selectedStore.regionKey, language)}</span>
