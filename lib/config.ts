@@ -24,15 +24,15 @@ export type MapViewportConfig = {
 
 export const MAP_VIEWPORTS: Record<string, MapViewportConfig> = {
   seoul: {
-    center: { latitude: 37.5666103, longitude: 126.9783882 },
+    center: { latitude: 37.552, longitude: 126.989 },
     maxBounds: {
-      west: 126.76620435615891,
-      south: 37.42829747263545,
-      east: 127.18379493229875,
-      north: 37.7010174173061,
+      west: 126.86,
+      south: 37.49,
+      east: 127.115,
+      north: 37.635,
     },
-    minZoom: 11,
-    initialZoom: 12,
+    minZoom: 13,
+    initialZoom: 13,
   },
   seongsu: {
     center: { latitude: 37.5439, longitude: 127.0525 },

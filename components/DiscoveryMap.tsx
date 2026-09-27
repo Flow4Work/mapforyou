@@ -132,11 +132,12 @@ function clusterBucketSize(zoom: number) {
   if (zoom <= 11) return 0.04;
   if (zoom === 12) return 0.025;
   if (zoom === 13) return 0.013;
-  if (zoom === 14) return 0.006;
-  // Dense Seoul streets: keep pins legible at common mobile zoom levels.
-  if (zoom === 15) return 0.003;
-  if (zoom === 16) return 0.0016;
-  if (zoom === 17) return 0.0008;
+  // Keep nearby pins readable while showing restaurant icons (not numbers)
+  // after the distant overview. Each closer zoom reveals more individual pins.
+  if (zoom === 14) return 0.004;
+  if (zoom === 15) return 0.0025;
+  if (zoom === 16) return 0.0012;
+  if (zoom === 17) return 0.00055;
   return 0;
 }
 
@@ -236,7 +237,7 @@ export default function DiscoveryMap({
   const idleListenerRef = useRef<NaverListener | null>(null);
   const tilesListenerRef = useRef<NaverListener | null>(null);
   const lastStoreKeyRef = useRef("");
-  const lastAppliedViewportRef = useRef(viewportRegion);
+  const lastAppliedViewportRef = useRef(MAP_VIEWPORTS[viewportRegion] ? viewportRegion : "seoul");
   const preservedViewRef = useRef<{ center: { lat: number; lng: number }; zoom: number; viewportKey: string } | null>(null);
   const drawMarkersRef = useRef<() => void>(() => undefined);
   const [mapState, setMapState] = useState<"loading" | "ready" | "error">("loading");
@@ -269,8 +270,13 @@ export default function DiscoveryMap({
 
     for (const group of groups) {
       const coordinate = new maps.LatLng(group.latitude, group.longitude);
-      const isCluster = group.stores.length > 1;
+      // At neighborhood zoom, use a real restaurant icon to represent
+      // nearby locations; only the distant overview shows count bubbles.
+      const isCluster = group.stores.length > 1 && zoom <= 13;
       const store = group.stores[0];
+      const markerCoordinate = isCluster
+        ? coordinate
+        : new maps.LatLng(store.latitude!, store.longitude!);
       const selected = !isCluster && store.id === selectedId;
       const key = isCluster
         ? `cluster:${zoom}:${group.stores.map((item) => item.id).sort().join("|")}`
@@ -289,7 +295,7 @@ export default function DiscoveryMap({
 
       const marker = new maps.Marker({
         map,
-        position: coordinate,
+        position: markerCoordinate,
         icon: isCluster ? clusterIcon(maps, group.stores.length) : markerIcon(maps, store, selected),
         title: isCluster
           ? `${group.stores.length} places`
@@ -358,11 +364,15 @@ export default function DiscoveryMap({
         const preservedView = preservedViewRef.current?.viewportKey === viewportKey
           ? preservedViewRef.current
           : null;
+        const focusStore = !preservedView && viewportKey === "seoul" && selectedStore?.latitude != null && selectedStore?.longitude != null
+          ? selectedStore : null;
         const map = new maps.Map(containerRef.current, {
           center: preservedView
             ? new maps.LatLng(preservedView.center.lat, preservedView.center.lng)
-            : new maps.LatLng(viewport.center.latitude, viewport.center.longitude),
-          zoom: preservedView ? Math.max(preservedView.zoom, viewport.minZoom) : viewport.initialZoom,
+            : focusStore
+              ? new maps.LatLng(focusStore.latitude!, focusStore.longitude!)
+              : new maps.LatLng(viewport.center.latitude, viewport.center.longitude),
+          zoom: preservedView ? Math.max(preservedView.zoom, viewport.minZoom) : focusStore ? Math.max(15, viewport.initialZoom) : viewport.initialZoom,
           minZoom: viewport.minZoom,
           maxZoom: 19,
           maxBounds,
@@ -449,6 +459,7 @@ export default function DiscoveryMap({
   useEffect(() => {
     if (mapState !== "ready" || !mapRef.current || !mapsRef.current) return;
     if (lastAppliedViewportRef.current === viewportKey) return;
+    const previousViewport = lastAppliedViewportRef.current;
     lastAppliedViewportRef.current = viewportKey;
     const map = mapRef.current;
     const maps = mapsRef.current;
@@ -457,8 +468,14 @@ export default function DiscoveryMap({
       new maps.LatLng(viewport.maxBounds.north, viewport.maxBounds.east),
     );
     map.setOptions({ minZoom: viewport.minZoom, maxBounds: bounds });
-    map.setCenter(new maps.LatLng(viewport.center.latitude, viewport.center.longitude));
-    map.setZoom(viewport.initialZoom, false);
+    // Switching to All keeps the current neighborhood visible instead of
+    // moving to an empty area halfway between Seongsu and Hongdae.
+    if (viewportKey === "seoul" && previousViewport !== "seoul") {
+      if (map.getZoom() < viewport.minZoom) map.setZoom(viewport.minZoom, false);
+    } else {
+      map.setCenter(new maps.LatLng(viewport.center.latitude, viewport.center.longitude));
+      map.setZoom(viewport.initialZoom, false);
+    }
   }, [viewportKey, viewport, mapState]);
 
   useEffect(() => {
