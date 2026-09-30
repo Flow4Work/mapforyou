@@ -5,12 +5,12 @@ import { createClient } from "@supabase/supabase-js";
 
 const REGIONS = {
   seongsu: {
-    bounds: { west: 127.044, south: 37.535, east: 127.0685, north: 37.5555 },
+    bounds: { west: 127.037, south: 37.535, east: 127.0685, north: 37.558 },
     aliases: ["성수", "서울숲", "뚝섬"],
   },
   hongdae: {
-    bounds: { west: 126.91, south: 37.548, east: 126.936, north: 37.5665 },
-    aliases: ["홍대", "연남동", "합정", "상수"],
+    bounds: { west: 126.907, south: 37.5445, east: 126.94, north: 37.5665 },
+    aliases: ["홍대입구역", "홍익대학교", "합정", "광흥창역", "홍대", "연남동", "상수"],
   },
   itaewon: {
     bounds: { west: 126.975, south: 37.525, east: 127.011, north: 37.546 },
@@ -248,7 +248,13 @@ async function readCandidate(page, placeId) {
   return null;
 }
 
-async function inspectCandidates(ids, bounds, existingPlaceIds, stopAfterRestaurants = Infinity) {
+async function inspectCandidates(
+  ids,
+  bounds,
+  existingPlaceIds,
+  stopAfterRestaurants = Infinity,
+  stopAfterCafes = Infinity,
+) {
   const browser = await puppeteer.launch({
     executablePath: "C:/Program Files/BraveSoftware/Brave-Browser/Application/brave.exe",
     headless: true,
@@ -284,7 +290,9 @@ async function inspectCandidates(ids, bounds, existingPlaceIds, stopAfterRestaur
         "menus",
         store.menuCount,
       );
-      if (stores.filter((row) => row.valid && row.kind === "restaurant").length >= stopAfterRestaurants) break;
+      const validRestaurants = stores.filter((row) => row.valid && row.kind === "restaurant").length;
+      const validCafes = stores.filter((row) => row.valid && row.kind === "cafe").length;
+      if (validRestaurants >= stopAfterRestaurants && validCafes >= stopAfterCafes) break;
     }
   } finally {
     await browser.close();
@@ -613,7 +621,13 @@ async function main() {
     ));
   } else {
     search = await searchPlaceIds(region);
-    candidates = await inspectCandidates(search.ids, region.bounds, existingPlaceIds, cafeTarget === 0 ? restaurantTarget + 20 : Infinity);
+    candidates = await inspectCandidates(
+      search.ids,
+      region.bounds,
+      existingPlaceIds,
+      restaurantTarget + (restaurantTarget ? 15 : 0),
+      cafeTarget + (cafeTarget ? 10 : 0),
+    );
   }
   fs.writeFileSync(path.join(runDir, "search.json"), JSON.stringify(search, null, 2), "utf8");
   fs.writeFileSync(path.join(runDir, "candidates.json"), JSON.stringify(candidates, null, 2), "utf8");

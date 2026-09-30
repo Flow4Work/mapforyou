@@ -3,11 +3,11 @@ import type { Bounds } from "./types";
 export const REGION_PRESETS: Record<string, { name: string; bounds: Bounds }> = {
   seongsu: {
     name: "성수",
-    bounds: { west: 127.044, south: 37.535, east: 127.0685, north: 37.5555 },
+    bounds: { west: 127.037, south: 37.535, east: 127.0685, north: 37.558 },
   },
   hongdae: {
     name: "홍대",
-    bounds: { west: 126.91, south: 37.548, east: 126.936, north: 37.5665 },
+    bounds: { west: 126.907, south: 37.5445, east: 126.94, north: 37.5665 },
   },
   itaewon: {
     name: "이태원",
