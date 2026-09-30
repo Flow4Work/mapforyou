@@ -3,7 +3,6 @@ import { loadDiscoveryRestaurantPage } from "@/lib/discovery";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-export const revalidate = 0;
 
 function integerParam(value: string | null, fallback: number) {
   if (value === null || value.trim() === "") return fallback;
@@ -17,14 +16,12 @@ export async function GET(request: Request) {
     const offset = integerParam(url.searchParams.get("offset"), 0);
     const perRegion = integerParam(url.searchParams.get("perRegion"), 20);
     const page = await loadDiscoveryRestaurantPage({ offset, perRegion });
-    const stores = page.stores.filter(
-      (store) => store.regionKey === "seongsu" || store.regionKey === "hongdae" || store.regionKey === "itaewon",
-    );
+
     return NextResponse.json(
-      { stores, nextOffset: page.nextOffset },
+      { stores: page.stores, nextOffset: page.nextOffset },
       {
         headers: {
-          "Cache-Control": "no-store, max-age=0",
+          "Cache-Control": "public, max-age=60, s-maxage=300, stale-while-revalidate=3600",
         },
       },
     );

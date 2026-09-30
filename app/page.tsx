@@ -1,21 +1,26 @@
 import AnalyticsTracker from "@/components/AnalyticsTracker";
 import DetailPanelScrollReset from "@/components/DetailPanelScrollReset";
-import DiscoveryApp from "@/components/DiscoveryApp";
-import { loadDiscoveryRestaurants } from "@/lib/discovery";
+import PaginatedDiscoveryApp from "@/components/PaginatedDiscoveryApp";
+import { loadDiscoveryRestaurantPage } from "@/lib/discovery";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 300;
+
+const INITIAL_PER_REGION = 12;
 
 export default async function HomePage() {
-  const stores = (await loadDiscoveryRestaurants(1000)).filter(
-    (store) => store.regionKey === "seongsu" || store.regionKey === "hongdae" || store.regionKey === "itaewon",
-  );
+  const page = await loadDiscoveryRestaurantPage({
+    offset: 0,
+    perRegion: INITIAL_PER_REGION,
+  });
 
   return (
     <>
       <AnalyticsTracker />
       <DetailPanelScrollReset />
-      <DiscoveryApp initialStores={stores} />
+      <PaginatedDiscoveryApp
+        initialStores={page.stores}
+        initialNextOffset={page.nextOffset}
+      />
     </>
   );
 }
