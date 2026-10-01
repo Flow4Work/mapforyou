@@ -24,6 +24,18 @@ const REGIONS = {
     bounds: { west: 126.9405, south: 37.538, east: 126.9635, north: 37.5565 },
     aliases: ["공덕역", "공덕", "마포역", "대흥역"],
   },
+  chungmuro: {
+    bounds: { west: 126.984, south: 37.553, east: 127.0045, north: 37.5665 },
+    aliases: ["충무로역", "충무로", "필동", "남산골"],
+  },
+  euljiro: {
+    bounds: { west: 126.9815, south: 37.5625, east: 127.0065, north: 37.5685 },
+    aliases: ["을지로입구역", "을지로3가역", "을지로4가역", "을지로", "청계천"],
+  },
+  jongno: {
+    bounds: { west: 126.979, south: 37.568, east: 127.014, north: 37.5845 },
+    aliases: ["종각역", "종로3가역", "종로5가역", "종로", "익선동"],
+  },
 };
 
 const RESTAURANT_TERMS = [
@@ -32,7 +44,7 @@ const RESTAURANT_TERMS = [
 ];
 const CAFE_TERMS = ["카페", "로스터리 카페", "디저트 카페", "베이커리 카페", "커피 맛집"];
 const CAFE_RE = /(카페|커피|베이커리|디저트|도넛|아이스크림|제과|브런치)/i;
-const NON_FOOD_RE = /(와인바|와인샵|주점|호프|펍|클럽|노래|바\(BAR\)|이자카야|칵테일바|라운지바|포차)/i;
+const NON_FOOD_RE = /(와인바|와인샵|주점|호프|펍|클럽|노래|바\(BAR\)|이자카야|칵테일바|라운지바|루프탑바|포차)/i;
 
 function parseArgs(argv) {
   const out = {};
@@ -285,7 +297,7 @@ async function inspectCandidates(
         && store.inBounds
         && store.menuCount > 0
         && http(store.representativeImage)
-        && !NON_FOOD_RE.test(store.category),
+        && !NON_FOOD_RE.test(`${store.name} ${store.category}`),
       );
       stores.push(store);
       console.log(
@@ -358,7 +370,7 @@ function selectCandidates(candidates, existingRows, restaurantTarget, cafeTarget
   const existingNameAddr = new Set(existingRows.map((row) => `${norm(row.name)}|${norm(row.road_address)}`));
   const seen = new Set();
   const fresh = [];
-  for (const store of candidates.filter((item) => item.valid).sort((a, b) => scoreCandidate(b) - scoreCandidate(a))) {
+  for (const store of candidates.filter((item) => item.valid && !NON_FOOD_RE.test(`${item.name} ${item.category}`)).sort((a, b) => scoreCandidate(b) - scoreCandidate(a))) {
     const key = `${norm(store.name)}|${norm(store.roadAddress)}`;
     if (!norm(store.name) || !norm(store.roadAddress) || existingNameAddr.has(key) || seen.has(key)) continue;
     seen.add(key);
@@ -568,7 +580,7 @@ async function revalidateCachedCandidates(run, region, existingRows, existingPla
   const prior = JSON.parse(fs.readFileSync(cache, "utf8"));
   if (!Array.isArray(prior)) throw new Error("Candidate cache must be an array");
   const existingNames = new Set(existingRows.map((row) => norm(row.name) + "|" + norm(row.road_address)));
-  const fresh = prior.filter((store) => store.valid && !NON_FOOD_RE.test(store.category)
+  const fresh = prior.filter((store) => store.valid && !NON_FOOD_RE.test(`${store.name} ${store.category}`)
     && (store.kind === "restaurant" ? restaurantTarget > 0 : cafeTarget > 0)
     && !existingPlaceIds.has(String(store.placeId))
     && !existingNames.has(norm(store.name) + "|" + norm(store.roadAddress)));
@@ -577,7 +589,7 @@ async function revalidateCachedCandidates(run, region, existingRows, existingPla
   for (let index = 0; index < fresh.length; index += 20) {
     const batch = await inspectCandidates(fresh.slice(index, index + 20).map((row) => row.placeId), region.bounds, existingPlaceIds);
     inspected.push(...batch);
-    const ready = inspected.filter((row) => row.valid && !NON_FOOD_RE.test(row.category));
+    const ready = inspected.filter((row) => row.valid && !NON_FOOD_RE.test(`${row.name} ${row.category}`));
     const restaurants = ready.filter((row) => row.kind === "restaurant").length;
     const cafes = ready.filter((row) => row.kind === "cafe").length;
     console.log("REVALIDATED", inspected.length, "restaurants", restaurants, "cafes", cafes);

@@ -21,6 +21,18 @@ export const REGION_PRESETS: Record<string, { name: string; bounds: Bounds }> = 
     name: "공덕",
     bounds: { west: 126.9405, south: 37.538, east: 126.9635, north: 37.5565 },
   },
+  chungmuro: {
+    name: "충무로",
+    bounds: { west: 126.984, south: 37.553, east: 127.0045, north: 37.5665 },
+  },
+  euljiro: {
+    name: "을지로",
+    bounds: { west: 126.9815, south: 37.5625, east: 127.0065, north: 37.5685 },
+  },
+  jongno: {
+    name: "종로",
+    bounds: { west: 126.979, south: 37.568, east: 127.014, north: 37.5845 },
+  },
   konkuk: {
     name: "건대·자양",
     bounds: { west: 127.061, south: 37.527, east: 127.091, north: 37.548 },
@@ -73,6 +85,24 @@ export const MAP_VIEWPORTS: Record<string, MapViewportConfig> = {
   gongdeok: {
     center: { latitude: 37.5445, longitude: 126.9519 },
     maxBounds: REGION_PRESETS.gongdeok.bounds,
+    minZoom: 14,
+    initialZoom: 15,
+  },
+  chungmuro: {
+    center: { latitude: 37.5612, longitude: 126.9941 },
+    maxBounds: REGION_PRESETS.chungmuro.bounds,
+    minZoom: 14,
+    initialZoom: 15,
+  },
+  euljiro: {
+    center: { latitude: 37.5668, longitude: 126.9928 },
+    maxBounds: REGION_PRESETS.euljiro.bounds,
+    minZoom: 14,
+    initialZoom: 15,
+  },
+  jongno: {
+    center: { latitude: 37.574, longitude: 126.9945 },
+    maxBounds: REGION_PRESETS.jongno.bounds,
     minZoom: 14,
     initialZoom: 15,
   },

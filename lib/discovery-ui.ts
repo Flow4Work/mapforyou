@@ -96,6 +96,11 @@ const KNOWN_ENGLISH_PLACES: Record<string, string> = {
   "서울역": "Seoul Station",
   "공덕": "Gongdeok",
   "공덕역": "Gongdeok Station",
+  "충무로": "Chungmuro",
+  "충무로역": "Chungmuro Station",
+  "을지로": "Euljiro",
+  "종로": "Jongno",
+  "종각": "Jonggak",
   "이태원": "Itaewon",
   "녹사평": "Noksapyeong",
   "해방촌": "Haebangchon",
@@ -359,6 +364,9 @@ export function regionLabel(regionKey: string, language: PublicLanguage) {
     itaewon: { en: "Itaewon", ja: "梨泰院" },
     seoulstation: { en: "Seoul Station", ja: "ソウル駅" },
     gongdeok: { en: "Gongdeok", ja: "孔徳" },
+    chungmuro: { en: "Chungmuro", ja: "忠武路" },
+    euljiro: { en: "Euljiro", ja: "乙支路" },
+    jongno: { en: "Jongno", ja: "鍾路" },
     geondae: { en: "Konkuk Univ.", ja: "建大入口" },
   };
   return labels[regionKey]?.[language] ?? (regionKey || (language === "ja" ? "ソウル" : "Seoul"));
