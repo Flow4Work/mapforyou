@@ -16,6 +16,14 @@ const REGIONS = {
     bounds: { west: 126.975, south: 37.525, east: 127.011, north: 37.546 },
     aliases: ["이태원", "녹사평", "경리단길", "해방촌"],
   },
+  seoulstation: {
+    bounds: { west: 126.958, south: 37.545, east: 126.9845, north: 37.5625 },
+    aliases: ["서울역", "남대문", "회현", "충정로"],
+  },
+  gongdeok: {
+    bounds: { west: 126.9405, south: 37.538, east: 126.9635, north: 37.5565 },
+    aliases: ["공덕역", "공덕", "마포역", "대흥역"],
+  },
 };
 
 const RESTAURANT_TERMS = [

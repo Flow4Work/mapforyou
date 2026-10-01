@@ -13,6 +13,14 @@ export const REGION_PRESETS: Record<string, { name: string; bounds: Bounds }> = 
     name: "이태원",
     bounds: { west: 126.975, south: 37.525, east: 127.011, north: 37.546 },
   },
+  seoulstation: {
+    name: "서울역",
+    bounds: { west: 126.958, south: 37.545, east: 126.9845, north: 37.5625 },
+  },
+  gongdeok: {
+    name: "공덕",
+    bounds: { west: 126.9405, south: 37.538, east: 126.9635, north: 37.5565 },
+  },
   konkuk: {
     name: "건대·자양",
     bounds: { west: 127.061, south: 37.527, east: 127.091, north: 37.548 },
@@ -53,6 +61,18 @@ export const MAP_VIEWPORTS: Record<string, MapViewportConfig> = {
   itaewon: {
     center: { latitude: 37.5353, longitude: 126.9935 },
     maxBounds: { west: 126.967, south: 37.517, east: 127.018, north: 37.552 },
+    minZoom: 14,
+    initialZoom: 15,
+  },
+  seoulstation: {
+    center: { latitude: 37.5546, longitude: 126.9707 },
+    maxBounds: REGION_PRESETS.seoulstation.bounds,
+    minZoom: 14,
+    initialZoom: 15,
+  },
+  gongdeok: {
+    center: { latitude: 37.5445, longitude: 126.9519 },
+    maxBounds: REGION_PRESETS.gongdeok.bounds,
     minZoom: 14,
     initialZoom: 15,
   },

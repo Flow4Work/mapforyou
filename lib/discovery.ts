@@ -3,8 +3,8 @@ import "server-only";
 import { getSupabaseServerClient } from "@/lib/supabase";
 import { REGION_PRESETS } from "@/lib/config";
 
-const ACTIVE_REGIONS = ["seongsu", "hongdae", "itaewon", "geondae", "jongno"] as const;
-const DISCOVERY_REGIONS = ["seongsu", "hongdae", "itaewon"] as const;
+const ACTIVE_REGIONS = ["seongsu", "hongdae", "itaewon", "seoulstation", "gongdeok", "geondae", "jongno"] as const;
+const DISCOVERY_REGIONS = ["seongsu", "hongdae", "itaewon", "seoulstation", "gongdeok"] as const;
 const DEFAULT_PER_REGION = 20;
 const MAX_PER_REGION = 150;
 
@@ -110,16 +110,15 @@ type MenuRow = {
 const RESTAURANT_COLUMNS = "source_id,name,name_en,name_ja,road_address,road_address_en,road_address_ja,address,latitude,longitude,phone,category,license_type,introduction,introduction_en,introduction_ja,region_key,search_keyword,image_url,image_gallery_urls,image_source,image_attribution,image_source_url,instagram_url,instagram_username,updated_at";
 const MENU_COLUMNS = "menu_id,restaurant_id,name_ko,name_en,name_ja,price,is_specialty,sort_order,description_ko,description_en,description_ja,image_url,image_source,image_source_url,image_attribution,image_status";
 
-// Keep the original Mapo-wide legacy records and their direct links intact.
-// Only geographically accurate, translated and photographed Hongdae records
-// belong in the public discovery list. Filter before pagination, not afterward.
+// Keep legacy direct links intact while discovery uses only region-scoped,
+// translated and photographed records. Filter before pagination, not afterward.
 function discoveryRegionQuery(supabase: NonNullable<ReturnType<typeof getSupabaseServerClient>>, regionKey: string) {
   let query = supabase.from("public_data_restaurants")
     .select(RESTAURANT_COLUMNS)
     .eq("region_key", regionKey)
     .eq("publish_status", "published");
 
-  if (regionKey === "hongdae" || regionKey === "itaewon") {
+  if (["hongdae", "itaewon", "seoulstation", "gongdeok"].includes(regionKey)) {
     const { south, north, west, east } = REGION_PRESETS[regionKey].bounds;
     query = query.gte("latitude", south).lte("latitude", north)
       .gte("longitude", west).lte("longitude", east);
