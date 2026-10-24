@@ -529,7 +529,7 @@ export default function DiscoveryApp({
         <div className="discovery-brand">
           <span className="brand-mark">M</span>
           <span>
-            ココチズ<small>{copy.tagline}</small>
+            {language === "ja" ? "ココチズ" : "KOKOCHIZU"}<small>{copy.tagline}</small>
           </span>
         </div>
         <a

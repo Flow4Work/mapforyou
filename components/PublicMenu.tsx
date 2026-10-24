@@ -30,7 +30,7 @@ export default function PublicMenu({ initialStore }: { initialStore: StoreRecord
 
   return (
     <main className="public-page">
-      <div className="public-topbar"><a href="/">ココチズ</a><span>{language === "ja" ? "翻訳メニューを確認" : "Translated menus"}</span></div>
+      <div className="public-topbar"><a href="/">{language === "ja" ? "ココチズ" : "KOKOCHIZU"}</a><span>{language === "ja" ? "翻訳メニューを確認" : "Translated menus"}</span></div>
       <section className="store-hero">
         <div className="store-hero-overlay" />
         <div className="store-hero-content">
