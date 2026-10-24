@@ -9,6 +9,7 @@ import "./mobile-polish.css";
 import "./final-ui-polish.css";
 import "./mobile-map-home.css";
 import "./mobile-compact-layout.css";
+import "./brand.css";
 
 export const metadata: Metadata = {
   title: "ココチズ | ソウルのグルメマップ",

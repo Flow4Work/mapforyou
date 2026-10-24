@@ -1,0 +1,25 @@
+.brand-mark,
+.discovery-page .brand-mark {
+  display: block;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  object-fit: contain;
+  border-radius: 10px;
+  background: transparent;
+  box-shadow: none;
+}
+
+.public-topbar .brand > span {
+  color: inherit;
+}
+
+@media (max-width: 640px) {
+  .brand-mark,
+  .discovery-page .brand-mark {
+    width: 34px;
+    height: 34px;
+    flex-basis: 34px;
+    border-radius: 8px;
+  }
+}

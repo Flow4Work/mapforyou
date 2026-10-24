@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import BrandMark from "@/components/BrandMark";
 import { STORAGE_KEYS } from "@/lib/config";
 import type { StoreRecord } from "@/lib/types";
 
@@ -30,7 +31,7 @@ export default function PublicMenu({ initialStore }: { initialStore: StoreRecord
 
   return (
     <main className="public-page">
-      <div className="public-topbar"><a href="/">{language === "ja" ? "ココチズ" : "KOKOCHIZU"}</a><span>{language === "ja" ? "翻訳メニューを確認" : "Translated menus"}</span></div>
+      <div className="public-topbar"><a className="brand" href="/"><BrandMark /><span>{language === "ja" ? "ココチズ" : "KOKOCHIZU"}</span></a><span>{language === "ja" ? "翻訳メニューを確認" : "Translated menus"}</span></div>
       <section className="store-hero">
         <div className="store-hero-overlay" />
         <div className="store-hero-content">

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import BrandMark from "@/components/BrandMark";
 import { useEffect, useMemo, useState } from "react";
 import { CATEGORY_PRESETS, REGION_PRESETS, STORAGE_KEYS } from "@/lib/config";
 import type { MenuItem, SearchResponse, StoreRecord } from "@/lib/types";
@@ -222,7 +223,7 @@ export default function AdminApp() {
   return (
     <div className="admin-shell">
       <aside className="sidebar">
-        <Link className="brand" href="/"><span className="brand-mark">M</span><span>ココチズ<small>Menu Studio</small></span></Link>
+        <Link className="brand" href="/"><BrandMark /><span>ココチズ<small>Menu Studio</small></span></Link>
         <nav>
           <a className="nav-active" href="#collect">매장 수집</a>
           <a href="#results">수집 목록</a>

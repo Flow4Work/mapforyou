@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import BrandMark from "@/components/BrandMark";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ImageViewer from "@/components/ImageViewer";
 import DetailActionIcon from "@/components/DetailActionIcon";
@@ -527,7 +528,7 @@ export default function DiscoveryApp({
     <main className={`discovery-page ${isNarrowScreen ? "mobile-map-home" : ""} ${mobilePanel === "menu" ? "mobile-details-open" : ""} ${sheetExpanded ? "mobile-sheet-expanded" : "mobile-sheet-peek"} ${sheetContent === "selected" ? "mobile-sheet-selected" : ""} ${mobileFullMap ? "mobile-full-map" : ""}`}>
       <header className="discovery-header">
         <div className="discovery-brand">
-          <span className="brand-mark">M</span>
+          <BrandMark />
           <span>
             {language === "ja" ? "ココチズ" : "KOKOCHIZU"}<small>{copy.tagline}</small>
           </span>
