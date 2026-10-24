@@ -8,9 +8,9 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const { id } = await params;
   const sourceId = decodeURIComponent(id);
   const store = await loadDiscoveryRestaurant(sourceId);
-  if (!store) return { title: "Restaurant not found | MapForYou" };
+  if (!store) return { title: "店舗が見つかりません | ココチズ" };
   return {
-    title: `${store.name} Menu | MapForYou`,
+    title: `${store.name} メニュー | ココチズ`,
     description: store.regionKey === "hongdae" && store.searchKeyword === "전체"
       ? `Archived Mapo-area restaurant data for ${store.name}. Menu translations and listing details may be incomplete.`
       : `Translated English and Japanese menu for ${store.name} in Seoul.`,

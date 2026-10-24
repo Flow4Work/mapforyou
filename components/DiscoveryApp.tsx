@@ -212,7 +212,7 @@ export default function DiscoveryApp({
   initialStores: DiscoveryRestaurant[];
 }) {
   const [stores, setStores] = useState(initialStores);
-  const [language, setLanguage] = useState<PublicLanguage>("en");
+  const [language, setLanguage] = useState<PublicLanguage>("ja");
   const [search, setSearch] = useState("");
   const [region, setRegion] = useState("all");
   const [mobileFullMap, setMobileFullMap] = useState(false);
@@ -237,6 +237,9 @@ export default function DiscoveryApp({
   const [mapActiveId, setMapActiveId] = useState("");
   const sheetTouchStart = useRef<number | null>(null);
   const handledDrag = useRef(false);
+  useEffect(() => {
+    document.documentElement.lang = language;
+  }, [language]);
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 900px)");
     const update = () => {
@@ -526,7 +529,7 @@ export default function DiscoveryApp({
         <div className="discovery-brand">
           <span className="brand-mark">M</span>
           <span>
-            MapForYou<small>{copy.tagline}</small>
+            ココチズ<small>{copy.tagline}</small>
           </span>
         </div>
         <a
@@ -556,16 +559,16 @@ export default function DiscoveryApp({
           </button>
           <div className="public-language-toggle" aria-label="Language">
             <button
-              className={language === "en" ? "active" : ""}
-              onClick={() => setLanguage("en")}
-            >
-              EN
-            </button>
-            <button
               className={language === "ja" ? "active" : ""}
               onClick={() => setLanguage("ja")}
             >
               日本語
+            </button>
+            <button
+              className={language === "en" ? "active" : ""}
+              onClick={() => setLanguage("en")}
+            >
+              EN
             </button>
           </div>
         </div>

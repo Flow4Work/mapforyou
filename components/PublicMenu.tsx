@@ -6,8 +6,12 @@ import type { StoreRecord } from "@/lib/types";
 
 export default function PublicMenu({ initialStore }: { initialStore: StoreRecord }) {
   const [store, setStore] = useState(initialStore);
-  const [language, setLanguage] = useState<"en" | "ja">("en");
+  const [language, setLanguage] = useState<"en" | "ja">("ja");
   const [activeCategory, setActiveCategory] = useState("All");
+
+  useEffect(() => {
+    document.documentElement.lang = language;
+  }, [language]);
 
   useEffect(() => {
     try {
@@ -26,7 +30,7 @@ export default function PublicMenu({ initialStore }: { initialStore: StoreRecord
 
   return (
     <main className="public-page">
-      <div className="public-topbar"><a href="/">MapForYou</a><span>Verified multilingual menu</span></div>
+      <div className="public-topbar"><a href="/">ココチズ</a><span>{language === "ja" ? "翻訳メニューを確認" : "Translated menus"}</span></div>
       <section className="store-hero">
         <div className="store-hero-overlay" />
         <div className="store-hero-content">
@@ -38,8 +42,8 @@ export default function PublicMenu({ initialStore }: { initialStore: StoreRecord
 
       <section className="public-content">
         <div className="language-switch" role="tablist">
-          <button className={language === "en" ? "active" : ""} onClick={() => setLanguage("en")}>English</button>
           <button className={language === "ja" ? "active" : ""} onClick={() => setLanguage("ja")}>日本語</button>
+          <button className={language === "en" ? "active" : ""} onClick={() => setLanguage("en")}>English</button>
         </div>
 
         <div className="store-info-card">

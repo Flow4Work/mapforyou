@@ -2,7 +2,7 @@ import Link from "next/link";
 import PublicDataTabs from "@/components/PublicDataTabs";
 import { getSupabaseServerClient } from "@/lib/supabase";
 
-export const metadata = { title: "이용 현황 | MapForYou" };
+export const metadata = { title: "이용 현황 | ココチズ" };
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 

@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import ImageViewer from "@/components/ImageViewer";
 import DetailActionIcon from "@/components/DetailActionIcon";
 import RestaurantCover from "@/components/RestaurantCover";
@@ -41,11 +41,14 @@ const ORDER_PHRASES = {
 };
 
 export default function RestaurantDetail({ store }: { store: DiscoveryRestaurant }) {
-  const [language, setLanguage] = useState<PublicLanguage>("en");
+  const [language, setLanguage] = useState<PublicLanguage>("ja");
   const [revealedMenuId, setRevealedMenuId] = useState("");
   const [revealedPhrase, setRevealedPhrase] = useState("");
   const [menuViewMode, setMenuViewMode] = useState<"photo" | "compact">("photo");
   const [menuImageViewer, setMenuImageViewer] = useState<{ src: string; alt: string } | null>(null);
+  useEffect(() => {
+    document.documentElement.lang = language;
+  }, [language]);
   const category = broadCategory(store);
   const legacyMapo = store.regionKey === "hongdae" && store.searchKeyword === "전체";
   const menus = useMemo(
@@ -104,8 +107,8 @@ export default function RestaurantDetail({ store }: { store: DiscoveryRestaurant
       <header className="detail-topbar">
         <Link href="/">← {copy.back}</Link>
         <div className="public-language-toggle" aria-label="Language">
-          <button className={language === "en" ? "active" : ""} onClick={() => setLanguage("en")}>EN</button>
           <button className={language === "ja" ? "active" : ""} onClick={() => setLanguage("ja")}>日本語</button>
+          <button className={language === "en" ? "active" : ""} onClick={() => setLanguage("en")}>EN</button>
         </div>
       </header>
 

@@ -11,10 +11,10 @@ import "./mobile-map-home.css";
 import "./mobile-compact-layout.css";
 
 export const metadata: Metadata = {
-  title: "MapForYou | Translated Seoul Menus",
-  description: "Explore Seoul restaurants on a map and read English and Japanese menus before you visit.",
+  title: "ココチズ | ソウルのグルメマップ",
+  description: "ソウルのおいしいお店を地図で探して、日本語のメニューや料理の写真をチェック。英語にも切り替えられます。",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="en"><body><PublicQualityGuard />{children}</body></html>;
+  return <html lang="ja"><body><PublicQualityGuard />{children}</body></html>;
 }

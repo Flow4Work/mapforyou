@@ -222,7 +222,7 @@ export default function AdminApp() {
   return (
     <div className="admin-shell">
       <aside className="sidebar">
-        <Link className="brand" href="/"><span className="brand-mark">M</span><span>MapForYou<small>Menu Studio</small></span></Link>
+        <Link className="brand" href="/"><span className="brand-mark">M</span><span>ココチズ<small>Menu Studio</small></span></Link>
         <nav>
           <a className="nav-active" href="#collect">매장 수집</a>
           <a href="#results">수집 목록</a>

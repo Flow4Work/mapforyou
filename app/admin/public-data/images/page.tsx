@@ -1,7 +1,7 @@
 import PublicDataImageBackfill from "@/components/PublicDataImageBackfill";
 import PublicDataTabs from "@/components/PublicDataTabs";
 
-export const metadata = { title: "사진 보강 | MapForYou" };
+export const metadata = { title: "사진 보강 | ココチズ" };
 
 export default function PublicDataImagesPage() {
   return (
