@@ -1,6 +1,7 @@
 /* Mobile-only map-first discovery; the established desktop columns are untouched. */
 .mobile-sheet-toolbar,
 .mobile-recommendation-rail,
+.mobile-sheet-no-results,
 .mobile-selected-preview,
 .mobile-map-tools,
 .mobile-detail-back { display: none; }

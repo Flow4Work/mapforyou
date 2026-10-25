@@ -653,7 +653,7 @@ export default function DiscoveryApp({
               </div>
             </div>
           )}
-          {!sheetExpanded && sheetContent === "browse" && (
+          {isNarrowScreen && !sheetExpanded && sheetContent === "browse" && (
             filteredStores.length > 0 ? (
               <div className="mobile-recommendation-rail">
                 {filteredStores.slice(0, 3).map((store) => (
@@ -679,6 +679,8 @@ export default function DiscoveryApp({
             <label className="discovery-search">
               <span>⌕</span>
               <input
+                type="search"
+                spellCheck={false}
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
                 placeholder={copy.search}
@@ -793,6 +795,7 @@ export default function DiscoveryApp({
               <span aria-hidden="true">⌕</span>
               <input
                 type="search"
+                spellCheck={false}
                 value={search}
                 placeholder={copy.search}
                 onFocus={() => { setSheetContent("browse"); }}
@@ -1049,7 +1052,7 @@ export default function DiscoveryApp({
               </p>
             </div>
           ) : (
-            <div className="detail-panel-empty">{copy.noResults}</div>
+            <div className="detail-panel-empty" aria-hidden="true" />
           )}
         </aside>
       </section>
